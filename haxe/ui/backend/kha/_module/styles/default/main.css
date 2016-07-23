@@ -1,0 +1,8 @@
+.label, .textfield {
+	font-name: "arial";
+	font-size: 14px;
+}
+
+.scrollview {
+    padding: 1px;
+}

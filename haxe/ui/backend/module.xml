@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+	<resources>
+		<resource path="/haxe/ui/backend/kha/_module/styles" prefix="styles" />
+	</resources>
+	<themes>
+		<global>
+			<style resource="styles/main.css" />
+		</global>
+		<default>
+			<style resource="styles/default/main.css" />
+		</default>
+	</themes>
+    <!--
+	<plugins>
+		<plugin type="asset" class="haxe.ui.assets.AssetNamePlugin" startsWith="img/" replaceWith="" removeExtension="true" />
+	</plugins>
+    -->    
+</module>
