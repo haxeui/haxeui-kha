@@ -14,33 +14,33 @@ class StyleHelper {
         y = Math.ffloor(y);
         w = Math.fceil(w);
         h = Math.fceil(h);
-        
+
         if (w <= 0 || h <= 0) {
             return;
         }
-        
+
         var alpha:Int = 0xFF000000;
         if (style.opacity != null) {
             alpha = Std.int(style.opacity * 255) << 24;
         }
-        
+
         if (style.borderLeftColor != null
             && style.borderLeftColor == style.borderRightColor
             && style.borderLeftColor == style.borderBottomColor
             && style.borderLeftColor == style.borderTopColor) { // full border
-            
+
             var borderSize:Int = Std.int(style.borderLeftSize);
-            
+
             g.color = style.borderLeftColor | alpha;
             x++;
             w--;
             h--;
             for (i in 0...borderSize) {
-				g.drawRect(x, y, w, h);
-				x++;
-				y++;
-				w-=2;
-				h-=2;
+                g.drawRect(x, y, w, h);
+                x++;
+                y++;
+                w-=2;
+                h-=2;
             }
             g.color = Color.White;
             x--;
@@ -54,7 +54,7 @@ class StyleHelper {
                 y += style.borderTopSize;
                 h -= style.borderTopSize;
             }
-            
+
             if (style.borderLeftSize != null && style.borderLeftSize > 0) {
                 g.color = style.borderLeftColor | alpha;
                 g.fillRect(x, y, style.borderLeftSize, h); // left
@@ -62,14 +62,14 @@ class StyleHelper {
                 x += style.borderLeftSize;
                 w -= style.borderLeftSize;
             }
-            
+
             if (style.borderBottomSize != null && style.borderBottomSize > 0) {
                 g.color = style.borderBottomColor | alpha;
                 g.fillRect(x, y + h - style.borderBottomSize, w, style.borderBottomSize); // bottom
                 g.color = Color.White;
                 h -= style.borderBottomSize;
             }
-            
+
             if (style.borderRightSize != null && style.borderRightSize > 0) {
                 g.color = style.borderRightColor | alpha;
                 g.fillRect(x + w - style.borderRightSize, y, style.borderRightSize, h + 1); // right
@@ -77,14 +77,14 @@ class StyleHelper {
                 w -= style.borderRightSize;
             }
         }
-        
+
         if (style.backgroundColor != null) {
             if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
                 var gradientType:String = "vertical";
                 if (style.backgroundGradientStyle != null) {
                     gradientType = style.backgroundGradientStyle;
                 }
-                
+
                 var arr:Array<Int> = null;
                 var n:Int = 0;
                 if (gradientType == "vertical") {
@@ -123,7 +123,7 @@ class StyleHelper {
                                             style.backgroundImageClipRight - style.backgroundImageClipLeft,
                                             style.backgroundImageClipBottom - style.backgroundImageClipTop);
                 }
-                
+
                 var slice:Rectangle = null;
                 if (style.backgroundImageSliceTop != null
                     && style.backgroundImageSliceLeft != null
@@ -134,7 +134,7 @@ class StyleHelper {
                                           style.backgroundImageSliceRight - style.backgroundImageSliceLeft,
                                           style.backgroundImageSliceBottom - style.backgroundImageSliceTop);
                 }
-                
+
                 if (slice == null) {
                     if (style.backgroundImageRepeat == null) {
                         g.drawSubImage(imageInfo.data, x, y, 0, 0, trc.width, trc.height);
@@ -149,18 +149,18 @@ class StyleHelper {
                                                     srcRects[i].width,
                                                     srcRects[i].height);
                         var dstRect = dstRects[i];
-                        g.drawScaledSubImage(imageInfo.data, srcRect.left, srcRect.top, srcRect.width, srcRect.height, 
+                        g.drawScaledSubImage(imageInfo.data, srcRect.left, srcRect.top, srcRect.width, srcRect.height,
                                                              x + dstRect.left, y + dstRect.top, dstRect.width, dstRect.height);
                     }
                 }
             });
         }
-        
+
         if (style.filter != null) {
             drawShadow(g, 0x888888 | 0x444444, x, y, w, h, 1, true);
         }
     }
-    
+
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
         g.color = color | 0x7F000000;
         if (inset == false) {

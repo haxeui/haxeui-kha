@@ -11,13 +11,13 @@ class AppBase {
     private var _callback:Void->Void;
     private var _backgroudColor:Int = 0;
     public function new() {
-        
+
     }
-    
+
     private function build() {
-        
+
     }
-    
+
     private function init(callback:Void->Void, onEnd:Void->Void = null) {
         _callback = callback;
         var title:String = Toolkit.backendProperties.getProp("haxe.ui.kha.title", "");
@@ -26,36 +26,36 @@ class AppBase {
         _backgroudColor = parseCol(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
         System.init(title, width, height, initialized);
     }
-    
+
     private function initialized() {
         Assets.loadEverything(assetsLoaded);
     }
-    
+
     private function assetsLoaded() {
         System.notifyOnRender(render);
         _callback();
     }
-    
+
     public function render(framebuffer:Framebuffer):Void {
         var g = framebuffer.g2;
         g.begin(true, _backgroudColor);
-        
+
         for (c in Screen.instance.rootComponents) {
             c.renderTo(g);
         }
-        
+
         g.end();
     }
-    
+
     private function getToolkitInit():Dynamic {
         return {
         };
     }
 
     public function start() {
-        
+
     }
-    
+
     private static inline function parseCol(s:String):Int {
         if (StringTools.startsWith(s, "#")) {
             s = s.substring(1, s.length);
