@@ -20,7 +20,6 @@ import kha.input.Mouse;
 class ComponentBase {
     public var parent:ComponentBase;
     private var __children:Array<ComponentBase>;
-    private var __ready:Bool = false;
     private var _eventMap:Map<String, UIEvent->Void>;
 
     public function new() {
