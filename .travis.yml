@@ -1,0 +1,27 @@
+language: haxe
+
+os:
+  - linux
+
+haxe:
+  - "3.2.1"
+  - development
+
+sudo: true
+
+before_install:
+    - git clone https://github.com/haxeui/haxeui-core.git --depth=1
+    - haxelib dev haxeui-core haxeui-core
+
+install:
+    - haxelib install hscript
+    - haxelib install kha
+    - haxelib dev haxeui-kha $TRAVIS_BUILD_DIR
+
+
+script:
+    - git clone https://github.com/haxeui/haxeui-templates.git --depth=1
+    - cd haxeui-templates/kha/skeleton
+    - haxelib run kha html5
+    - cd build
+    - haxe project-html5.hxml
