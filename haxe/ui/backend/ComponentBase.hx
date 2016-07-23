@@ -369,6 +369,7 @@ class ComponentBase {
     }
 
     private var _mouseDownFlag:Bool = false;
+    // temp
     private function __onMouseDown(button:Int, x:Int, y:Int) {
         var i = inBounds(x, y);
         if (i == true && _mouseDownFlag == false) {
