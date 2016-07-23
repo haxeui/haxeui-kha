@@ -15,12 +15,10 @@ import kha.input.Mouse;
 
 class ComponentBase {
     public var parent:ComponentBase;
-    private var __children:Array<ComponentBase>;
     private var _eventMap:Map<String, UIEvent->Void>;
 
     public function new() {
         _eventMap = new Map<String, UIEvent->Void>();
-        __children = new Array<ComponentBase>();
     }
 
     private function createDelegate(native:Bool) {
