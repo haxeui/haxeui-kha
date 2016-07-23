@@ -8,8 +8,6 @@ haxe:
   - "3.2.1"
   - development
 
-sudo: true
-
 before_install:
     - git clone https://github.com/haxeui/haxeui-core.git --depth=1
     - haxelib dev haxeui-core haxeui-core
