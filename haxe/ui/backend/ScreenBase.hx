@@ -20,12 +20,20 @@ class ScreenBase {
 
     public var width(get, null):Float;
     public function get_width():Float {
+        #if (kha_version >= 1607)
+        return System.windowWidth();
+        #else
         return System.pixelWidth;
+        #end
     }
 
     public var height(get, null):Float;
     public function get_height() {
-        return System.pixelHeight;
+        #if (kha_version >= 1607)
+        return System.windowHeight();
+        #else
+        return System.pixelWidth;
+        #end
     }
 
     public var focus(get, set):Component;
