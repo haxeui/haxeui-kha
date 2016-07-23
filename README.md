@@ -8,7 +8,7 @@
 <h2>haxeui-kha</h2>
 `haxeui-kha` is the `Kha` backend for HaxeUI.
 
-**_Important Note: currently in the alpha release of `haxeui-kha` only the `Kha` HTML5 renderer is supposed, using different renderer will most likely cause compilation errors._**
+**_Important Note: currently in the alpha release of `haxeui-kha` only the `Kha` HTML5 renderer is supported, using different renderer will most likely cause compilation errors._**
 
 <h2>Installation</h2>
  * `haxeui-kha` has a dependency to <a href="https://github.com/haxeui/haxeui-core">`haxeui-core`</a>, and so that too must be installed.
