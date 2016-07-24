@@ -8,6 +8,10 @@
 <h2>haxeui-kha</h2>
 `haxeui-kha` is the `Kha` backend for HaxeUI.
 
+<p align="center">
+	<img src="https://github.com/haxeui/haxeui-kha/raw/master/screen.png" />
+</p>
+
 **_Important Note: currently in the alpha release of `haxeui-kha` only the `Kha` HTML5 renderer is supported, using different renderer will most likely cause compilation errors._**
 
 <h2>Installation</h2>
