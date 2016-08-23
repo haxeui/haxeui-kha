@@ -4,6 +4,7 @@ import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.ImageDisplay;
 import haxe.ui.core.MouseEvent;
+import haxe.ui.core.Screen;
 import haxe.ui.core.TextDisplay;
 import haxe.ui.core.TextInput;
 import haxe.ui.core.UIEvent;
@@ -348,6 +349,9 @@ class ComponentBase {
     private function __onMouseMove(x:Int, y:Int, movementX:Int, movementY:Int) {
         var i = inBounds(x, y);
         if (i == true && _mouseOverFlag == false) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                return;
+            }
             _mouseOverFlag = true;
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OVER);
             if (fn != null) {
@@ -369,10 +373,12 @@ class ComponentBase {
     }
 
     private var _mouseDownFlag:Bool = false;
-    // temp
     private function __onMouseDown(button:Int, x:Int, y:Int) {
         var i = inBounds(x, y);
         if (i == true && _mouseDownFlag == false) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                return;
+            }
             _mouseDownFlag = true;
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_DOWN);
             if (fn != null) {
@@ -384,10 +390,12 @@ class ComponentBase {
         }
     }
 
-
     private function __onMouseUp(button:Int, x:Int, y:Int) {
         var i = inBounds(x, y);
         if (i == true) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                return;
+            }
             if (_mouseDownFlag == true) {
                 var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.CLICK);
                 if (fn != null) {
@@ -409,5 +417,48 @@ class ComponentBase {
             }
         }
         _mouseDownFlag = false;
+    }
+    
+    private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
+        var array:Array<Component> = getComponentsAtPoint(x, y);
+        if (array.length == 0) {
+            return false;
+        }
+        
+        return !hasChildRecursive(cast ref, cast array[array.length - 1]);
+    }
+    
+    private function getComponentsAtPoint(x:Int, y:Int):Array<Component> {
+        var array:Array<Component> = new Array<Component>();
+        for (r in Screen.instance.rootComponents) {
+            findChildrenAtPoint(r, x, y, array);
+        }
+        return array;
+    }
+    
+    private function findChildrenAtPoint(child:Component, x:Int, y:Int, array:Array<Component>) {
+        if (child.inBounds(x, y) == true) {
+            array.push(child);
+            for (c in child.childComponents) {
+                findChildrenAtPoint(c, x, y, array);
+            }
+        }
+    }
+    
+    public function hasChildRecursive(parent:Component, child:Component):Bool {
+        if (parent == child) {
+            return true;
+        }
+        var r = false;
+        for (t in parent.childComponents) {
+            if (t == child) {
+                r = true;
+                break;
+            }
+            
+            r = hasChildRecursive(t, child);
+        }
+        
+        return r;
     }
 }
