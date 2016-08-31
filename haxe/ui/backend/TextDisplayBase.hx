@@ -101,11 +101,13 @@ class TextDisplayBase {
         return value;
     }
 
+    private var _textWidth:Float = 0;
     public var textWidth(get, null):Float;
     private function get_textWidth():Float {
         return _textWidth;
     }
 
+    private var _textHeight:Float = 0;
     public var textHeight(get, null):Float;
     private function get_textHeight():Float {
         return _textHeight;
@@ -120,8 +122,6 @@ class TextDisplayBase {
     }
     
     private var _lines:Array<String>;
-    private var _textWidth:Float = 0;
-    private var _textHeight:Float = 0;
     function splitText() {
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
@@ -177,9 +177,7 @@ class TextDisplayBase {
             var tx:Float = x + left;
             var ty:Float = y + top + 1;
             
-            var lastLine = "";
             for (line in _lines) {
-                lastLine = line;
                 g.drawString(line, tx, ty);
                 ty += _font.height(Std.int(_fontSize));
             }
