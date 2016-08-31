@@ -228,15 +228,11 @@ class ComponentBase {
         }
 
         if (_textDisplay != null) {
-            g.font = _textDisplay._font;
-            g.fontSize = Std.int(_textDisplay.fontSize);
-            g.drawString(_textDisplay.text, x + _textDisplay.left,  y + _textDisplay.top + 1);
+            _textDisplay.renderTo(g, x, y);
         }
 
         if (_textInput != null) {
-            g.font = _textInput._font;
-            g.fontSize = Std.int(_textInput.fontSize);
-            g.drawString(_textInput.text, x + _textInput.left, y + _textInput.top + 1);
+            _textInput.renderTo(g, x, y);
         }
 
         g.color = Color.White;
