@@ -10,7 +10,10 @@ import haxe.ui.core.TextInput;
 import haxe.ui.core.UIEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.util.Rectangle;
+import js.html.Image;
 import kha.Color;
+import kha.Scaler;
+import kha.ScreenRotation;
 import kha.graphics2.Graphics;
 import kha.input.Mouse;
 
@@ -75,10 +78,10 @@ class ComponentBase {
         }
 
         var b:Bool = false;
-        var sx = screenX;
-        var sy = screenY;
-        var cx = cast(this, Component).componentWidth;
-        var cy = cast(this, Component).componentHeight;
+        var sx = screenX * Toolkit.scaleX;
+        var sy = screenY * Toolkit.scaleY;
+        var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
+        var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
 
         if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
             b = true;
@@ -247,6 +250,43 @@ class ComponentBase {
 
     }
 
+    private var _componentBuffer:kha.Image;
+    private var _scaledComponentBuffer:kha.Image;
+    public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
+        var cx:Int = Std.int(cast(this, Component).width);
+        var cy:Int = Std.int(cast(this, Component).height);
+        var scx:Int = Std.int(cx * scaleX);
+        var scy:Int = Std.int(cy * scaleY);
+        
+        if (_componentBuffer == null || _componentBuffer.width != cx || _componentBuffer.height != cy) {
+            if (_componentBuffer != null) {
+                _componentBuffer.unload();
+            }
+            _componentBuffer = kha.Image.create(cx, cy);
+        }
+        
+        _componentBuffer.lock();
+        _componentBuffer.g2.begin(true, 0xFFFFFFFF);
+        renderTo(_componentBuffer.g2);
+        _componentBuffer.g2.end();
+        _componentBuffer.unlock();
+        
+        if (_scaledComponentBuffer == null || _scaledComponentBuffer.width != scx || _scaledComponentBuffer.height != scy) {
+            if (_scaledComponentBuffer != null) {
+                _scaledComponentBuffer.unload();
+            }
+            _scaledComponentBuffer = kha.Image.create(scx, scy);
+        }
+        
+        _scaledComponentBuffer.lock();
+        _scaledComponentBuffer.g2.begin(true, 0xFFFFFFFF);
+        Scaler.scale(_componentBuffer, _scaledComponentBuffer, ScreenRotation.RotationNone);
+        _scaledComponentBuffer.g2.end();
+        _scaledComponentBuffer.unlock();
+        
+        g.drawImage(_scaledComponentBuffer, 0, 0);
+    }
+    
     private function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;

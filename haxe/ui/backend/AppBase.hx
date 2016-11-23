@@ -2,7 +2,10 @@ package haxe.ui.backend;
 
 import haxe.ui.components.Button;
 import haxe.ui.core.Screen;
+import kha.Image;
+import kha.Scaler;
 import kha.Scheduler;
+import kha.ScreenRotation;
 import kha.System;
 import kha.Framebuffer;
 import kha.Assets;
@@ -24,7 +27,7 @@ class AppBase {
         var width:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.width", 800);
         var height:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.height", 600);
         _backgroudColor = parseCol(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
-        System.init(title, width, height, initialized);
+        System.init( { title: title, width: width, height: height }, initialized);
     }
 
     private function initialized() {
@@ -37,11 +40,16 @@ class AppBase {
     }
 
     public function render(framebuffer:Framebuffer):Void {
+        
         var g = framebuffer.g2;
         g.begin(true, _backgroudColor);
 
         for (c in Screen.instance.rootComponents) {
-            c.renderTo(g);
+            if (Toolkit.scaleX == 1 && Toolkit.scaleY == 1) {
+                c.renderTo(g);
+            } else {
+                c.renderToScaled(g, Toolkit.scaleX, Toolkit.scaleY);
+            }
         }
 
         g.end();
