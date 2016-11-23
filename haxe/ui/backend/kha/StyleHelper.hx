@@ -33,22 +33,15 @@ class StyleHelper {
             && style.borderLeftColor == style.borderTopColor) { // full border
 
             var borderSize:Int = Std.int(style.borderLeftSize);
-
             g.color = style.borderLeftColor | alpha;
-            x++;
-            w--;
-            h--;
             for (i in 0...borderSize) {
-                g.drawRect(x, y, w, h);
+                g.drawRect(x + .5, y + .5, w, h, 1);
                 x++;
                 y++;
-                w-=2;
-                h-=2;
+                w -= 1;
+                h -= 1;
             }
             g.color = Color.White;
-            x--;
-            w++;
-            h++;
         } else { // compound border
             if (style.borderTopSize != null && style.borderTopSize > 0) {
                 g.color = style.borderTopColor | alpha;

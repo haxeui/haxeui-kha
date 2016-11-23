@@ -15,6 +15,8 @@ class TextDisplayBase {
         _font = Assets.fonts.arial;
     }
 
+    private var _dirty:Bool = true;
+    
     public var left(default, default):Float;
     public var top(default, default):Float;
     
@@ -29,7 +31,8 @@ class TextDisplayBase {
         }
         
         _width = value;
-        splitText();
+        _dirty = true;
+        measureText();
         
         return value;
     }
@@ -45,7 +48,8 @@ class TextDisplayBase {
         }
         
         _height = value;
-        splitText();
+        _dirty = true;
+        measureText();
         
         return value;
     }
@@ -60,7 +64,8 @@ class TextDisplayBase {
             return value;
         }
         
-        splitText();
+        _dirty = true;
+        measureText();
         
         _fontSize = value;
         return value;
@@ -82,7 +87,8 @@ class TextDisplayBase {
             _font = newFont;
         }
 
-        splitText();
+        _dirty = true;
+        measureText();
         
         return value;
     }
@@ -97,19 +103,22 @@ class TextDisplayBase {
             return value;
         }
         _text = value;
-        splitText();
+        _dirty = true;
+        measureText();
         return value;
     }
 
     private var _textWidth:Float = 0;
     public var textWidth(get, null):Float;
     private function get_textWidth():Float {
+        measureText();
         return _textWidth;
     }
 
     private var _textHeight:Float = 0;
     public var textHeight(get, null):Float;
     private function get_textHeight():Float {
+        measureText();
         return _textHeight;
     }
 
@@ -122,10 +131,15 @@ class TextDisplayBase {
     }
     
     private var _lines:Array<String>;
-    function splitText() {
+    function measureText() {
+        if (_dirty == false) {
+            //return;
+        }
+        
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
             _textHeight = 0;
+            _dirty = false;
             return;
         }
         
@@ -134,6 +148,7 @@ class TextDisplayBase {
             _lines.push(_text);
             _textWidth = _font.width(Std.int(_fontSize), _text);
             _textHeight = _font.height(Std.int(_fontSize)) + 1;
+            _dirty = false;
             return;
         }
         
@@ -167,6 +182,7 @@ class TextDisplayBase {
         }
         
         _textHeight = _font.height(Std.int(_fontSize)) * _lines.length;
+        _dirty = false;
     }
     
     public function renderTo(g:Graphics, x:Float, y:Float) {
