@@ -139,8 +139,8 @@ class ScreenBase {
         }
 
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
-        mouseEvent.screenX = x;
-        mouseEvent.screenY = y;
+        mouseEvent.screenX = x / Toolkit.scaleX;
+        mouseEvent.screenY = y / Toolkit.scaleY;
         _mapping.get(haxe.ui.core.MouseEvent.MOUSE_MOVE)(mouseEvent);
     }
 
@@ -150,8 +150,8 @@ class ScreenBase {
         }
 
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_DOWN);
-        mouseEvent.screenX = x;
-        mouseEvent.screenY = y;
+        mouseEvent.screenX = x / Toolkit.scaleX;
+        mouseEvent.screenY = y / Toolkit.scaleY;
         _mapping.get(haxe.ui.core.MouseEvent.MOUSE_DOWN)(mouseEvent);
     }
 
@@ -161,8 +161,8 @@ class ScreenBase {
         }
 
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_UP);
-        mouseEvent.screenX = x;
-        mouseEvent.screenY = y;
+        mouseEvent.screenX = x / Toolkit.scaleX;
+        mouseEvent.screenY = y / Toolkit.scaleY;
         _mapping.get(MouseEvent.MOUSE_UP)(mouseEvent);
     }
 }
