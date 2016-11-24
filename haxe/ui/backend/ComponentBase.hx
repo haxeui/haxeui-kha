@@ -92,10 +92,10 @@ class ComponentBase {
             var clip:Component = findClipComponent();
             if (clip != null) {
                 b = false;
-                var sx = clip.screenX + clip.clipRect.left;
-                var sy = clip.screenY + clip.clipRect.top;
-                var cx = clip.clipRect.width;
-                var cy = clip.clipRect.height;
+                var sx = (clip.screenX + clip.clipRect.left) * Toolkit.scaleX;
+                var sy = (clip.screenY + clip.clipRect.top) * Toolkit.scaleY;
+                var cx = clip.clipRect.width * Toolkit.scaleX;
+                var cy = clip.clipRect.height * Toolkit.scaleY;
                 if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
                     b = true;
                 }
@@ -209,12 +209,11 @@ class ComponentBase {
         var w:Int = Math.ceil(cast(this, Component).componentWidth);
         var h:Int = Math.ceil(cast(this, Component).componentHeight);
 
-
         var style:Style = cast(this, Component).style;
         var clipRect:Rectangle = cast(this, Component).clipRect;
 
         if (clipRect != null) {
-            g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
+            //g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
         }
 
         //style.opacity = calcAlpha();
@@ -247,44 +246,25 @@ class ComponentBase {
         if (clipRect != null) {
             g.disableScissor();
         }
-
     }
 
     private var _componentBuffer:kha.Image;
-    private var _scaledComponentBuffer:kha.Image;
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
         var cx:Int = Std.int(cast(this, Component).width);
         var cy:Int = Std.int(cast(this, Component).height);
-        var scx:Int = Std.int(cx * scaleX);
-        var scy:Int = Std.int(cy * scaleY);
         
         if (_componentBuffer == null || _componentBuffer.width != cx || _componentBuffer.height != cy) {
             if (_componentBuffer != null) {
                 _componentBuffer.unload();
             }
-            _componentBuffer = kha.Image.create(cx, cy);
+            _componentBuffer = kha.Image.createRenderTarget(cx, cy);
         }
         
-        _componentBuffer.lock();
         _componentBuffer.g2.begin(true, 0xFFFFFFFF);
         renderTo(_componentBuffer.g2);
         _componentBuffer.g2.end();
-        _componentBuffer.unlock();
         
-        if (_scaledComponentBuffer == null || _scaledComponentBuffer.width != scx || _scaledComponentBuffer.height != scy) {
-            if (_scaledComponentBuffer != null) {
-                _scaledComponentBuffer.unload();
-            }
-            _scaledComponentBuffer = kha.Image.create(scx, scy);
-        }
-        
-        _scaledComponentBuffer.lock();
-        _scaledComponentBuffer.g2.begin(true, 0xFFFFFFFF);
-        Scaler.scale(_componentBuffer, _scaledComponentBuffer, ScreenRotation.RotationNone);
-        _scaledComponentBuffer.g2.end();
-        _scaledComponentBuffer.unlock();
-        
-        g.drawImage(_scaledComponentBuffer, 0, 0);
+        g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }
     
     private function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
@@ -395,8 +375,8 @@ class ComponentBase {
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OVER);
             if (fn != null) {
                 var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OVER);
-                mouseEvent.screenX = x;
-                mouseEvent.screenY = y;
+                mouseEvent.screenX = x / Toolkit.scaleX;
+                mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         } else if (i == false && _mouseOverFlag == true) {
@@ -404,8 +384,8 @@ class ComponentBase {
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OUT);
             if (fn != null) {
                 var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OUT);
-                mouseEvent.screenX = x;
-                mouseEvent.screenY = y;
+                mouseEvent.screenX = x / Toolkit.scaleX;
+                mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         }
@@ -422,8 +402,8 @@ class ComponentBase {
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_DOWN);
             if (fn != null) {
                 var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_DOWN);
-                mouseEvent.screenX = x;
-                mouseEvent.screenY = y;
+                mouseEvent.screenX = x / Toolkit.scaleX;
+                mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         }
@@ -439,8 +419,8 @@ class ComponentBase {
                 var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.CLICK);
                 if (fn != null) {
                     var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.CLICK);
-                    mouseEvent.screenX = x;
-                    mouseEvent.screenY = y;
+                    mouseEvent.screenX = x / Toolkit.scaleX;
+                    mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
                 }
             }
@@ -450,8 +430,8 @@ class ComponentBase {
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_UP);
             if (fn != null) {
                 var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_UP);
-                mouseEvent.screenX = x;
-                mouseEvent.screenY = y;
+                mouseEvent.screenX = x / Toolkit.scaleX;
+                mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         }
