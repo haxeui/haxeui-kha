@@ -220,7 +220,7 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top + 1);
         }
 
         if (style.color != null) {

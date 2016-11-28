@@ -22,6 +22,11 @@ class StyleHelper {
             return;
         }
 
+        var orgX = x;
+        var orgY = y;
+        var orgW = w;
+        var orgH = h;
+        
         var alpha:Int = 0xFF000000;
         if (style.opacity != null) {
             alpha = Std.int(style.opacity * 255) << 24;
@@ -35,11 +40,11 @@ class StyleHelper {
             var borderSize:Int = Std.int(style.borderLeftSize);
             g.color = style.borderLeftColor | alpha;
             for (i in 0...borderSize) {
-                g.drawRect(x + .5, y + .5, w, h, 1);
+                g.drawRect(x + .0, y + .0, w, h, 1);
                 x++;
                 y++;
-                w -= 1;
-                h -= 1;
+                w -= 2;
+                h -= 2;
             }
             g.color = Color.White;
         } else { // compound border
@@ -74,6 +79,12 @@ class StyleHelper {
             }
         }
 
+        //w += 1;
+        //h += 1;
+        x--;
+        w++;
+        h++;
+        
         if (style.backgroundColor != null) {
             if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
                 var gradientType:String = "vertical";
@@ -152,34 +163,29 @@ class StyleHelper {
             });
         }
 
-        /*
-        if (style.filter != null) {
-            drawShadow(g, 0x888888 | 0x444444, x, y, w, h, 1, true);
-        }
-        */
         if (style.filter != null) {
             var f:Filter = FilterParser.parseFilter(style.filter);
             if (Std.is(f, DropShadow)) {
                 var dropShadow:DropShadow = cast(f, DropShadow);
-                /*
-                if (dropShadow.color == 0x888888) { // not ideal
-                    dropShadow.color |= 0x444444;
+                if (dropShadow.inner == true) {
+                    drawShadow(g, dropShadow.color, x, y, w, h, Std.int(dropShadow.distance), dropShadow.inner);
+                } else {
+                    drawShadow(g, dropShadow.color, orgX - 1, orgY, orgW, orgH, Std.int(dropShadow.distance), dropShadow.inner);
                 }
-                */
-                drawShadow(g, dropShadow.color, x, y, w, h, 1, dropShadow.inner);
             }
         }
     }
 
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
-        g.color = color | 0x30000000;
         if (inset == false) {
             for (i in 0...size) {
+                g.color = color | 0x30000000;
                 g.fillRect(x + i, y + h + 1 + i, w + 1, 1); // bottom
                 g.fillRect(x + w + 1 + i, y + i, 1, h + 2); // right
             }
         } else {
             for (i in 0...size) {
+                g.color = color | 0x30000000;
                 g.fillRect(x + i, y + i, w - i, 1); // top
                 g.fillRect(x + i, y + i, 1, h - i); // left
             }
