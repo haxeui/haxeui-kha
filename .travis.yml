@@ -28,5 +28,6 @@ script:
     - git submodule add https://github.com/KTXSoftware/Kha
     - git submodule update --init --recursive
     - node Kha/make html5
+    - ls
     - cd build
     - haxe project-html5.hxml
