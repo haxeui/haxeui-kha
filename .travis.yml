@@ -8,19 +8,24 @@ haxe:
   - "3.2.1"
   - development
 
+node_js:
+  - "6"
+
 before_install:
     - git clone https://github.com/haxeui/haxeui-core.git --depth=1
     - haxelib dev haxeui-core haxeui-core
 
 install:
     - haxelib install hscript
-    - haxelib install kha
     - haxelib dev haxeui-kha $TRAVIS_BUILD_DIR
 
 
 script:
     - git clone https://github.com/haxeui/haxeui-templates.git --depth=1
     - cd haxeui-templates/kha/skeleton
-    - haxelib run kha html5
+    - git init
+    - git submodule add https://github.com/KTXSoftware/Kha
+    - git submodule update --init --recursive
+    - node Kha/make html5
     - cd build
     - haxe project-html5.hxml
