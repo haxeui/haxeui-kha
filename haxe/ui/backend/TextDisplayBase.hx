@@ -122,6 +122,16 @@ class TextDisplayBase {
         return _textHeight;
     }
 
+    private var _textAlign:String;
+    public var textAlign(get, set):Null<String>;
+    private function get_textAlign():Null<String> {
+        return _textAlign;
+    }
+    private function set_textAlign(value:Null<String>):Null<String> {
+        _textAlign = value;
+        return value;
+    }
+
     public var color(get, set):Int;
     private function get_color():Int {
         return 0;
@@ -189,10 +199,21 @@ class TextDisplayBase {
         if (_lines != null) {
             g.font = _font;
             g.fontSize = Std.int(fontSize);
-            
-            var tx:Float = x + left;
+
+            var tx:Float = x;
             var ty:Float = y + top + 1;
-            
+
+            switch(_textAlign) {
+                case "center":
+                    tx += (_width - _textWidth) / 2;
+
+                case "right":
+                    tx += _width - _textWidth;
+
+                default:
+                    tx += left;
+            }
+
             for (line in _lines) {
                 g.drawString(line, tx, ty);
                 ty += _font.height(Std.int(_fontSize));
