@@ -252,21 +252,21 @@ class ComponentBase {
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
         var cx:Int = Std.int(cast(this, Component).width);
         var cy:Int = Std.int(cast(this, Component).height);
-        
+
         if (_componentBuffer == null || _componentBuffer.width != cx || _componentBuffer.height != cy) {
             if (_componentBuffer != null) {
                 _componentBuffer.unload();
             }
             _componentBuffer = kha.Image.createRenderTarget(cx, cy);
         }
-        
+
         _componentBuffer.g2.begin(true, 0xFFFFFFFF);
         renderTo(_componentBuffer.g2);
         _componentBuffer.g2.end();
-        
+
         g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }
-    
+
     private function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;
@@ -437,16 +437,16 @@ class ComponentBase {
         }
         _mouseDownFlag = false;
     }
-    
+
     private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);
         if (array.length == 0) {
             return false;
         }
-        
+
         return !hasChildRecursive(cast ref, cast array[array.length - 1]);
     }
-    
+
     private function getComponentsAtPoint(x:Int, y:Int):Array<Component> {
         var array:Array<Component> = new Array<Component>();
         for (r in Screen.instance.rootComponents) {
@@ -454,7 +454,7 @@ class ComponentBase {
         }
         return array;
     }
-    
+
     private function findChildrenAtPoint(child:Component, x:Int, y:Int, array:Array<Component>) {
         if (child.inBounds(x, y) == true) {
             array.push(child);
@@ -463,7 +463,7 @@ class ComponentBase {
             }
         }
     }
-    
+
     public function hasChildRecursive(parent:Component, child:Component):Bool {
         if (parent == child) {
             return true;
@@ -474,10 +474,10 @@ class ComponentBase {
                 r = true;
                 break;
             }
-            
+
             r = hasChildRecursive(t, child);
         }
-        
+
         return r;
     }
 }

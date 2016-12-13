@@ -40,7 +40,7 @@ class AppBase {
     }
 
     public function render(framebuffer:Framebuffer):Void {
-        
+
         var g = framebuffer.g2;
         g.begin(true, _backgroudColor);
 

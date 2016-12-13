@@ -26,7 +26,7 @@ class StyleHelper {
         var orgY = y;
         var orgW = w;
         var orgH = h;
-        
+
         var alpha:Int = 0xFF000000;
         if (style.opacity != null) {
             alpha = Std.int(style.opacity * 255) << 24;
@@ -84,7 +84,7 @@ class StyleHelper {
         x--;
         w++;
         h++;
-        
+
         if (style.backgroundColor != null) {
             if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
                 var gradientType:String = "vertical";
