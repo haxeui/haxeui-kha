@@ -15,5 +15,5 @@
     <plugins>
         <plugin type="asset" class="haxe.ui.assets.AssetNamePlugin" startsWith="img/" replaceWith="" removeExtension="true" />
     </plugins>
-    -->    
+    -->
 </module>

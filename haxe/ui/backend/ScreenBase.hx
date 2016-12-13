@@ -32,7 +32,7 @@ class ScreenBase {
     private function get_dpi():Float {
         return 72;
     }
-    
+
     public var focus(get, set):Component;
     private function get_focus():Component {
         return null;

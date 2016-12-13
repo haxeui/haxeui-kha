@@ -16,10 +16,10 @@ class TextDisplayBase {
     }
 
     private var _dirty:Bool = true;
-    
+
     public var left(default, default):Float;
     public var top(default, default):Float;
-    
+
     private var _width:Float = 0;
     public var width(get, set):Float;
     private function get_width():Float {
@@ -29,14 +29,14 @@ class TextDisplayBase {
         if (value == _width) {
             return value;
         }
-        
+
         _width = value;
         _dirty = true;
         measureText();
-        
+
         return value;
     }
-    
+
     private var _height:Float = 0;
     public var height(get, set):Float;
     private function get_height():Float {
@@ -46,11 +46,11 @@ class TextDisplayBase {
         if (value == _height) {
             return value;
         }
-        
+
         _height = value;
         _dirty = true;
         measureText();
-        
+
         return value;
     }
 
@@ -63,10 +63,10 @@ class TextDisplayBase {
         if (value == _fontSize) {
             return value;
         }
-        
+
         _dirty = true;
         measureText();
-        
+
         _fontSize = value;
         return value;
     }
@@ -89,7 +89,7 @@ class TextDisplayBase {
 
         _dirty = true;
         measureText();
-        
+
         return value;
     }
     private var _text:String;
@@ -139,20 +139,20 @@ class TextDisplayBase {
     private function set_color(value:Int):Int {
         return value;
     }
-    
+
     private var _lines:Array<String>;
     function measureText() {
         if (_dirty == false) {
             //return;
         }
-        
+
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
             _textHeight = 0;
             _dirty = false;
             return;
         }
-        
+
         if (_width <= 0) {
             _lines = new Array<String>();
             _lines.push(_text);
@@ -161,8 +161,8 @@ class TextDisplayBase {
             _dirty = false;
             return;
         }
-        
-        
+
+
         var maxWidth:Float = _width;
         _lines = new Array<String>();
         var lines = _text.split("\n");
@@ -190,11 +190,11 @@ class TextDisplayBase {
                 _lines.push(line);
             }
         }
-        
+
         _textHeight = _font.height(Std.int(_fontSize)) * _lines.length;
         _dirty = false;
     }
-    
+
     public function renderTo(g:Graphics, x:Float, y:Float) {
         if (_lines != null) {
             g.font = _font;
@@ -218,6 +218,6 @@ class TextDisplayBase {
                 g.drawString(line, tx, ty);
                 ty += _font.height(Std.int(_fontSize));
             }
-        }        
+        }
     }
 }

@@ -35,8 +35,8 @@ class ComponentBase {
         var xpos:Float = 0;
         while (c != null) {
             xpos += Math.fceil(c.left);
-            if (c.clipRect != null) {
-                xpos -= Math.fceil(c.clipRect.left);
+            if (c.componentClipRect != null) {
+                xpos -= Math.fceil(c.componentClipRect.left);
             }
             c = c.parentComponent;
         }
@@ -49,8 +49,8 @@ class ComponentBase {
         var ypos:Float = 0;
         while (c != null) {
             ypos += c.top;
-            if (c.clipRect != null) {
-                ypos -= c.clipRect.top;
+            if (c.componentClipRect != null) {
+                ypos -= c.componentClipRect.top;
             }
             c = c.parentComponent;
         }
@@ -61,7 +61,7 @@ class ComponentBase {
         var c:Component = cast(this, Component);
         var clip:Component = null;
         while (c != null) {
-            if (c.clipRect != null) {
+            if (c.componentClipRect != null) {
                 clip = c;
                 break;
             }
@@ -92,10 +92,10 @@ class ComponentBase {
             var clip:Component = findClipComponent();
             if (clip != null) {
                 b = false;
-                var sx = (clip.screenX + clip.clipRect.left) * Toolkit.scaleX;
-                var sy = (clip.screenY + clip.clipRect.top) * Toolkit.scaleY;
-                var cx = clip.clipRect.width * Toolkit.scaleX;
-                var cy = clip.clipRect.height * Toolkit.scaleY;
+                var sx = (clip.screenX + clip.componentClipRect.left) * Toolkit.scaleX;
+                var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
+                var cx = clip.componentClipRect.width * Toolkit.scaleX;
+                var cy = clip.componentClipRect.height * Toolkit.scaleY;
                 if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
                     b = true;
                 }
@@ -210,7 +210,7 @@ class ComponentBase {
         var h:Int = Math.ceil(cast(this, Component).componentHeight);
 
         var style:Style = cast(this, Component).style;
-        var clipRect:Rectangle = cast(this, Component).clipRect;
+        var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
             //g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
@@ -252,21 +252,21 @@ class ComponentBase {
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
         var cx:Int = Std.int(cast(this, Component).width);
         var cy:Int = Std.int(cast(this, Component).height);
-        
+
         if (_componentBuffer == null || _componentBuffer.width != cx || _componentBuffer.height != cy) {
             if (_componentBuffer != null) {
                 _componentBuffer.unload();
             }
             _componentBuffer = kha.Image.createRenderTarget(cx, cy);
         }
-        
+
         _componentBuffer.g2.begin(true, 0xFFFFFFFF);
         renderTo(_componentBuffer.g2);
         _componentBuffer.g2.end();
-        
+
         g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }
-    
+
     private function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;
@@ -437,16 +437,16 @@ class ComponentBase {
         }
         _mouseDownFlag = false;
     }
-    
+
     private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);
         if (array.length == 0) {
             return false;
         }
-        
+
         return !hasChildRecursive(cast ref, cast array[array.length - 1]);
     }
-    
+
     private function getComponentsAtPoint(x:Int, y:Int):Array<Component> {
         var array:Array<Component> = new Array<Component>();
         for (r in Screen.instance.rootComponents) {
@@ -454,7 +454,7 @@ class ComponentBase {
         }
         return array;
     }
-    
+
     private function findChildrenAtPoint(child:Component, x:Int, y:Int, array:Array<Component>) {
         if (child.inBounds(x, y) == true) {
             array.push(child);
@@ -463,7 +463,7 @@ class ComponentBase {
             }
         }
     }
-    
+
     public function hasChildRecursive(parent:Component, child:Component):Bool {
         if (parent == child) {
             return true;
@@ -474,10 +474,10 @@ class ComponentBase {
                 r = true;
                 break;
             }
-            
+
             r = hasChildRecursive(t, child);
         }
-        
+
         return r;
     }
 }
