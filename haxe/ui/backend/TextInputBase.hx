@@ -5,4 +5,6 @@ class TextInputBase extends TextDisplayBase {
         super();
     }
 
+    public var vscrollPos:Float;
+    public var multiline:Bool;
 }
