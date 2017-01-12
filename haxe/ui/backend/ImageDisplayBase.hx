@@ -1,4 +1,5 @@
 package haxe.ui.backend;
+import haxe.ui.util.Rectangle;
 import haxe.ui.core.Component;
 import haxe.ds.Either;
 import haxe.ui.assets.ImageInfo;
@@ -65,6 +66,24 @@ class ImageDisplayBase {
         _imageWidth = _imageInfo.width;
         _imageHeight = _imageInfo.height;
         aspectRatio = _imageInfo.width / _imageInfo.height;
+        return value;
+    }
+
+    public var imageClipRect(get, set):Rectangle;
+    private var _imageClipRect:Rectangle;
+    public function get_imageClipRect():Rectangle {
+        return _imageClipRect;
+    }
+    private function set_imageClipRect(value:Rectangle):Rectangle {
+        _imageClipRect = value;
+
+        //TODO
+        if(value == null) {
+
+        } else {
+
+        }
+
         return value;
     }
 
