@@ -10,7 +10,6 @@ import haxe.ui.core.TextInput;
 import haxe.ui.core.UIEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.util.Rectangle;
-import js.html.Image;
 import kha.Color;
 import kha.Scaler;
 import kha.ScreenRotation;
