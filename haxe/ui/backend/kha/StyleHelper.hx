@@ -81,6 +81,10 @@ class StyleHelper {
 
         //w += 1;
         //h += 1;
+        #if !js
+        y--;
+        #end
+        
         x--;
         w++;
         h++;
