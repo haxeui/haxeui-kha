@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="https://dl.dropboxusercontent.com/u/26678671/haxeui2-warning.png"/>
+  <img src="http://haxeui.org/db/haxeui2-warning.png"/>
 </p>
 
 [![Build Status](https://travis-ci.org/haxeui/haxeui-kha.svg?branch=master)](https://travis-ci.org/haxeui/haxeui-kha)
-[![Support this project on Patreon](https://dl.dropboxusercontent.com/u/26678671/patreon_button.png)](https://www.patreon.com/haxeui)
+[![Support this project on Patreon](http://haxeui.org/db/patreon_button.png)](https://www.patreon.com/haxeui)
 
-<h2>haxeui-kha</h2>
+# haxeui-kha
 `haxeui-kha` is the `Kha` backend for HaxeUI.
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 **_Important Note: currently in the alpha release of `haxeui-kha` only the `Kha` HTML5 renderer is supported, using different renderer will most likely cause compilation errors._**
 
-<h2>Installation</h2>
+## Installation
  * `haxeui-kha` has a dependency to <a href="https://github.com/haxeui/haxeui-core">`haxeui-core`</a>, and so that too must be installed.
  * `haxeui-kha` also has a dependency to <a href="https://github.com/KTXSoftware/Kha">Kha</a>, please refer to the installation instructions on their <a href="https://github.com/KTXSoftware/Kha">site</a>.
 
@@ -25,12 +25,12 @@ haxelib git haxeui-core https://github.com/haxeui/haxeui-core
 haxelib dev haxeui-kha path/to/expanded/source/archive
 ```
 
-<h2>Usage</h2>
+## Usage
 The simplest method to create a new `Kha` application that is HaxeUI ready is to use one of the <a href="https://github.com/haxeui/haxeui-templates">haxeui-templates</a>. These templates will allow you to start a new project rapidly with HaxeUI support baked in. 
 
 If however you already have an existing application, then incorporating HaxeUI into that application is straightforward:
 
-<h2>khamake.js</h2>
+## khamake.js
 Simply add the following lines to your `khamake.js` and rebuild your project files (using `haxelib run kha html5` for example):
 
 ```js
@@ -39,7 +39,7 @@ project.addLibrary('haxeui-kha');
 project.addLibrary('hscript');
 ```
 
-<h3>Toolkit initialisation and usage</h3>
+### Toolkit initialisation and usage
 The `Kha` system itself must be initialised and a render loop started. This can be done by using code similar to:
 
 ```haxe
@@ -62,14 +62,14 @@ function render(framebuffer:Framebuffer): Void {
 
 Once the toolkit is initialised you can add components using the methods specified <a href="https://github.com/haxeui/haxeui-core#adding-components-using-haxe-code">here</a>.
 
-<h2>Kha specifics</h2>
+## Kha specifics
 As well as using the generic `Screen.instance.addComponent`, it is also possible to render a component to a specific surface use the components special `renderTo` function. Eg:
 
 ```haxe
 main.renderTo(...);
 ```
 
-<h2>Addtional resources</h2>
+## Addtional resources
 * <a href="http://haxeui.github.io/haxeui-api/">haxeui-api</a> - The HaxeUI api docs.
 * <a href="https://github.com/haxeui/haxeui-guides">haxeui-guides</a> - Set of guides to working with HaxeUI and backends.
 * <a href="https://github.com/haxeui/haxeui-demo">haxeui-demo</a> - Demo application written using HaxeUI.
