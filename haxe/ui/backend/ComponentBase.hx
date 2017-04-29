@@ -212,7 +212,7 @@ class ComponentBase {
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
-            //g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
+            g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
         }
 
         //style.opacity = calcAlpha();
