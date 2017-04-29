@@ -1,5 +1,6 @@
 package haxe.ui.backend;
 
+import haxe.ui.styles.Style;
 import kha.Assets;
 import kha.Color;
 import kha.Font;
@@ -140,6 +141,10 @@ class TextDisplayBase {
         return value;
     }
 
+    public function applyStyle(style:Style) {
+        
+    }
+    
     private var _lines:Array<String>;
     function measureText() {
         if (_dirty == false) {
