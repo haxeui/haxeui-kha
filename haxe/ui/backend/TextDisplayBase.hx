@@ -10,151 +10,77 @@ import kha.Image;
 
 class TextDisplayBase {
     public var _font:Font;
-    //public var _fontStyle:FontStyle;
 
     public function new() {
         _font = Assets.fonts.arial;
     }
 
-    private var _dirty:Bool = true;
-
-    public var left(default, default):Float;
-    public var top(default, default):Float;
-
-    private var _width:Float = 0;
-    public var width(get, set):Float;
-    private function get_width():Float {
-        return _width;
-    }
-    private function set_width(value:Float):Float {
-        if (value == _width) {
-            return value;
-        }
-
-        _width = value;
-        _dirty = true;
-        measureText();
-
-        return value;
-    }
-
-    private var _height:Float = 0;
-    public var height(get, set):Float;
-    private function get_height():Float {
-        return _height;
-    }
-    private function set_height(value:Float):Float {
-        if (value == _height) {
-            return value;
-        }
-
-        _height = value;
-        _dirty = true;
-        measureText();
-
-        return value;
-    }
-
-    private var _fontSize:Float = 14;
-    public var fontSize(get, set):Float;
-    private function get_fontSize():Float {
-        return _fontSize;
-    }
-    private function set_fontSize(value:Float):Float {
-        if (value == _fontSize) {
-            return value;
-        }
-
-        _dirty = true;
-        measureText();
-
-        _fontSize = value;
-        return value;
-    }
-
-    private var _fontName:String;
-    public var fontName(get, set):String;
-    private function get_fontName():String {
-        return _fontName;
-    }
-    private function set_fontName(value:String):String {
-        if (_fontName == value) {
-            return value;
-        }
-
-        _fontName = value;
-        var newFont:Font = Reflect.field(Assets.fonts, _fontName);
-        if (newFont != null) {
-            _font = newFont;
-        }
-
-        _dirty = true;
-        measureText();
-
-        return value;
-    }
     private var _text:String;
-    public var text(get, set):String;
-    private function get_text():String {
-        return _text;
-    }
-
-    private function set_text(value:String):String {
-        if (_text == value) {
-            return value;
-        }
-        _text = value;
-        _dirty = true;
-        measureText();
-        return value;
-    }
-
+    private var _left:Float = 0;
+    private var _top:Float = 0;
+    private var _width:Float = 0;
+    private var _height:Float = 0;
     private var _textWidth:Float = 0;
-    public var textWidth(get, null):Float;
-    private function get_textWidth():Float {
-        measureText();
-        return _textWidth;
-    }
-
     private var _textHeight:Float = 0;
-    public var textHeight(get, null):Float;
-    private function get_textHeight():Float {
-        measureText();
-        return _textHeight;
-    }
+    private var _textStyle:Style;
+    private var _multiline:Bool = true;
+    private var _wordWrap:Bool = false;
 
     private var _textAlign:String;
-    public var textAlign(get, set):Null<String>;
-    private function get_textAlign():Null<String> {
-        return _textAlign;
-    }
-    private function set_textAlign(value:Null<String>):Null<String> {
-        _textAlign = value;
-        return value;
-    }
+    private var _fontSize:Float = 14;
+    private var _fontName:String;
+    private var _color:Int;
+    
+    //***********************************************************************************************************
+    // Validation functions
+    //***********************************************************************************************************
 
-    public var color(get, set):Int;
-    private function get_color():Int {
-        return 0;
+    private function validateData() {
+        
     }
-    private function set_color(value:Int):Int {
-        return value;
+    
+    private function validateStyle():Bool {
+        var measureTextRequired:Bool = false;
+        
+        if (_textStyle != null) {
+            if (_textAlign != _textStyle.textAlign) {
+                _textAlign = _textStyle.textAlign;
+            }
+            
+            if (_fontSize != _textStyle.fontSize) {
+                _fontSize = _textStyle.fontSize;
+                measureTextRequired = true;
+            }
+            
+            if (_fontName != _textStyle.fontName) {
+                var newFont:Font = Reflect.field(Assets.fonts, _fontName);
+                if (newFont != null) {
+                    _font = newFont;
+                    measureTextRequired = true;
+                }
+            }
+            
+            if (_color != _textStyle.color) {
+                _color = _textStyle.color;
+            }
+        }
+        
+        return measureTextRequired;
     }
-
-    public function applyStyle(style:Style) {
+    
+    private function validatePosition() {
+        
+    }
+    
+    private function validateDisplay() {
         
     }
     
     private var _lines:Array<String>;
     function measureText() {
-        if (_dirty == false) {
-            //return;
-        }
-
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
             _textHeight = 0;
-            _dirty = false;
             return;
         }
 
@@ -163,7 +89,6 @@ class TextDisplayBase {
             _lines.push(_text);
             _textWidth = _font.width(Std.int(_fontSize), _text);
             _textHeight = _font.height(Std.int(_fontSize)) + 1;
-            _dirty = false;
             return;
         }
 
@@ -197,16 +122,15 @@ class TextDisplayBase {
         }
 
         _textHeight = _font.height(Std.int(_fontSize)) * _lines.length;
-        _dirty = false;
     }
 
     public function renderTo(g:Graphics, x:Float, y:Float) {
         if (_lines != null) {
             g.font = _font;
-            g.fontSize = Std.int(fontSize);
+            g.fontSize = Std.int(_fontSize);
 
             var tx:Float = x;
-            var ty:Float = y + top + 1;
+            var ty:Float = y + _top + 1;
 
             switch(_textAlign) {
                 case "center":
@@ -216,7 +140,7 @@ class TextDisplayBase {
                     tx += _width - _textWidth;
 
                 default:
-                    tx += left;
+                    tx += _left;
             }
 
             for (line in _lines) {

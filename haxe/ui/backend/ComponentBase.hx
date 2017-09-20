@@ -11,8 +11,6 @@ import haxe.ui.core.UIEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.util.Rectangle;
 import kha.Color;
-import kha.Scaler;
-import kha.ScreenRotation;
 import kha.graphics2.Graphics;
 import kha.input.Mouse;
 
@@ -209,6 +207,9 @@ class ComponentBase {
         var h:Int = Math.ceil(cast(this, Component).componentHeight);
 
         var style:Style = cast(this, Component).style;
+        if (style == null) {
+            return;
+        }
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
@@ -273,7 +274,6 @@ class ComponentBase {
     }
 
     public function handleCreate(native:Bool) {
-
     }
 
     public function handlePreReposition():Void {

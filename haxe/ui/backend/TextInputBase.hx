@@ -5,9 +5,7 @@ class TextInputBase extends TextDisplayBase {
         super();
     }
 
-    public var hscrollPos:Float;
-    public var vscrollPos:Float;
-    public var multiline:Bool;
-    public var password:Bool;
-    public var wordWrap:Bool;
+    private var _password:Bool = false;
+    private var _hscrollPos:Float = 0;
+    private var _vscrollPos:Float = 0;
 }
