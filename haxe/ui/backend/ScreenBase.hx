@@ -30,7 +30,7 @@ class ScreenBase {
 
     public var dpi(get, null):Float;
     private function get_dpi():Float {
-        return 72;
+        return System.screenDpi();
     }
 
     public var focus(get, set):Component;
