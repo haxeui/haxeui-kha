@@ -4,6 +4,6 @@ import kha.Scheduler;
 
 class CallLaterBase {
     public function new(fn:Void->Void) {
-        Scheduler.addTimeTask(fn, 0);
+        Scheduler.addFrameTask(fn, 0);
     }
 }
