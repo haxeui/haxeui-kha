@@ -36,24 +36,18 @@ class AssetsBase {
     private function getImageFromHaxeResource(resourceId:String, callback:String->ImageInfo->Void) {
         var bytes:Bytes = Resource.getBytes(resourceId);
 
-        #if js
-
-        var image = Browser.document.createImageElement();
-        image.onload = function(e) {
-            var img:Image = Image.fromImage(image, true);
+        var extension = resourceId.split(".").pop();
+        Image.fromEncodedBytes(bytes, extension, function(image) {
             var imageInfo:ImageInfo = {
-                width: img.realWidth,
-                height: img.realHeight,
-                data: img
+                width: image.realWidth,
+                height: image.realHeight,
+                data: image
             }
             callback(resourceId, imageInfo);
-        }
-        var base64:String = haxe.crypto.Base64.encode(bytes);
-        image.src = "data:image/png;base64," + base64;
-
-        #elseif flash
-
-        #end
+        }, function(error) {
+            trace("Problem loading image: " + error);
+            callback(resourceId, null);
+        });
     }
 
     private function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
