@@ -1,5 +1,6 @@
 package haxe.ui.backend;
 
+import haxe.ui.Preloader.PreloadItem;
 import haxe.ui.components.Button;
 import haxe.ui.core.Screen;
 import kha.Image;
@@ -71,5 +72,9 @@ class AppBase {
             s = s.substring(2, s.length);
         }
         return Std.parseInt("0xFF" + s);
+    }
+    
+    private function buildPreloadList():Array<PreloadItem> {
+        return [];
     }
 }
