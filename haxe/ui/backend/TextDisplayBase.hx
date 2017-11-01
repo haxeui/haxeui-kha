@@ -1,7 +1,10 @@
 package haxe.ui.backend;
 
+import haxe.ui.assets.FontInfo;
+import haxe.ui.core.Component;
 import haxe.ui.styles.Style;
-import kha.Assets;
+//import kha.Assets;
+//import kha.Assets;
 import kha.Color;
 import kha.Font;
 import kha.FontStyle;
@@ -11,8 +14,10 @@ import kha.Image;
 class TextDisplayBase {
     public var _font:Font;
 
+    public var parentComponent:Component;
+    
     public function new() {
-        _font = Assets.fonts.arial;
+        //_font = Assets.fonts.arial;
     }
 
     private var _text:String;
@@ -30,6 +35,8 @@ class TextDisplayBase {
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
+    
+    private var _fontInfo:FontInfo;
     
     //***********************************************************************************************************
     // Validation functions
@@ -52,12 +59,9 @@ class TextDisplayBase {
                 measureTextRequired = true;
             }
             
-            if (_fontName != _textStyle.fontName) {
-                var newFont:Font = Reflect.field(Assets.fonts, _fontName);
-                if (newFont != null) {
-                    _font = newFont;
-                    measureTextRequired = true;
-                }
+            if (_fontName != _textStyle.fontName && _fontInfo != null) {
+                _font = _fontInfo.data;
+                measureTextRequired = true;
             }
             
             if (_color != _textStyle.color) {

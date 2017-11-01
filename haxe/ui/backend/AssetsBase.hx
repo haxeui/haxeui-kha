@@ -1,14 +1,11 @@
 package haxe.ui.backend;
+
 import haxe.io.Bytes;
 import haxe.ui.assets.FontInfo;
 import haxe.ui.assets.ImageInfo;
 import kha.Assets;
+import kha.Font;
 import kha.Image;
-
-#if js
-import js.Browser;
-import js.html.*;
-#end
 
 class AssetsBase {
     public function new() {
@@ -51,10 +48,18 @@ class AssetsBase {
     }
 
     private function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
-        callback(null);
+        if (Reflect.hasField(Assets.fonts, resourceId)) {
+            callback(cast Reflect.field(Assets.fonts, resourceId));
+        } else {
+            callback(null);            
+        }
     }
 
     private function getFontFromHaxeResource(resourceId:String, callback:String->FontInfo->Void) {
-        callback(resourceId, null);
+        var bytes:Bytes = Resource.getBytes(resourceId);
+        var fontInfo = {
+            data: Font.fromBytes(bytes)
+        }
+        callback(resourceId, fontInfo);
     }
 }
