@@ -60,20 +60,20 @@ class StyleHelper {
                 g.color = style.borderLeftColor | alpha;
                 g.fillRect(x, y, style.borderLeftSize, h); // left
                 g.color = Color.White;
-                x += style.borderLeftSize;
-                w -= style.borderLeftSize;
+                x += style.borderLeftSize * 2;
+                w -= style.borderLeftSize * 2;
             }
 
             if (style.borderBottomSize != null && style.borderBottomSize > 0) {
                 g.color = style.borderBottomColor | alpha;
-                g.fillRect(x, y + h - style.borderBottomSize, w, style.borderBottomSize); // bottom
+                g.fillRect(x - style.borderBottomSize, y + h, w + 1, style.borderBottomSize); // bottom
                 g.color = Color.White;
                 h -= style.borderBottomSize;
             }
 
             if (style.borderRightSize != null && style.borderRightSize > 0) {
                 g.color = style.borderRightColor | alpha;
-                g.fillRect(x + w - style.borderRightSize, y, style.borderRightSize, h + 1); // right
+                g.fillRect(x + w - style.borderRightSize, y, style.borderRightSize, h + 2); // right
                 g.color = Color.White;
                 w -= style.borderRightSize;
             }
@@ -168,7 +168,7 @@ class StyleHelper {
         }
 
         if (style.filter != null) {
-            var f:Filter = FilterParser.parseFilter(style.filter);
+            var f:Filter = style.filter[0];
             if (Std.is(f, DropShadow)) {
                 var dropShadow:DropShadow = cast(f, DropShadow);
                 if (dropShadow.inner == true) {
