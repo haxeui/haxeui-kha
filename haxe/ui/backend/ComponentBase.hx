@@ -18,8 +18,8 @@ class ComponentBase {
     public var parent:ComponentBase;
     private var _eventMap:Map<String, UIEvent->Void>;
 
-    var lastMouseX: Int;
-    var lastMouseY: Int;
+    private var lastMouseX = -1;
+    private var lastMouseY = -1;
 
     public function new() {
         _eventMap = new Map<String, UIEvent->Void>();
@@ -452,7 +452,7 @@ class ComponentBase {
         _mouseDownFlag = false;
     }
 
-    function __onMouseWheel( delta: Int ) {
+    private function __onMouseWheel(delta: Int) {
         var fn = _eventMap.get(MouseEvent.MOUSE_WHEEL);
 
         if (fn == null) {
@@ -463,11 +463,10 @@ class ComponentBase {
             return;
         }
 
-        var d = Math.max(-1, Math.min(1, -delta));
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_WHEEL);
         mouseEvent.screenX = lastMouseX / Toolkit.scaleX;
         mouseEvent.screenY = lastMouseY / Toolkit.scaleY;
-        mouseEvent.delta = d;
+        mouseEvent.delta = Math.max(-1, Math.min(1, -delta));
         fn(mouseEvent);
     }
 
