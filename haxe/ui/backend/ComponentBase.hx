@@ -18,6 +18,9 @@ class ComponentBase {
     public var parent:ComponentBase;
     private var _eventMap:Map<String, UIEvent->Void>;
 
+    var lastMouseX: Int;
+    var lastMouseY: Int;
+
     public function new() {
         _eventMap = new Map<String, UIEvent->Void>();
     }
@@ -343,7 +346,11 @@ class ComponentBase {
                     Mouse.get().notify(null, __onMouseUp, null, null);
                     _eventMap.set(MouseEvent.MOUSE_UP, listener);
                 }
-
+            case MouseEvent.MOUSE_WHEEL:
+                if (!_eventMap.exists(MouseEvent.MOUSE_WHEEL)) {
+                    Mouse.get().notify(null, null, null, __onMouseWheel, null);
+                    _eventMap.set(MouseEvent.MOUSE_WHEEL, listener);
+                }
             case MouseEvent.CLICK:
                 if (_eventMap.exists(MouseEvent.CLICK) == false) {
                     _eventMap.set(MouseEvent.CLICK, listener);
@@ -367,6 +374,8 @@ class ComponentBase {
 
     private var _mouseOverFlag:Bool = false;
     private function __onMouseMove(x:Int, y:Int, movementX:Int, movementY:Int) {
+        lastMouseX = x;
+        lastMouseY = y;
         var i = inBounds(x, y);
         if (i == true && _mouseOverFlag == false) {
             if (hasComponentOver(cast this, x, y) == true) {
@@ -394,6 +403,8 @@ class ComponentBase {
 
     private var _mouseDownFlag:Bool = false;
     private function __onMouseDown(button:Int, x:Int, y:Int) {
+        lastMouseX = x;
+        lastMouseY = y;
         var i = inBounds(x, y);
         if (i == true && _mouseDownFlag == false) {
             if (hasComponentOver(cast this, x, y) == true) {
@@ -411,6 +422,8 @@ class ComponentBase {
     }
 
     private function __onMouseUp(button:Int, x:Int, y:Int) {
+        lastMouseX = x;
+        lastMouseY = y;
         var i = inBounds(x, y);
         if (i == true) {
             if (hasComponentOver(cast this, x, y) == true) {
@@ -437,6 +450,21 @@ class ComponentBase {
             }
         }
         _mouseDownFlag = false;
+    }
+
+    function __onMouseWheel( delta: Int ) {
+        var fn = _eventMap.get(MouseEvent.MOUSE_WHEEL);
+
+        if (fn == null) {
+            return;
+        }
+
+        var d = Math.max(-1, Math.min(1, -delta));
+        var mouseEvent = new MouseEvent(MouseEvent.MOUSE_WHEEL);
+        mouseEvent.screenX = lastMouseX / Toolkit.scaleX;
+        mouseEvent.screenY = lastMouseY / Toolkit.scaleY;
+        mouseEvent.delta = d;
+        fn(mouseEvent);
     }
 
     private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
