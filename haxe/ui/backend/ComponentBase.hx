@@ -459,6 +459,10 @@ class ComponentBase {
             return;
         }
 
+        if (!inBounds(lastMouseX, lastMouseY)) {
+            return;
+        }
+
         var d = Math.max(-1, Math.min(1, -delta));
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_WHEEL);
         mouseEvent.screenX = lastMouseX / Toolkit.scaleX;
