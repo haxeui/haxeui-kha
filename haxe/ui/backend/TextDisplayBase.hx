@@ -2,6 +2,7 @@ package haxe.ui.backend;
 
 import haxe.ui.assets.FontInfo;
 import haxe.ui.core.Component;
+import haxe.ui.core.TextDisplay.TextDisplayData;
 import haxe.ui.styles.Style;
 //import kha.Assets;
 //import kha.Assets;
@@ -14,10 +15,11 @@ import kha.Image;
 class TextDisplayBase {
     public var _font:Font;
 
+    private var _displayData:TextDisplayData = new TextDisplayData();
+     
     public var parentComponent:Component;
     
     public function new() {
-        //_font = Assets.fonts.arial;
     }
 
     private var _text:String;
@@ -28,8 +30,6 @@ class TextDisplayBase {
     private var _textWidth:Float = 0;
     private var _textHeight:Float = 0;
     private var _textStyle:Style;
-    private var _multiline:Bool = true;
-    private var _wordWrap:Bool = false;
 
     private var _textAlign:String;
     private var _fontSize:Float = 14;
