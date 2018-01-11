@@ -121,7 +121,9 @@ class TextDisplayBase {
                 }
             } else {
                 _textWidth = Math.max(_textWidth, tw);
-                _lines.push(line);
+                if (line != '') {
+                    _lines.push(line);
+                }
             }
         }
 
