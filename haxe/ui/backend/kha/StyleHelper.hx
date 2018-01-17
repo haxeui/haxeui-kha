@@ -13,10 +13,12 @@ import kha.graphics2.Graphics;
 
 class StyleHelper {
     public static function paintStyle(g:Graphics, style:Style, x:Float, y:Float, w:Float, h:Float):Void {
+        /*
         x = Math.ffloor(x);
         y = Math.ffloor(y);
         w = Math.fceil(w);
         h = Math.fceil(h);
+        */
 
         if (w <= 0 || h <= 0) {
             return;
@@ -31,63 +33,6 @@ class StyleHelper {
         if (style.opacity != null) {
             alpha = Std.int(style.opacity * 255) << 24;
         }
-
-        if (style.borderLeftColor != null
-            && style.borderLeftColor == style.borderRightColor
-            && style.borderLeftColor == style.borderBottomColor
-            && style.borderLeftColor == style.borderTopColor) { // full border
-
-            var borderSize:Int = Std.int(style.borderLeftSize);
-            g.color = style.borderLeftColor | alpha;
-            for (i in 0...borderSize) {
-                g.drawRect(x + .0, y + .0, w, h, 1);
-                x++;
-                y++;
-                w -= 2;
-                h -= 2;
-            }
-            g.color = Color.White;
-        } else { // compound border
-            if (style.borderTopSize != null && style.borderTopSize > 0) {
-                g.color = style.borderTopColor | alpha;
-                g.fillRect(x, y, w, style.borderTopSize); // top
-                g.color = Color.White;
-                y += style.borderTopSize;
-                h -= style.borderTopSize;
-            }
-
-            if (style.borderLeftSize != null && style.borderLeftSize > 0) {
-                g.color = style.borderLeftColor | alpha;
-                g.fillRect(x, y, style.borderLeftSize, h); // left
-                g.color = Color.White;
-                x += style.borderLeftSize;
-                w -= style.borderLeftSize;
-            }
-
-            if (style.borderBottomSize != null && style.borderBottomSize > 0) {
-                g.color = style.borderBottomColor | alpha;
-                g.fillRect(x, y + h - style.borderBottomSize, w, style.borderBottomSize); // bottom
-                g.color = Color.White;
-                h -= style.borderBottomSize;
-            }
-
-            if (style.borderRightSize != null && style.borderRightSize > 0) {
-                g.color = style.borderRightColor | alpha;
-                g.fillRect(x + w - style.borderRightSize, y, style.borderRightSize, h + 1); // right
-                g.color = Color.White;
-                w -= style.borderRightSize;
-            }
-        }
-
-        //w += 1;
-        //h += 1;
-        #if !js
-        y--;
-        #end
-        
-        x--;
-        w++;
-        h++;
 
         if (style.backgroundColor != null) {
             if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
@@ -121,7 +66,7 @@ class StyleHelper {
                 g.color = Color.White;
             }
         }
-
+        
         if (style.backgroundImage != null) {
             Toolkit.assets.getImage(style.backgroundImage, function(imageInfo:ImageInfo) {
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
@@ -166,7 +111,48 @@ class StyleHelper {
                 }
             });
         }
+        
+        if (style.borderLeftColor != null
+            && style.borderLeftColor == style.borderRightColor
+            && style.borderLeftColor == style.borderBottomColor
+            && style.borderLeftColor == style.borderTopColor) { // full border
 
+            var borderSize:Int = Std.int(style.borderLeftSize);
+            g.color = style.borderLeftColor | alpha;
+            for (i in 0...borderSize) {
+                g.drawRect(x + .0 + 1, y + .0, w - 1, h - 1, 1);
+                x++;
+                y++;
+                w -= 2;
+                h -= 2;
+            }
+            g.color = Color.White;
+        } else { // compound border
+            if (style.borderTopSize != null && style.borderTopSize > 0) {
+                g.color = style.borderTopColor | alpha;
+                g.fillRect(x, y, w, style.borderTopSize); // top
+                g.color = Color.White;
+            }
+            
+            if (style.borderBottomSize != null && style.borderBottomSize > 0) {
+                g.color = style.borderBottomColor | alpha;
+                g.fillRect(x, y + h - style.borderBottomSize, w, style.borderBottomSize); // bottom
+                g.color = Color.White;
+            }
+
+            if (style.borderLeftSize != null && style.borderLeftSize > 0) {
+                g.color = style.borderLeftColor | alpha;
+                g.fillRect(x, y, style.borderLeftSize, h); // left
+                g.color = Color.White;
+            }
+            
+            if (style.borderRightSize != null && style.borderRightSize > 0) {
+                g.color = style.borderRightColor | alpha;
+                g.fillRect(x + w - style.borderRightSize, y, style.borderRightSize, h + 1); // right
+                g.color = Color.White;
+            }
+        }        
+        
         if (style.filter != null) {
             var f:Filter = FilterParser.parseFilter(style.filter);
             if (Std.is(f, DropShadow)) {
