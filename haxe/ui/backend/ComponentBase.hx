@@ -225,7 +225,7 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top + 1);
+            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
         }
 
         if (style.color != null) {
@@ -276,6 +276,10 @@ class ComponentBase {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;
         }
+        
+        if (style.clip != null && style.clip == true) {
+            cast(this, Component).componentClipRect = new Rectangle(0, 0, width, height);
+        }
     }
 
     public function handleCreate(native:Bool) {
@@ -307,6 +311,14 @@ class ComponentBase {
 
     private function handleRemoveComponent(child:Component, dispose:Bool = true):Component {
         return child;
+    }
+
+    private function handleAddComponentAt(child:Component, index:Int):Component {
+        return child;
+    }
+
+    private function handleRemoveComponentAt(index:Int, dispose:Bool = true):Component {
+        return null;
     }
 
     private function handleVisibility(show:Bool):Void {
