@@ -4,13 +4,8 @@ import haxe.ui.assets.FontInfo;
 import haxe.ui.core.Component;
 import haxe.ui.core.TextDisplay.TextDisplayData;
 import haxe.ui.styles.Style;
-//import kha.Assets;
-//import kha.Assets;
-import kha.Color;
 import kha.Font;
-import kha.FontStyle;
 import kha.graphics2.Graphics;
-import kha.Image;
 
 class TextDisplayBase {
     public var _font:Font;
