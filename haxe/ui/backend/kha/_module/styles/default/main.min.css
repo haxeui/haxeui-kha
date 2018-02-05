@@ -1,3 +1,5 @@
-.label,.textfield{font-name:"styles/default/arial.ttf";font-size:14px;}
+.label,.textfield,.textarea{font-name:"styles/default/arial.ttf";font-size:14px;}
+.textarea{__padding-top:3px;__padding-left:4px;color:black;}
+.textfield{padding:4px;padding-left:4px;padding-bottom:3px;color:black;}
 .scrollview{padding:1px;}
 
