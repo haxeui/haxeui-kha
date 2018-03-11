@@ -1,7 +1,7 @@
 package haxe.ui.backend;
 
+import haxe.ui.util.ColorUtil;
 import haxe.ui.Preloader.PreloadItem;
-import haxe.ui.components.Button;
 import haxe.ui.core.Screen;
 import kha.Image;
 import kha.Scaler;
@@ -27,7 +27,7 @@ class AppBase {
         var title:String = Toolkit.backendProperties.getProp("haxe.ui.kha.title", "");
         var width:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.width", 800);
         var height:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.height", 600);
-        _backgroudColor = parseCol(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
+        _backgroudColor = ColorUtil.parseColor(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
         System.init( { title: title, width: width, height: height }, initialized);
     }
 
@@ -63,15 +63,6 @@ class AppBase {
 
     public function start() {
 
-    }
-
-    private static inline function parseCol(s:String):Int {
-        if (StringTools.startsWith(s, "#")) {
-            s = s.substring(1, s.length);
-        } else if (StringTools.startsWith(s, "0x")) {
-            s = s.substring(2, s.length);
-        }
-        return Std.parseInt("0xFF" + s);
     }
     
     private function buildPreloadList():Array<PreloadItem> {
