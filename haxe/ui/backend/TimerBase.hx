@@ -19,8 +19,8 @@ class TimerBase {
     }
 
     public function stop() {
+        _stopped = true;
         if (_timerId != -1) {
-            _stopped = true;
             Scheduler.removeTimeTask(_timerId);
         }
     }
