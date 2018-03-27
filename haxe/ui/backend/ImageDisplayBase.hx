@@ -29,14 +29,26 @@ class ImageDisplayBase {
         if (_imageInfo != null) {
             dispose();
             _buffer = _imageInfo.data;
-            _imageWidth = _imageInfo.width;
-            _imageHeight = _imageInfo.height;
+            if (_imageWidth <= 0) {
+                _imageWidth = _imageInfo.width;
+            }
+            if (_imageHeight <= 0) {
+                _imageHeight = _imageInfo.height;
+            }
             aspectRatio = _imageInfo.width / _imageInfo.height;
         } else {
             dispose();
             _imageWidth = 0;
             _imageHeight = 0;
         }
+    }
+    
+    public var scaled(get, null):Bool;
+    private function get_scaled():Bool {
+        if (_imageInfo == null) {
+            return false;
+        }
+        return (_imageWidth != _imageInfo.width || _imageHeight != _imageInfo.height);
     }
     
     private function validatePosition() {
@@ -49,8 +61,8 @@ class ImageDisplayBase {
     
     public function dispose() {
         if (_buffer != null) {
-            //_buffer.unload();
-            //_buffer = null;
+            _buffer.unload();
+            _buffer = null;
         }
     }
 }

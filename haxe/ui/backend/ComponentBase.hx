@@ -225,7 +225,11 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+            if (_imageDisplay.scaled == true) {
+                g.drawScaledImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
+            } else {
+                g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+            }
         }
 
         if (style.color != null) {
