@@ -60,9 +60,11 @@ class ImageDisplayBase {
     }
     
     public function dispose() {
+        /*
         if (_buffer != null) {
             _buffer.unload();
             _buffer = null;
         }
+        */
     }
 }
