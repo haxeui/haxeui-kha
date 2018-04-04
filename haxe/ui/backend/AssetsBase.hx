@@ -48,8 +48,9 @@ class AssetsBase {
     }
 
     private function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
-        if (Reflect.hasField(Assets.fonts, resourceId)) {
-            callback({ data: cast Reflect.field(Assets.fonts, resourceId) });
+        var font = Assets.fonts.get(resourceId);
+        if (font != null) {
+            callback({ data: font });
         } else {
             callback(null);            
         }
