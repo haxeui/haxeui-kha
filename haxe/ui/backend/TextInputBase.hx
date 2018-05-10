@@ -33,6 +33,7 @@ class TextInputBase {
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
+    private var _backgroundColor:Int;
     
     private var _fontInfo:FontInfo;
 
@@ -93,6 +94,11 @@ class TextInputBase {
             if (_color != _textStyle.color) {
                 _color = _textStyle.color;
                 _tf.textColor = Color.fromValue(_textStyle.color | 0xFF000000);
+            }
+            
+            if (_backgroundColor != _textStyle.backgroundColor) {
+                _backgroundColor = _textStyle.backgroundColor;
+                _tf.backgroundColor = Color.fromValue(_textStyle.backgroundColor | 0xFF000000);
             }
         }
         
