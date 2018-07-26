@@ -17,6 +17,14 @@ class AssetsBase {
     }
 
     private function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
+        if (resourceId.indexOf(".") != -1) {
+            var parts = resourceId.split(".");
+            parts.pop();
+            resourceId = parts.join(".");
+        }
+        if (resourceId.indexOf("/") != -1) {
+            resourceId = resourceId.split("/").pop();
+        }
         var img:Image = Reflect.field(Assets.images, resourceId);
         if (img != null) {
             var imageInfo:ImageInfo = {
