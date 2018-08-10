@@ -160,7 +160,7 @@ class StyleHelper {
                 if (dropShadow.inner == true) {
                     drawShadow(g, dropShadow.color, x, y, w, h, Std.int(dropShadow.distance), dropShadow.inner);
                 } else {
-                    drawShadow(g, dropShadow.color, orgX - 1, orgY, orgW, orgH, Std.int(dropShadow.distance), dropShadow.inner);
+                    drawShadow(g, dropShadow.color, orgX - 1, orgY - 1, orgW, orgH, Std.int(dropShadow.distance), dropShadow.inner);
                 }
             }
         }

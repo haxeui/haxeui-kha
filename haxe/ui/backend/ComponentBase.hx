@@ -334,16 +334,23 @@ class ComponentBase {
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
+    private var hasMouseMove:Bool = false;
     private function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
             case MouseEvent.MOUSE_OVER:
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
-                    Mouse.get().notify(null, null, __onMouseMove, null);
+                    if (hasMouseMove == false) {
+                        Mouse.get().notify(null, null, __onMouseMove, null);
+                        hasMouseMove = true;
+                    }
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
             case MouseEvent.MOUSE_OUT:
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
-                    //Mouse.get().notify(null, null, __onMouseMove, null);
+                    if (hasMouseMove == false) {
+                        Mouse.get().notify(null, null, __onMouseMove, null);
+                        hasMouseMove = true;
+                    }
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
@@ -361,6 +368,10 @@ class ComponentBase {
             case MouseEvent.MOUSE_WHEEL:
                 if (!_eventMap.exists(MouseEvent.MOUSE_WHEEL)) {
                     Mouse.get().notify(null, null, null, __onMouseWheel, null);
+                    if (hasMouseMove == false) {
+                        Mouse.get().notify(null, null, __onMouseMove, null);
+                        hasMouseMove = true;
+                    }
                     _eventMap.set(MouseEvent.MOUSE_WHEEL, listener);
                 }
             case MouseEvent.CLICK:
@@ -381,7 +392,6 @@ class ComponentBase {
     }
 
     private function unmapEvent(type:String, listener:UIEvent->Void) {
-
     }
 
     private var _mouseOverFlag:Bool = false;
@@ -465,13 +475,16 @@ class ComponentBase {
     }
 
     private function __onMouseWheel(delta: Int) {
+        trace("mouse wheel");
         var fn = _eventMap.get(MouseEvent.MOUSE_WHEEL);
 
         if (fn == null) {
+            trace("nope");
             return;
         }
 
         if (!inBounds(lastMouseX, lastMouseY)) {
+            trace("nope2");
             return;
         }
 
