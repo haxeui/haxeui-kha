@@ -475,16 +475,13 @@ class ComponentBase {
     }
 
     private function __onMouseWheel(delta: Int) {
-        trace("mouse wheel");
         var fn = _eventMap.get(MouseEvent.MOUSE_WHEEL);
 
         if (fn == null) {
-            trace("nope");
             return;
         }
 
         if (!inBounds(lastMouseX, lastMouseY)) {
-            trace("nope2");
             return;
         }
 
