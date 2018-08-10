@@ -5,6 +5,7 @@ import haxe.ui.containers.dialogs.DialogButton;
 import haxe.ui.core.Component;
 import haxe.ui.core.MouseEvent;
 import haxe.ui.core.UIEvent;
+import kha.Display;
 import kha.input.Mouse;
 import kha.System;
 import kha.graphics2.Graphics;
@@ -30,7 +31,7 @@ class ScreenBase {
 
     public var dpi(get, null):Float;
     private function get_dpi():Float {
-        return System.screenDpi();
+        return Display.primary.pixelsPerInch;
     }
 
     public var focus(get, set):Component;
