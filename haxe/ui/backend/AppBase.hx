@@ -28,21 +28,21 @@ class AppBase {
         var width:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.width", 800);
         var height:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.height", 600);
         _backgroudColor = parseCol(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
-        System.init( { title: title, width: width, height: height }, initialized);
+        System.start( { title: title, width: width, height: height }, initialized);
     }
 
-    private function initialized() {
+    private function initialized(_) {
         Assets.loadEverything(assetsLoaded);
     }
 
     private function assetsLoaded() {
-        System.notifyOnRender(render);
+        System.notifyOnFrames(render);
         _callback();
     }
 
-    public function render(framebuffer:Framebuffer):Void {
+    public function render(framebuffers:Array<Framebuffer>):Void {
 
-        var g = framebuffer.g2;
+        var g = framebuffers[0].g2;
         g.begin(true, _backgroudColor);
 
         for (c in Screen.instance.rootComponents) {
