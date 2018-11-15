@@ -1,10 +1,10 @@
 package haxe.ui.backend;
 
-import haxe.ui.containers.dialogs.Dialog;
 import haxe.ui.containers.dialogs.DialogButton;
 import haxe.ui.core.Component;
 import haxe.ui.core.MouseEvent;
 import haxe.ui.core.UIEvent;
+import kha.Display;
 import kha.input.Mouse;
 import kha.System;
 import kha.graphics2.Graphics;
@@ -30,7 +30,7 @@ class ScreenBase {
 
     public var dpi(get, null):Float;
     private function get_dpi():Float {
-        return System.screenDpi();
+        return Display.primary.pixelsPerInch;
     }
 
     public var focus(get, set):Component;
@@ -92,6 +92,7 @@ class ScreenBase {
     //***********************************************************************************************************
     // Dialogs
     //***********************************************************************************************************
+    /*
     public function messageDialog(message:String, title:String = null, options:Dynamic = null, callback:DialogButton->Void = null):Dialog {
         return null;
     }
@@ -103,7 +104,7 @@ class ScreenBase {
     public function hideDialog(dialog:Dialog):Bool {
         return false;
     }
-
+    */
 
     //***********************************************************************************************************
     // Events

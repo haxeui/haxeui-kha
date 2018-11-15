@@ -33,7 +33,6 @@ class TextInputBase {
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
-    private var _backgroundColor:Int;
     
     private var _fontInfo:FontInfo;
 
@@ -43,6 +42,14 @@ class TextInputBase {
         _tf.notify(onTextChanged, onCaretMoved);
     }
 
+    public function focus() {
+        _tf.focus();
+    }
+    
+    public function blur() {
+        _tf.blur();
+    }
+    
     private function onTextChanged(text) {
         _text = text;
         if (_inputData.onChangedCallback != null) {
@@ -95,11 +102,6 @@ class TextInputBase {
                 _color = _textStyle.color;
                 _tf.textColor = Color.fromValue(_textStyle.color | 0xFF000000);
             }
-            
-            if (_backgroundColor != _textStyle.backgroundColor) {
-                _backgroundColor = _textStyle.backgroundColor;
-                _tf.backgroundColor = Color.fromValue(_textStyle.backgroundColor | 0xFF000000);
-            }
         }
         
         return measureTextRequired;
@@ -125,6 +127,10 @@ class TextInputBase {
     }
     
     function measureText() {
+        if (_font == null) {
+            return;
+        }
+        
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
             _textHeight = _font.height(Std.int(_fontSize));

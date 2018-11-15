@@ -72,7 +72,12 @@ class TextDisplayBase {
     }
     
     private function validateDisplay() {
-        
+        if (_width == 0 && _textWidth > 0) {
+            _width = _textWidth;
+        }
+        if (_height == 0 && _textHeight > 0) {
+            _height = _textHeight;
+        }
     }
     
     private var _lines:Array<String>;
@@ -87,7 +92,7 @@ class TextDisplayBase {
             _lines = new Array<String>();
             _lines.push(_text);
             _textWidth = _font.width(Std.int(_fontSize), _text);
-            _textHeight = _font.height(Std.int(_fontSize)) + 1;
+            _textHeight = _font.height(Std.int(_fontSize));
             return;
         }
 
@@ -131,7 +136,7 @@ class TextDisplayBase {
             g.fontSize = Std.int(_fontSize);
 
             var tx:Float = x;
-            var ty:Float = y + _top + 1;
+            var ty:Float = y + _top;
 
             switch(_textAlign) {
                 case "center":
