@@ -1,4 +1,5 @@
 .label, .textfield, .textarea {
+    __font-name: "styles/default/droid_sans.ttf";
     font-name: "styles/default/arial.ttf";
     font-size: 14px;
 }

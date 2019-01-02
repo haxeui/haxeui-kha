@@ -160,7 +160,7 @@ class StyleHelper {
                 if (dropShadow.inner == true) {
                     drawShadow(g, dropShadow.color, x, y, w, h, Std.int(dropShadow.distance), dropShadow.inner);
                 } else {
-                    drawShadow(g, dropShadow.color, orgX - 1, orgY, orgW, orgH, Std.int(dropShadow.distance), dropShadow.inner);
+                    drawShadow(g, dropShadow.color, orgX - 1, orgY - 1, orgW, orgH, Std.int(dropShadow.distance), dropShadow.inner);
                 }
             }
         }
@@ -170,8 +170,8 @@ class StyleHelper {
         if (inset == false) {
             for (i in 0...size) {
                 g.color = color | 0x30000000;
-                g.fillRect(x + i, y + h + 1 + i, w + 1, 1); // bottom
-                g.fillRect(x + w + 1 + i, y + i, 1, h + 2); // right
+                g.fillRect(x + i + 1, y + h + 1 + i, w + 0, 1); // bottom
+                g.fillRect(x + w + 1 + i, y + i + 1, 1, h + 1); // right
             }
         } else {
             for (i in 0...size) {
