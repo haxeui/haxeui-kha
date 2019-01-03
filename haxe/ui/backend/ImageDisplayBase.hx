@@ -1,5 +1,5 @@
 package haxe.ui.backend;
-import haxe.ui.util.Rectangle;
+import haxe.ui.geom.Rectangle;
 import haxe.ui.core.Component;
 import haxe.ds.Either;
 import haxe.ui.assets.ImageInfo;
