@@ -3,11 +3,11 @@ package haxe.ui.backend;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.ImageDisplay;
-import haxe.ui.core.MouseEvent;
 import haxe.ui.core.Screen;
 import haxe.ui.core.TextDisplay;
 import haxe.ui.core.TextInput;
-import haxe.ui.core.UIEvent;
+import haxe.ui.events.MouseEvent;
+import haxe.ui.events.UIEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.util.Rectangle;
 import kha.Color;
@@ -398,18 +398,18 @@ class ComponentBase {
                 return;
             }
             _mouseOverFlag = true;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OVER);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OVER);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OVER);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OVER);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         } else if (i == false && _mouseOverFlag == true) {
             _mouseOverFlag = false;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OUT);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OUT);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OUT);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OUT);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -427,9 +427,9 @@ class ComponentBase {
                 return;
             }
             _mouseDownFlag = true;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_DOWN);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_DOWN);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_DOWN);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_DOWN);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -446,9 +446,9 @@ class ComponentBase {
                 return;
             }
             if (_mouseDownFlag == true) {
-                var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.CLICK);
+                var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.CLICK);
                 if (fn != null) {
-                    var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.CLICK);
+                    var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.CLICK);
                     mouseEvent.screenX = x / Toolkit.scaleX;
                     mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
@@ -457,9 +457,9 @@ class ComponentBase {
 
             _mouseDownFlag = false;
 
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_UP);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_UP);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_UP);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_UP);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
