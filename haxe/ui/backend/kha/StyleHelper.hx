@@ -5,9 +5,9 @@ import haxe.ui.styles.Style;
 import haxe.ui.util.ColorUtil;
 import haxe.ui.util.Rectangle;
 import haxe.ui.util.Slice9;
-import haxe.ui.util.filters.DropShadow;
-import haxe.ui.util.filters.Filter;
-import haxe.ui.util.filters.FilterParser;
+import haxe.ui.filters.DropShadow;
+import haxe.ui.filters.Filter;
+import haxe.ui.filters.FilterParser;
 import kha.Color;
 import kha.graphics2.Graphics;
 
