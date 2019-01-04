@@ -2,8 +2,8 @@ package haxe.ui.backend;
 
 import haxe.ui.containers.dialogs.DialogButton;
 import haxe.ui.core.Component;
-import haxe.ui.core.MouseEvent;
-import haxe.ui.core.UIEvent;
+import haxe.ui.events.MouseEvent;
+import haxe.ui.events.UIEvent;
 import kha.Display;
 import kha.input.Mouse;
 import kha.System;
@@ -161,7 +161,7 @@ class ScreenBase {
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
         mouseEvent.screenX = x / Toolkit.scaleX;
         mouseEvent.screenY = y / Toolkit.scaleY;
-        _mapping.get(haxe.ui.core.MouseEvent.MOUSE_MOVE)(mouseEvent);
+        _mapping.get(haxe.ui.events.MouseEvent.MOUSE_MOVE)(mouseEvent);
     }
 
     private function __onMouseDown(button:Int, x:Int, y:Int) {
@@ -172,7 +172,7 @@ class ScreenBase {
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_DOWN);
         mouseEvent.screenX = x / Toolkit.scaleX;
         mouseEvent.screenY = y / Toolkit.scaleY;
-        _mapping.get(haxe.ui.core.MouseEvent.MOUSE_DOWN)(mouseEvent);
+        _mapping.get(haxe.ui.events.MouseEvent.MOUSE_DOWN)(mouseEvent);
     }
 
     private function __onMouseUp(button:Int, x:Int, y:Int) {
