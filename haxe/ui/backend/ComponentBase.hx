@@ -6,12 +6,15 @@ import haxe.ui.core.ImageDisplay;
 import haxe.ui.core.Screen;
 import haxe.ui.core.TextDisplay;
 import haxe.ui.core.TextInput;
+import haxe.ui.events.KeyboardEvent;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
 import haxe.ui.styles.Style;
 import haxe.ui.geom.Rectangle;
 import kha.Color;
 import kha.graphics2.Graphics;
+import kha.input.KeyCode;
+import kha.input.Keyboard;
 import kha.input.Mouse;
 
 class ComponentBase {
@@ -381,6 +384,16 @@ class ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+			case KeyboardEvent.KEY_DOWN:
+				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
+                    Keyboard.get().notify(__onKeyDown, null, null);
+                    _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
+                }
+			case KeyboardEvent.KEY_UP:
+				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
+                    Keyboard.get().notify(null, __onKeyUp, null);
+                    _eventMap.set(KeyboardEvent.KEY_UP, listener);
+                }
         }
     }
 
@@ -485,6 +498,38 @@ class ComponentBase {
         mouseEvent.delta = Math.max(-1, Math.min(1, -delta));
         fn(mouseEvent);
     }
+	
+	private function __onKeyDown(key:KeyCode) {
+		if (cast(this, Component).hasClass(":active") == false) {
+			return;
+		}
+		
+		var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
+		
+		if (fn == null) {
+            return;
+        }
+		
+		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
+		keyEvent.keyCode = key;
+		fn(keyEvent);
+	}
+	
+	private function __onKeyUp(key:KeyCode) {
+		if (cast(this, Component).hasClass(":active") == false) {
+			return;
+		}
+		
+		var fn = _eventMap.get(KeyboardEvent.KEY_UP);
+		
+		if (fn == null) {
+            return;
+        }
+		
+		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
+		keyEvent.keyCode = key;
+		fn(keyEvent);
+	}
 
     private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);
