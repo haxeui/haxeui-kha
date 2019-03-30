@@ -1,47 +1,20 @@
 package haxe.ui.backend;
 
-import haxe.ui.assets.FontInfo;
-import haxe.ui.core.Component;
-import haxe.ui.core.TextDisplay.TextDisplayData;
-import haxe.ui.styles.Style;
 import kha.Font;
 import kha.graphics2.Graphics;
 
-class TextDisplayBase {
-    public var _font:Font;
-
-    private var _displayData:TextDisplayData = new TextDisplayData();
-     
-    public var parentComponent:Component;
-    
-    public function new() {
-    }
-
-    private var _text:String;
-    private var _left:Float = 0;
-    private var _top:Float = 0;
-    private var _width:Float = 0;
-    private var _height:Float = 0;
-    private var _textWidth:Float = 0;
-    private var _textHeight:Float = 0;
-    private var _textStyle:Style;
-
+class TextDisplayImpl extends TextBase {
+    private var _font:Font;
     private var _textAlign:String;
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
-    
-    private var _fontInfo:FontInfo;
-    
+
     //***********************************************************************************************************
     // Validation functions
     //***********************************************************************************************************
-
-    private function validateData() {
-        
-    }
     
-    private function validateStyle():Bool {
+    private override function validateStyle():Bool {
         var measureTextRequired:Bool = false;
         
         if (_textStyle != null) {
@@ -67,11 +40,7 @@ class TextDisplayBase {
         return measureTextRequired;
     }
     
-    private function validatePosition() {
-        
-    }
-    
-    private function validateDisplay() {
+    private override function validateDisplay() {
         if (_width == 0 && _textWidth > 0) {
             _width = _textWidth;
         }
@@ -81,7 +50,7 @@ class TextDisplayBase {
     }
     
     private var _lines:Array<String>;
-    function measureText() {
+    private override function measureText() {
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
             _textHeight = 0;
@@ -137,7 +106,7 @@ class TextDisplayBase {
 
             var tx:Float = x;
             var ty:Float = y + _top;
-
+            
             switch(_textAlign) {
                 case "center":
                     tx += (_width - _textWidth) / 2;

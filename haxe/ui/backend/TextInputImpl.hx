@@ -1,52 +1,30 @@
 package haxe.ui.backend;
 
-import haxe.ui.assets.FontInfo;
 import haxe.ui.backend.kha.TextField;
-import haxe.ui.core.Component;
-import haxe.ui.core.TextDisplay.TextDisplayData;
-import haxe.ui.core.TextInput.TextInputData;
-import haxe.ui.styles.Style;
 import kha.Color;
 import kha.Font;
 import kha.graphics2.Graphics;
 
-class TextInputBase {
-    private var _displayData:TextDisplayData = new TextDisplayData();
-    private var _inputData:TextInputData = new TextInputData();
-    
+class TextInputImpl extends TextBase {
     private var _tf:TextField;
-    
     public var _font:Font;
-
-    public var parentComponent:Component;
-    
-    private var _text:String;
-    private var _left:Float = 0;
-    private var _top:Float = 0;
-    private var _width:Float = 0;
-    private var _height:Float = 0;
-    private var _textWidth:Float = 0;
-    private var _textHeight:Float = 0;
-    private var _textStyle:Style;
 
     private var _textAlign:String;
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
     
-    private var _fontInfo:FontInfo;
-
-    
     public function new() {
+        super();
         _tf = new TextField();
         _tf.notify(onTextChanged, onCaretMoved);
     }
 
-    public function focus() {
+    public override function focus() {
         _tf.focus();
     }
     
-    public function blur() {
+    public override function blur() {
         _tf.blur();
     }
     
@@ -65,7 +43,7 @@ class TextInputBase {
         }
     }
     
-    private function validateData() {
+    private override function validateData() {
         if (_text != null) {
             _tf.text = normalizeText(_text);
         }
@@ -74,7 +52,7 @@ class TextInputBase {
         _tf.scrollTop = Std.int(_inputData.vscrollPos);
     }
     
-    private function validateStyle():Bool {
+    private override  function validateStyle():Bool {
         var measureTextRequired:Bool = false;
         
         if (_textStyle != null) {
@@ -107,11 +85,7 @@ class TextInputBase {
         return measureTextRequired;
     }
     
-    private function validatePosition() {
-        
-    }
-    
-    private function validateDisplay() {
+    private override function validateDisplay() {
         if (_width > 0) {
             _tf.width = _width;
         }
@@ -126,7 +100,7 @@ class TextInputBase {
         _tf.render(g);
     }
     
-    function measureText() {
+    private override function measureText() {
         if (_font == null) {
             return;
         }

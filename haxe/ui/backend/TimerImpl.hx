@@ -2,7 +2,7 @@ package haxe.ui.backend;
 
 import kha.Scheduler;
 
-class TimerBase {
+class TimerImpl {
     private var _timerId:Int = -1;
     private var _stopped:Bool = false;  //Needed if the stop method is called in the callback execution
 

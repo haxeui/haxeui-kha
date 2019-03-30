@@ -1,28 +1,19 @@
 package haxe.ui.backend;
 
-import haxe.ui.util.ColorUtil;
-import haxe.ui.Preloader.PreloadItem;
 import haxe.ui.core.Screen;
-import kha.Image;
-import kha.Scaler;
-import kha.Scheduler;
-import kha.ScreenRotation;
-import kha.System;
-import kha.Framebuffer;
+import haxe.ui.util.ColorUtil;
 import kha.Assets;
+import kha.Framebuffer;
+import kha.System;
 
-class AppBase {
+class AppImpl extends AppBase {
     private var _callback:Void->Void;
     private var _backgroudColor:Int = 0;
+    
     public function new() {
-
     }
-
-    private function build() {
-
-    }
-
-    private function init(callback:Void->Void, onEnd:Void->Void = null) {
+    
+    private override function init(callback:Void->Void, onEnd:Void->Void = null) {
         _callback = callback;
         var title:String = Toolkit.backendProperties.getProp("haxe.ui.kha.title", "");
         var width:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.width", 800);
@@ -61,18 +52,5 @@ class AppBase {
         }
 
         g.end();
-    }
-
-    private function getToolkitInit():Dynamic {
-        return {
-        };
-    }
-
-    public function start() {
-
-    }
-    
-    private function buildPreloadList():Array<PreloadItem> {
-        return [];
     }
 }

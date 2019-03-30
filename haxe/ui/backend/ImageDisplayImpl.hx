@@ -1,31 +1,19 @@
 package haxe.ui.backend;
+
 import haxe.ui.geom.Rectangle;
 import haxe.ui.core.Component;
 import haxe.ds.Either;
 import haxe.ui.assets.ImageInfo;
 import kha.Image;
 
-class ImageDisplayBase {
-    public function new() {
-    }
-
+class ImageDisplayImpl extends ImageBase {
     public var _buffer:Image = null;
-    public var parentComponent:Component;
-    public var aspectRatio:Float = 1; // width x height
-
-    private var _left:Float = 0;
-    private var _top:Float = 0;
-    private var _imageWidth:Float = 0;
-    private var _imageHeight:Float = 0;
-    private var _imageInfo:ImageInfo;
-    private var _imageClipRect:Rectangle;
-    
     
     //***********************************************************************************************************
     // Validation functions
     //***********************************************************************************************************
 
-    private function validateData() {
+    private override function validateData() {
         if (_imageInfo != null) {
             dispose();
             _buffer = _imageInfo.data;
@@ -49,22 +37,5 @@ class ImageDisplayBase {
             return false;
         }
         return (_imageWidth != _imageInfo.width || _imageHeight != _imageInfo.height);
-    }
-    
-    private function validatePosition() {
-        
-    }
-    
-    private function validateDisplay() {
-        
-    }
-    
-    public function dispose() {
-        /*
-        if (_buffer != null) {
-            _buffer.unload();
-            _buffer = null;
-        }
-        */
     }
 }

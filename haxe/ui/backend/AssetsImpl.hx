@@ -7,16 +7,8 @@ import kha.Assets;
 import kha.Font;
 import kha.Image;
 
-class AssetsBase {
-    public function new() {
-
-    }
-
-    public function getTextDelegate(resourceId:String):String {
-        return null;
-    }
-
-    private function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
+class AssetsImpl extends AssetsBase {
+    private override function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
         if (resourceId.indexOf(".") != -1) {
             var parts = resourceId.split(".");
             parts.pop();
@@ -38,14 +30,14 @@ class AssetsBase {
         }
     }
 
-    private function getImageFromHaxeResource(resourceId:String, callback:String->ImageInfo->Void) {
+    private override function getImageFromHaxeResource(resourceId:String, callback:String->ImageInfo->Void) {
         var bytes:Bytes = Resource.getBytes(resourceId);
         imageFromBytes(bytes, function(imageInfo) {
             callback(resourceId, imageInfo);
         });
     }
 
-    public function imageFromBytes(bytes:Bytes, callback:ImageInfo->Void) {
+    public override function imageFromBytes(bytes:Bytes, callback:ImageInfo->Void) {
         Image.fromEncodedBytes(bytes, extensionFromMagicBytes(bytes), function(image) {
             var imageInfo:ImageInfo = {
                 width: image.realWidth,
@@ -94,7 +86,7 @@ class AssetsBase {
         return b;
     }
     
-    private function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
+    private override function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
         var font = Assets.fonts.get(resourceId);
         if (font != null) {
             callback({ data: font });
@@ -103,7 +95,7 @@ class AssetsBase {
         }
     }
 
-    private function getFontFromHaxeResource(resourceId:String, callback:String->FontInfo->Void) {
+    private override function getFontFromHaxeResource(resourceId:String, callback:String->FontInfo->Void) {
         var bytes:Bytes = Resource.getBytes(resourceId);
         var fontInfo = {
             data: Font.fromBytes(bytes)

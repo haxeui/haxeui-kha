@@ -1,5 +1,5 @@
 package haxe.ui.backend;
 
-class BackendBase {
+class BackendImpl {
     public static var id:String = "kha";
 }
