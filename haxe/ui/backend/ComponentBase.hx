@@ -13,6 +13,8 @@ import haxe.ui.util.Rectangle;
 import kha.Color;
 import kha.graphics2.Graphics;
 import kha.input.Mouse;
+import kha.math.FastMatrix3;
+import kha.math.FastVector2;
 
 class ComponentBase {
     public var parent:ComponentBase;
@@ -71,6 +73,7 @@ class ComponentBase {
         return clip;
     }
 
+    private var transformation = FastMatrix3.identity();
     @:access(haxe.ui.core.Component)
     private function inBounds(x:Int, y:Int):Bool {
         if (cast(this, Component).hidden == true) {
@@ -82,8 +85,10 @@ class ComponentBase {
         var sy = screenY * Toolkit.scaleY;
         var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
         var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
+        var position = transformation.multvec(new FastVector2(sx, sy));
+        var dimensions = transformation.multvec(new FastVector2(cx, cy));
 
-        if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
+        if (x >= position.x && y >= position.y && x <= dimensions.x && y <= dimensions.y) {
             b = true;
         }
 
@@ -96,7 +101,9 @@ class ComponentBase {
                 var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
                 var cx = clip.componentClipRect.width * Toolkit.scaleX;
                 var cy = clip.componentClipRect.height * Toolkit.scaleY;
-                if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
+                var position = transformation.multvec(new FastVector2(sx, sy));
+                var dimensions = transformation.multvec(new FastVector2(cx, cy));
+                if (x >= position.x && y >= position.y && x <= dimensions.x && y <= dimensions.y) {
                     b = true;
                 }
             }
@@ -225,6 +232,7 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
+            transformation.setFrom(g.transformation);
             g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
         }
 
