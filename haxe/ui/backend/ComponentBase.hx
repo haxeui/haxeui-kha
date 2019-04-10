@@ -73,7 +73,24 @@ class ComponentBase {
         return clip;
     }
 
-    private var transformation = FastMatrix3.identity();
+    private var transformation(default, set) = FastMatrix3.identity();
+    private var translation = FastMatrix3.identity();
+    private var scaling = FastMatrix3.identity();
+    private var rotation = FastMatrix3.identity();
+    private function set_transformation(matrix:FastMatrix3):FastMatrix3 {
+        translation = FastMatrix3.translation(matrix._20, matrix._21);
+        var scaleX = Math.sqrt(matrix._00*matrix._00 + matrix._10*matrix._10);
+        var scaleY = Math.sqrt(matrix._01*matrix._01 + matrix._11*matrix._11);
+        scaling = FastMatrix3.scale(scaleX, scaleY);
+        rotation = FastMatrix3.identity();
+        rotation._00 = matrix._00/scaleX;
+        rotation._10 = matrix._10/scaleX;
+        rotation._01 = matrix._01/scaleY;
+        rotation._11 = matrix._11/scaleY;
+        transformation.setFrom(matrix);
+        return transformation;
+    }
+
     @:access(haxe.ui.core.Component)
     private function inBounds(x:Int, y:Int):Bool {
         if (cast(this, Component).hidden == true) {
@@ -85,10 +102,11 @@ class ComponentBase {
         var sy = screenY * Toolkit.scaleY;
         var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
         var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
-        var position = transformation.multvec(new FastVector2(sx, sy));
-        var dimensions = transformation.multvec(new FastVector2(cx, cy));
+        var position = translation.multmat(scaling).multvec(new FastVector2(sx, sy));
+        var dimensions = scaling.multvec(new FastVector2(cx, cy));
 
-        if (x >= position.x && y >= position.y && x <= dimensions.x && y <= dimensions.y) {
+
+        if (x >= position.x && y >= position.y && x <= position.x + dimensions.x && y <= position.y + dimensions.y) {
             b = true;
         }
 
@@ -101,9 +119,9 @@ class ComponentBase {
                 var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
                 var cx = clip.componentClipRect.width * Toolkit.scaleX;
                 var cy = clip.componentClipRect.height * Toolkit.scaleY;
-                var position = transformation.multvec(new FastVector2(sx, sy));
-                var dimensions = transformation.multvec(new FastVector2(cx, cy));
-                if (x >= position.x && y >= position.y && x <= dimensions.x && y <= dimensions.y) {
+                var position = translation.multmat(scaling).multvec(new FastVector2(sx, sy));
+                var dimensions = scaling.multvec(new FastVector2(cx, cy));
+                if (x >= position.x && y >= position.y && x <= position.x + dimensions.x && y <= position.y + dimensions.y) {
                     b = true;
                 }
             }
@@ -217,6 +235,7 @@ class ComponentBase {
         var y:Int = Math.floor(screenY);
         var w:Int = Math.ceil(cast(this, Component).componentWidth);
         var h:Int = Math.ceil(cast(this, Component).componentHeight);
+        transformation = g.transformation;
 
         var style:Style = cast(this, Component).style;
         if (style == null) {
@@ -232,7 +251,6 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            transformation.setFrom(g.transformation);
             g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
         }
 
