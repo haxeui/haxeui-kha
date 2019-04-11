@@ -74,7 +74,7 @@ class ComponentBase {
     }
 
     private var transformation = FastMatrix3.identity();
-    private function checkTransformedBounds(x:Float, y:Float, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
+    private function inTransformedBounds(x:Float, y:Float, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
         var bottomLeft = transformation.multvec(new FastVector2(sx, sy));
         var topLeft = transformation.multvec(new FastVector2(sx, sy + cy));
         var topRight = transformation.multvec(new FastVector2(sx + cx, sy));
@@ -100,7 +100,7 @@ class ComponentBase {
         var sy = screenY * Toolkit.scaleY;
         var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
         var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
-        b = checkTransformedBounds(x, y, sx, sy, cx, cy);
+        b = inTransformedBounds(x, y, sx, sy, cx, cy);
 
         // let make sure its in the clip rect too
         if (b == true) {
@@ -111,7 +111,7 @@ class ComponentBase {
                 var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
                 var cx = clip.componentClipRect.width * Toolkit.scaleX;
                 var cy = clip.componentClipRect.height * Toolkit.scaleY;
-                b = checkTransformedBounds(x, y, sx, sy, cx, cy);
+                b = inTransformedBounds(x, y, sx, sy, cx, cy);
             }
         }
         return b;
