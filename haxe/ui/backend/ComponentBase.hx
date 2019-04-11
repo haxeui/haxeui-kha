@@ -13,6 +13,8 @@ import haxe.ui.util.Rectangle;
 import kha.Color;
 import kha.graphics2.Graphics;
 import kha.input.Mouse;
+import kha.math.FastMatrix3;
+import kha.math.FastVector2;
 
 class ComponentBase {
     public var parent:ComponentBase;
@@ -71,6 +73,22 @@ class ComponentBase {
         return clip;
     }
 
+    private var transformation = FastMatrix3.identity();
+    private function inTransformedBounds(x:Int, y:Int, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
+        var bottomLeft = transformation.multvec(new FastVector2(sx, sy));
+        var topLeft = transformation.multvec(new FastVector2(sx, sy + cy));
+        var topRight = transformation.multvec(new FastVector2(sx + cx, sy));
+        var leftEdge = topLeft.sub(bottomLeft);
+        var topEdge = topRight.sub(topLeft);
+        var mousePosition = new FastVector2(x, y);
+        var mouseOnLeft = leftEdge.dot(mousePosition.sub(bottomLeft));
+        var mouseOnTop = topEdge.dot(mousePosition.sub(topLeft));
+        var leftOnLeft = leftEdge.dot(leftEdge);
+        var topOnTop = topEdge.dot(topEdge);
+
+        return 0 <= mouseOnLeft && mouseOnLeft <= leftOnLeft && 0 <= mouseOnTop && mouseOnTop <= topOnTop;
+    }
+
     @:access(haxe.ui.core.Component)
     private function inBounds(x:Int, y:Int):Bool {
         if (cast(this, Component).hidden == true) {
@@ -82,10 +100,7 @@ class ComponentBase {
         var sy = screenY * Toolkit.scaleY;
         var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
         var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
-
-        if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
-            b = true;
-        }
+        b = inTransformedBounds(x, y, sx, sy, cx, cy);
 
         // let make sure its in the clip rect too
         if (b == true) {
@@ -96,9 +111,7 @@ class ComponentBase {
                 var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
                 var cx = clip.componentClipRect.width * Toolkit.scaleX;
                 var cy = clip.componentClipRect.height * Toolkit.scaleY;
-                if (x >= sx && y >= sy && x <= sx + cx && y <= sy + cy) {
-                    b = true;
-                }
+                b = inTransformedBounds(x, y, sx, sy, cx, cy);
             }
         }
         return b;
@@ -210,6 +223,7 @@ class ComponentBase {
         var y:Int = Math.floor(screenY);
         var w:Int = Math.ceil(cast(this, Component).componentWidth);
         var h:Int = Math.ceil(cast(this, Component).componentHeight);
+        transformation = g.transformation;
 
         var style:Style = cast(this, Component).style;
         if (style == null) {
