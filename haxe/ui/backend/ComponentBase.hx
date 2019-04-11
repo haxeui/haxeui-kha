@@ -74,7 +74,7 @@ class ComponentBase {
     }
 
     private var transformation = FastMatrix3.identity();
-    private function inTransformedBounds(x:Float, y:Float, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
+    private function inTransformedBounds(x:Int, y:Int, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
         var bottomLeft = transformation.multvec(new FastVector2(sx, sy));
         var topLeft = transformation.multvec(new FastVector2(sx, sy + cy));
         var topRight = transformation.multvec(new FastVector2(sx + cx, sy));
