@@ -73,22 +73,20 @@ class ComponentBase {
         return clip;
     }
 
-    private var transformation(default, set) = FastMatrix3.identity();
-    private var translation = FastMatrix3.identity();
-    private var scaling = FastMatrix3.identity();
-    private var rotation = FastMatrix3.identity();
-    private function set_transformation(matrix:FastMatrix3):FastMatrix3 {
-        translation = FastMatrix3.translation(matrix._20, matrix._21);
-        var scaleX = Math.sqrt(matrix._00*matrix._00 + matrix._10*matrix._10);
-        var scaleY = Math.sqrt(matrix._01*matrix._01 + matrix._11*matrix._11);
-        scaling = FastMatrix3.scale(scaleX, scaleY);
-        rotation = FastMatrix3.identity();
-        rotation._00 = matrix._00/scaleX;
-        rotation._10 = matrix._10/scaleX;
-        rotation._01 = matrix._01/scaleY;
-        rotation._11 = matrix._11/scaleY;
-        transformation.setFrom(matrix);
-        return transformation;
+    private var transformation = FastMatrix3.identity();
+    private function checkTransformedBounds(x:Float, y:Float, sx:Float, sy:Float, cx:Float, cy:Float):Bool {
+        var bottomLeft = transformation.multvec(new FastVector2(sx, sy));
+        var topLeft = transformation.multvec(new FastVector2(sx, sy + cy));
+        var topRight = transformation.multvec(new FastVector2(sx + cx, sy));
+        var leftEdge = topLeft.sub(bottomLeft);
+        var topEdge = topRight.sub(topLeft);
+        var mousePosition = new FastVector2(x, y);
+        var mouseOnLeft = leftEdge.dot(mousePosition.sub(bottomLeft));
+        var mouseOnTop = topEdge.dot(mousePosition.sub(topLeft));
+        var leftOnLeft = leftEdge.dot(leftEdge);
+        var topOnTop = topEdge.dot(topEdge);
+
+        return 0 <= mouseOnLeft && mouseOnLeft <= leftOnLeft && 0 <= mouseOnTop && mouseOnTop <= topOnTop;
     }
 
     @:access(haxe.ui.core.Component)
@@ -102,13 +100,7 @@ class ComponentBase {
         var sy = screenY * Toolkit.scaleY;
         var cx = cast(this, Component).componentWidth * Toolkit.scaleX;
         var cy = cast(this, Component).componentHeight * Toolkit.scaleY;
-        var position = translation.multmat(scaling).multvec(new FastVector2(sx, sy));
-        var dimensions = scaling.multvec(new FastVector2(cx, cy));
-
-
-        if (x >= position.x && y >= position.y && x <= position.x + dimensions.x && y <= position.y + dimensions.y) {
-            b = true;
-        }
+        b = checkTransformedBounds(x, y, sx, sy, cx, cy);
 
         // let make sure its in the clip rect too
         if (b == true) {
@@ -119,11 +111,7 @@ class ComponentBase {
                 var sy = (clip.screenY + clip.componentClipRect.top) * Toolkit.scaleY;
                 var cx = clip.componentClipRect.width * Toolkit.scaleX;
                 var cy = clip.componentClipRect.height * Toolkit.scaleY;
-                var position = translation.multmat(scaling).multvec(new FastVector2(sx, sy));
-                var dimensions = scaling.multvec(new FastVector2(cx, cy));
-                if (x >= position.x && y >= position.y && x <= position.x + dimensions.x && y <= position.y + dimensions.y) {
-                    b = true;
-                }
+                b = checkTransformedBounds(x, y, sx, sy, cx, cy);
             }
         }
         return b;
