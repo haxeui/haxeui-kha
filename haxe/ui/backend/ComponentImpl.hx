@@ -2,31 +2,28 @@ package haxe.ui.backend;
 
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
-import haxe.ui.core.ImageDisplay;
-import haxe.ui.core.MouseEvent;
 import haxe.ui.core.Screen;
-import haxe.ui.core.TextDisplay;
-import haxe.ui.core.TextInput;
-import haxe.ui.core.UIEvent;
+import haxe.ui.events.KeyboardEvent;
+import haxe.ui.events.MouseEvent;
+import haxe.ui.events.UIEvent;
+import haxe.ui.geom.Rectangle;
 import haxe.ui.styles.Style;
-import haxe.ui.util.Rectangle;
 import kha.Color;
 import kha.graphics2.Graphics;
+import kha.input.KeyCode;
+import kha.input.Keyboard;
 import kha.input.Mouse;
 
-class ComponentBase {
-    public var parent:ComponentBase;
+class ComponentImpl extends ComponentBase {
+    //public var parent:ComponentBase;
     private var _eventMap:Map<String, UIEvent->Void>;
 
     private var lastMouseX = -1;
     private var lastMouseY = -1;
 
     public function new() {
+        super();
         _eventMap = new Map<String, UIEvent->Void>();
-    }
-
-    private function createDelegate(native:Bool) {
-
     }
 
     public var screenX(get, null):Float;
@@ -105,89 +102,8 @@ class ComponentBase {
     }
 
     //***********************************************************************************************************
-    // Text related
-    //***********************************************************************************************************
-    private var _textDisplay:TextDisplay;
-    public function createTextDisplay(text:String = null):TextDisplay {
-        if (_textDisplay == null) {
-            _textDisplay = new TextDisplay();
-            _textDisplay.parentComponent = cast this;
-        }
-        if (text != null) {
-            _textDisplay.text = text;
-        }
-        return _textDisplay;
-    }
-
-    public function getTextDisplay():TextDisplay {
-        return createTextDisplay();
-    }
-
-    public function hasTextDisplay():Bool {
-        return (_textDisplay != null);
-    }
-
-    private var _textInput:TextInput;
-    public function createTextInput(text:String = null):TextInput {
-        if (_textInput == null) {
-            _textInput = new TextInput();
-            _textInput.parentComponent = cast this;
-        }
-        if (text != null) {
-            _textInput.text = text;
-        }
-        return _textInput;
-    }
-
-    public function getTextInput():TextInput {
-        return createTextInput();
-    }
-
-    public function hasTextInput():Bool {
-        return (_textInput != null);
-    }
-
-    //***********************************************************************************************************
-    // Image related
-    //***********************************************************************************************************
-    private var _imageDisplay:ImageDisplay;
-    public function createImageDisplay():ImageDisplay {
-        if (_imageDisplay == null) {
-            _imageDisplay = new ImageDisplay();
-        }
-
-        /*
-        if (resource != null) {
-            _imageDisplay.update(resource, type);
-        }
-        */
-        return _imageDisplay;
-    }
-
-    public function getImageDisplay():ImageDisplay {
-        return createImageDisplay();
-    }
-
-    public function hasImageDisplay():Bool {
-        return (_imageDisplay != null);
-    }
-
-
-    public function removeImageDisplay():Void {
-        if (_imageDisplay != null) {
-            _imageDisplay.dispose();
-            _imageDisplay = null;
-            //dirty = true;
-        }
-    }
-
-    //***********************************************************************************************************
     // Style related
     //***********************************************************************************************************
-    private function applyStyle(stye:Style) {
-    }
-
-
     private function calcAlpha():Float {
         var alpha:Float = 1;
         var c:Component = cast(this, Component);
@@ -225,7 +141,11 @@ class ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+            if (_imageDisplay.scaled == true) {
+                g.drawScaledImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
+            } else {
+                g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+            }
         }
 
         if (style.color != null) {
@@ -272,7 +192,7 @@ class ComponentBase {
         g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }
 
-    private function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
+    private override function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;
         }
@@ -282,75 +202,26 @@ class ComponentBase {
         }
     }
 
-    public function handleCreate(native:Bool) {
-    }
-
-    public function handlePreReposition():Void {
-    }
-
-    public function handlePostReposition():Void {
-    }
-
-    private function handlePosition(left:Null<Float>, top:Null<Float>, style:Style):Void {
-        if (left != null) {
-        }
-        if (top != null) {
-        }
-    }
-
-    private function handleReady() {
-
-    }
-
-    private function handleClipRect(value:Rectangle):Void {
-    }
-
-    private function handleAddComponent(child:Component):Component {
-        return child;
-    }
-
-    private function handleRemoveComponent(child:Component, dispose:Bool = true):Component {
-        return child;
-    }
-
-    private function handleAddComponentAt(child:Component, index:Int):Component {
-        return child;
-    }
-
-    private function handleRemoveComponentAt(index:Int, dispose:Bool = true):Component {
-        return null;
-    }
-
-    private function handleVisibility(show:Bool):Void {
+    private override function handleVisibility(show:Bool):Void {
         var c:Component = cast(this, Component);
         for (child in c.childComponents) {
             child.handleVisibility(show);
         }
     }
 
-    private function handleSetComponentIndex(child:Component, index:Int) {
-    }
-
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
-    private var hasMouseMove:Bool = false;
-    private function mapEvent(type:String, listener:UIEvent->Void) {
+    private override function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
             case MouseEvent.MOUSE_OVER:
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
-                    if (hasMouseMove == false) {
-                        Mouse.get().notify(null, null, __onMouseMove, null);
-                        hasMouseMove = true;
-                    }
+                    Mouse.get().notify(null, null, __onMouseMove, null);
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
             case MouseEvent.MOUSE_OUT:
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
-                    if (hasMouseMove == false) {
-                        Mouse.get().notify(null, null, __onMouseMove, null);
-                        hasMouseMove = true;
-                    }
+                    //Mouse.get().notify(null, null, __onMouseMove, null);
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
@@ -368,10 +239,6 @@ class ComponentBase {
             case MouseEvent.MOUSE_WHEEL:
                 if (!_eventMap.exists(MouseEvent.MOUSE_WHEEL)) {
                     Mouse.get().notify(null, null, null, __onMouseWheel, null);
-                    if (hasMouseMove == false) {
-                        Mouse.get().notify(null, null, __onMouseMove, null);
-                        hasMouseMove = true;
-                    }
                     _eventMap.set(MouseEvent.MOUSE_WHEEL, listener);
                 }
             case MouseEvent.CLICK:
@@ -388,10 +255,21 @@ class ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+			case KeyboardEvent.KEY_DOWN:
+				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
+                    Keyboard.get().notify(__onKeyDown, null, null);
+                    _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
+                }
+			case KeyboardEvent.KEY_UP:
+				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
+                    Keyboard.get().notify(null, __onKeyUp, null);
+                    _eventMap.set(KeyboardEvent.KEY_UP, listener);
+                }
         }
     }
 
-    private function unmapEvent(type:String, listener:UIEvent->Void) {
+    private override function unmapEvent(type:String, listener:UIEvent->Void) {
+
     }
 
     private var _mouseOverFlag:Bool = false;
@@ -404,18 +282,18 @@ class ComponentBase {
                 return;
             }
             _mouseOverFlag = true;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OVER);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OVER);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OVER);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OVER);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
         } else if (i == false && _mouseOverFlag == true) {
             _mouseOverFlag = false;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_OUT);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OUT);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_OUT);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OUT);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -433,9 +311,9 @@ class ComponentBase {
                 return;
             }
             _mouseDownFlag = true;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_DOWN);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_DOWN);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_DOWN);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_DOWN);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -452,9 +330,9 @@ class ComponentBase {
                 return;
             }
             if (_mouseDownFlag == true) {
-                var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.CLICK);
+                var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.CLICK);
                 if (fn != null) {
-                    var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.CLICK);
+                    var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.CLICK);
                     mouseEvent.screenX = x / Toolkit.scaleX;
                     mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
@@ -463,9 +341,9 @@ class ComponentBase {
 
             _mouseDownFlag = false;
 
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.core.MouseEvent.MOUSE_UP);
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_UP);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.core.MouseEvent(haxe.ui.core.MouseEvent.MOUSE_UP);
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_UP);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -491,6 +369,38 @@ class ComponentBase {
         mouseEvent.delta = Math.max(-1, Math.min(1, -delta));
         fn(mouseEvent);
     }
+	
+	private function __onKeyDown(key:KeyCode) {
+		if (cast(this, Component).hasClass(":active") == false) {
+			return;
+		}
+		
+		var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
+		
+		if (fn == null) {
+            return;
+        }
+		
+		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
+		keyEvent.keyCode = key;
+		fn(keyEvent);
+	}
+	
+	private function __onKeyUp(key:KeyCode) {
+		if (cast(this, Component).hasClass(":active") == false) {
+			return;
+		}
+		
+		var fn = _eventMap.get(KeyboardEvent.KEY_UP);
+		
+		if (fn == null) {
+            return;
+        }
+		
+		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
+		keyEvent.keyCode = key;
+		fn(keyEvent);
+	}
 
     private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);

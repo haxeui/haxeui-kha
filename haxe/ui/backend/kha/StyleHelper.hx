@@ -3,11 +3,11 @@ package haxe.ui.backend.kha;
 import haxe.ui.assets.ImageInfo;
 import haxe.ui.styles.Style;
 import haxe.ui.util.ColorUtil;
-import haxe.ui.util.Rectangle;
-import haxe.ui.util.Slice9;
-import haxe.ui.util.filters.DropShadow;
-import haxe.ui.util.filters.Filter;
-import haxe.ui.util.filters.FilterParser;
+import haxe.ui.geom.Rectangle;
+import haxe.ui.geom.Slice9;
+import haxe.ui.filters.DropShadow;
+import haxe.ui.filters.Filter;
+import haxe.ui.filters.FilterParser;
 import kha.Color;
 import kha.graphics2.Graphics;
 
@@ -154,7 +154,7 @@ class StyleHelper {
         }        
         
         if (style.filter != null) {
-            var f:Filter = FilterParser.parseFilter(style.filter);
+            var f:Filter = style.filter[0];
             if (Std.is(f, DropShadow)) {
                 var dropShadow:DropShadow = cast(f, DropShadow);
                 if (dropShadow.inner == true) {
@@ -170,8 +170,8 @@ class StyleHelper {
         if (inset == false) {
             for (i in 0...size) {
                 g.color = color | 0x30000000;
-                g.fillRect(x + i, y + h + 1 + i, w + 1, 1); // bottom
-                g.fillRect(x + w + 1 + i, y + i, 1, h + 2); // right
+                g.fillRect(x + i + 1, y + h + 1 + i, w + 0, 1); // bottom
+                g.fillRect(x + w + 1 + i, y + i + 1, 1, h + 1); // right
             }
         } else {
             for (i in 0...size) {

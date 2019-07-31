@@ -2,8 +2,8 @@ package haxe.ui.backend;
 
 import kha.Scheduler;
 
-class CallLaterBase {
+class CallLaterImpl {
     public function new(fn:Void->Void) {
-        Scheduler.addFrameTask(fn, 0);
+        Scheduler.addTimeTask(fn, 0.001);
     }
 }

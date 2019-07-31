@@ -576,7 +576,7 @@ class TextField {
     }
 
     private function onMouseDown(button:Int, x:Int, y:Int) {
-        if (inBounds(x, y) == false) {
+        if (_font == null || inBounds(x, y) == false) {
             return;
         }
 
@@ -595,6 +595,9 @@ class TextField {
             _caretInfo.row = _lines.length - 1;
         }
         var line = _lines[_caretInfo.row];
+        if (line == null) {
+            return;
+        }
         var totalWidth:Float = 0;
         var i = 0;
         var inText = false;
@@ -622,6 +625,10 @@ class TextField {
         _currentFocus.onFocus();
     }
 
+    public function focus() {
+        onFocus();
+    }
+    
     private function onFocus() {
         if (_caretInfo.timerId == -1) {
             _caretInfo.timerId = Scheduler.addTimeTask(function() {
@@ -630,6 +637,10 @@ class TextField {
         }
     }
 
+    public function blur() {
+        onBlur();
+    }
+    
     private function onBlur() {
         Scheduler.removeTimeTask(_caretInfo.timerId);
         _caretInfo.timerId = -1;
@@ -796,6 +807,10 @@ class TextField {
     // RENDER                                                                                                          //
     //*****************************************************************************************************************//
     public function render(g:Graphics) {
+        if (_font == null) {
+            return;
+        }
+        
         g.color = backgroundColor;
         g.fillRect(left, top, width, height);
 
