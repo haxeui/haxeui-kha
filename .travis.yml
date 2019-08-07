@@ -37,7 +37,7 @@ notifications:
 script:
   - git clone --depth=1 --branch update-kha-template https://github.com/sh-dave/haxeui-templates.git
   - cd haxeui-templates/kha/skeleton
-  - git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
+  - git clone --recursive --branch fix-dce-native --single-branch --depth=1 https://github.com/sh-dave/Kha.git
   - mkdir Libraries
   - cd Libraries
   - git clone --single-branch --depth=1 https://github.com/haxeui/haxeui-core.git
