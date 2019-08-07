@@ -14,8 +14,8 @@ node_js: 10
 
 env:
   - BUILD_TARGET=debug-html5 BUILD_OPTS=""
-  - BUILD_TARGET=linux BUILD_OPTS="--compile"
   - BUILD_TARGET=html5 BUILD_OPTS=""
+  - BUILD_TARGET=linux BUILD_OPTS="--compile"
 
 notifications:
   webhooks:
@@ -25,23 +25,14 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
 
-# before_install:
-  # - nvm install v8
-  # - git clone --branch $TRAVIS_BRANCH https://github.com/haxeui/haxeui-core.git --depth=1
-  # - haxelib dev haxeui-core haxeui-core
-
-# install:
-  # - haxelib install hscript
-  # - haxelib dev haxeui-kha $TRAVIS_BUILD_DIR
-
 script:
-  - git clone --depth=1 --branch update-kha-template https://github.com/sh-dave/haxeui-templates.git
+  - git clone --depth=1 --branch update-kha-template https://github.com/haxeui/haxeui-templates.git
   - cd haxeui-templates/kha/skeleton
-  - git clone --recursive --branch fix-dce-native --single-branch --depth=1 https://github.com/sh-dave/Kha.git
+  - git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
   - mkdir Libraries
   - cd Libraries
-  - git clone --single-branch --depth=1 https://github.com/haxeui/haxeui-core.git
-  - git clone --branch $TRAVIS_BRANCH --single-branch --depth=1 https://github.com/sh-dave/haxeui-kha.git
+  - git clone --branch $TRAVIS_BRANCH --single-branch --depth=1 https://github.com/haxeui/haxeui-core.git
+  - git clone --branch $TRAVIS_BRANCH --single-branch --depth=1 https://github.com/haxeui/haxeui-kha.git
   - git clone --single-branch --depth=1 https://github.com/haxefoundation/hscript.git
   - cd ..
   - node Kha/make $BUILD_TARGET $BUILD_OPTS
