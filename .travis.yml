@@ -27,7 +27,8 @@ notifications:
 
 before_install:
   # - nvm install v8
-  - git clone --branch $TRAVIS_BRANCH https://github.com/haxeui/haxeui-core.git --depth=1
+  # - git clone --branch $TRAVIS_BRANCH https://github.com/haxeui/haxeui-core.git --depth=1
+  - git clone https://github.com/haxeui/haxeui-core.git --depth=1
   - haxelib dev haxeui-core haxeui-core
 
 install:
@@ -37,5 +38,5 @@ install:
 script:
   - git clone https://github.com/sh-dave/haxeui-templates.git --depth=1
   - cd haxeui-templates/kha/skeleton
-  - git clone --recursive --single-branch https://github.com/Kode/Kha.git
+  - git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
   - node Kha/make $BUILD_TARGET $BUILD_OPTS
