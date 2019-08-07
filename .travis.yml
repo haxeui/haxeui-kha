@@ -1,5 +1,21 @@
-sudo: false
-language: haxe
+dist: xenial
+addons:
+  apt:
+    packages:
+    - libxinerama-dev
+    - libasound2-dev
+    - mesa-common-dev
+    - libgl-dev
+    - libxi-dev
+    - zip
+
+language: node_js
+node_js: 10
+
+env:
+  - BUILD_TARGET=debug-html5 BUILD_OPTS=""
+  - BUILD_TARGET=linux BUILD_OPTS="--compile"
+  - BUILD_TARGET=html5 BUILD_OPTS=""
 
 notifications:
   webhooks:
@@ -9,32 +25,17 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
 
-os:
-  - linux
-
-haxe:
-  - "3.2.1"
-  - development
-
-node_js:
-  - "8"
-
 before_install:
-    - nvm install v8
-    - git clone --branch $TRAVIS_BRANCH https://github.com/haxeui/haxeui-core.git --depth=1
-    - haxelib dev haxeui-core haxeui-core
+  # - nvm install v8
+  - git clone --branch $TRAVIS_BRANCH https://github.com/haxeui/haxeui-core.git --depth=1
+  - haxelib dev haxeui-core haxeui-core
 
 install:
-    - haxelib install hscript
-    - haxelib dev haxeui-kha $TRAVIS_BUILD_DIR
-
+  - haxelib install hscript
+  - haxelib dev haxeui-kha $TRAVIS_BUILD_DIR
 
 script:
-    - git clone https://github.com/haxeui/haxeui-templates.git --depth=1
-    - cd haxeui-templates/kha/skeleton
-    - git init
-    - git submodule add https://github.com/KTXSoftware/Kha
-    - git submodule update --init --recursive
-    - node Kha/make html5
-    - cd build
-    - haxe project-html5.hxml
+  - git clone https://github.com/sh-dave/haxeui-templates.git --depth=1
+  - cd haxeui-templates/kha/skeleton
+  - git clone --recursive --single-branch https://github.com/Kode/Kha.git
+  - node Kha/make $BUILD_TARGET $BUILD_OPTS
