@@ -104,16 +104,16 @@ class ComponentImpl extends ComponentBase {
     //***********************************************************************************************************
     // Style related
     //***********************************************************************************************************
-    private function calcAlpha():Float {
-        var alpha:Float = 1;
+    private function calcOpacity():Float {
+        var opacity:Float = 1;
         var c:Component = cast(this, Component);
         while (c != null) {
             if (c.style.opacity != null) {
-                alpha *= c.style.opacity;
+                opacity *= c.style.opacity;
             }
             c = c.parentComponent;
         }
-        return alpha;
+        return opacity;
     }
 
     @:access(haxe.ui.core.Component)
@@ -137,7 +137,8 @@ class ComponentImpl extends ComponentBase {
             g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
         }
 
-        //style.opacity = calcAlpha();
+        var opacity = calcOpacity();
+        g.opacity = opacity;
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
@@ -151,7 +152,7 @@ class ComponentImpl extends ComponentBase {
         if (style.color != null) {
             g.color = style.color | 0xFF000000;
         } else {
-            g.color = Color.Black;
+            g.color = Color.Black | 0xFF000000;
         }
 
         if (_textDisplay != null) {
@@ -168,6 +169,8 @@ class ComponentImpl extends ComponentBase {
             c.renderTo(g);
         }
 
+        g.opacity = 1;
+        
         if (clipRect != null) {
             g.disableScissor();
         }
