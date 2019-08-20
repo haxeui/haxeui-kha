@@ -37,5 +37,5 @@ script:
   - cd src
   - printf "package;\n\nclass Main {\npublic static function main() {\n}\n}" > Main.hx
   - cd ..
-  - cp Libraries/haxeui-core/khafile.js khafile.js
+  - cp Libraries/haxeui-kha/khafile.js khafile.js
   - node Kha/make $BUILD_TARGET $BUILD_OPTS
