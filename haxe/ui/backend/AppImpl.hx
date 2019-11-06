@@ -42,15 +42,7 @@ class AppImpl extends AppBase {
 
         var g = framebuffers[0].g2;
         g.begin(true, _backgroudColor);
-
-        for (c in Screen.instance.rootComponents) {
-            if (Toolkit.scaleX == 1 && Toolkit.scaleY == 1) {
-                c.renderTo(g);
-            } else {
-                c.renderToScaled(g, Toolkit.scaleX, Toolkit.scaleY);
-            }
-        }
-
+        Screen.instance.renderTo(g);
         g.end();
     }
 }

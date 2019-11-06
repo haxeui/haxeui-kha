@@ -188,9 +188,11 @@ class ComponentImpl extends ComponentBase {
             _componentBuffer = kha.Image.createRenderTarget(cx, cy);
         }
 
+        g.end();
         _componentBuffer.g2.begin(true, 0xFFFFFFFF);
         renderTo(_componentBuffer.g2);
         _componentBuffer.g2.end();
+        g.begin();
 
         g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }

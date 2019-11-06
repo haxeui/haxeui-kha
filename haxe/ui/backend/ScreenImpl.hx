@@ -16,11 +16,11 @@ class ScreenImpl extends ScreenBase {
     }
 
     public override function get_width():Float {
-        return System.windowWidth();
+        return System.windowWidth() / Toolkit.scaleX;
     }
 
     public override function get_height() {
-        return System.windowHeight();
+        return System.windowHeight() / Toolkit.scaleY;
     }
 
     private override function get_dpi():Float {
@@ -57,7 +57,11 @@ class ScreenImpl extends ScreenBase {
 
     public function renderTo(g:Graphics) {
         for (c in _topLevelComponents) {
-            c.renderTo(g);
+            if (Toolkit.scaleX == 1 && Toolkit.scaleY == 1) {
+                c.renderTo(g);
+            } else {
+                c.renderToScaled(g, Toolkit.scaleX, Toolkit.scaleY);
+            }
         }
     }
 
