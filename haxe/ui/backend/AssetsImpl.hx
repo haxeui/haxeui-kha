@@ -38,6 +38,18 @@ class AssetsImpl extends AssetsBase {
     }
 
     public override function imageFromBytes(bytes:Bytes, callback:ImageInfo->Void) {
+        #if kha_krom
+        var path = Krom.getFilesLocation()+"file."+extensionFromMagicBytes(bytes);
+        Krom.fileSaveBytes(path,bytes.getData());
+        kha.Assets.loadImageFromPath(path,false, function(image) {
+            var imageInfo:ImageInfo = {
+                width: image.realWidth,
+                height: image.realHeight,
+                data: image
+            }
+            callback(imageInfo);
+        });
+        #else
         Image.fromEncodedBytes(bytes, extensionFromMagicBytes(bytes), function(image) {
             var imageInfo:ImageInfo = {
                 width: image.realWidth,
@@ -49,6 +61,7 @@ class AssetsImpl extends AssetsBase {
             trace("Problem loading image: " + error);
             callback(null);
         });
+        #end
     }
     
     // .jpg:  FF D8 FF
