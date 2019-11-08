@@ -260,6 +260,31 @@ class ComponentImpl extends ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+            case MouseEvent.RIGHT_MOUSE_DOWN:
+                if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
+                    Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                    _eventMap.set(MouseEvent.RIGHT_MOUSE_DOWN, listener);
+                }
+
+            case MouseEvent.RIGHT_MOUSE_UP:
+                if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
+                    Mouse.get().notify(null, __onMouseUp, null, null);
+                    _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
+                }
+            case MouseEvent.RIGHT_CLICK:
+                if (_eventMap.exists(MouseEvent.RIGHT_CLICK) == false) {
+                    _eventMap.set(MouseEvent.RIGHT_CLICK, listener);
+
+                    if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
+                        Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                        _eventMap.set(MouseEvent.RIGHT_MOUSE_DOWN, listener);
+                    }
+
+                    if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
+                        Mouse.get().notify(null, __onMouseUp, null, null);
+                        _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
+                    }
+                }
 			case KeyboardEvent.KEY_DOWN:
 				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
                     Keyboard.get().notify(__onKeyDown, null, null);
@@ -316,9 +341,10 @@ class ComponentImpl extends ComponentBase {
                 return;
             }
             _mouseDownFlag = true;
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_DOWN);
+            var type = button == 0 ? haxe.ui.events.MouseEvent.MOUSE_DOWN: haxe.ui.events.MouseEvent.RIGHT_MOUSE_DOWN;
+            var fn:UIEvent->Void = _eventMap.get(type);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_DOWN);
+                var mouseEvent = new haxe.ui.events.MouseEvent(type);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
@@ -335,9 +361,10 @@ class ComponentImpl extends ComponentBase {
                 return;
             }
             if (_mouseDownFlag == true) {
-                var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.CLICK);
+                var type = button == 0 ? haxe.ui.events.MouseEvent.CLICK: haxe.ui.events.MouseEvent.RIGHT_CLICK;
+                var fn:UIEvent->Void = _eventMap.get(type);
                 if (fn != null) {
-                    var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.CLICK);
+                    var mouseEvent = new haxe.ui.events.MouseEvent(type);
                     mouseEvent.screenX = x / Toolkit.scaleX;
                     mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
@@ -345,10 +372,10 @@ class ComponentImpl extends ComponentBase {
             }
 
             _mouseDownFlag = false;
-
-            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_UP);
+            var type = button == 0 ? haxe.ui.events.MouseEvent.MOUSE_UP: haxe.ui.events.MouseEvent.RIGHT_MOUSE_UP;
+            var fn:UIEvent->Void = _eventMap.get(type);
             if (fn != null) {
-                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_UP);
+                var mouseEvent = new haxe.ui.events.MouseEvent(type);
                 mouseEvent.screenX = x / Toolkit.scaleX;
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
