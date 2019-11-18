@@ -56,27 +56,31 @@ class TextField {
     public var scrollTop:Int = 0;
     public var scrollLeft:Float = 0;
 
-    private var _textChanged:String->Void = null;
-    private var _caretMoved:CharPosition->Void = null;
+    private var _textChanged:Array<String->Void> = [];
+    private var _caretMoved:Array<CharPosition->Void> = [];
     public function notify(textChanged:String->Void, caretMoved:CharPosition->Void) {
-        _textChanged = textChanged;
-        _caretMoved = caretMoved;
+        if (textChanged != null) {
+            _textChanged.push(textChanged);
+        }
+        if (caretMoved != null) {
+            _caretMoved.push(caretMoved);
+        }
     }
 
     private function notifyTextChanged() {
-        if (_textChanged != null) {
-            _textChanged(_text);
+        for (l in _textChanged) {
+            l(_text);
         }
     }
 
     private function notifyCaretMoved() {
-        if (_caretMoved != null) {
-            _caretMoved(_caretInfo);
+        for (l in _caretMoved) {
+            l(_caretInfo);
         }
     }
 
     private var _lines:Array<Array<Int>> = null;
-    private var _text:String = null;
+    private var _text:String = "";
     public var text(get, set):String;
     private function get_text():String {
         return _text;

@@ -217,6 +217,7 @@ class ComponentImpl extends ComponentBase {
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
+    @:access(haxe.ui.backend.TextInputImpl)
     private override function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
             case MouseEvent.MOUSE_OVER:
@@ -295,9 +296,19 @@ class ComponentImpl extends ComponentBase {
                     Keyboard.get().notify(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);
                 }
+            case UIEvent.CHANGE: 
+                if (_eventMap.exists(type) == false) {
+                    if (hasTextInput() == true) {
+                        getTextInput()._tf.notify(onTextInputChanged, null);
+                    }
+                }
         }
     }
 
+    private function onTextInputChanged(s:String) {
+        dispatch(new UIEvent(UIEvent.CHANGE));
+    }
+    
     private override function unmapEvent(type:String, listener:UIEvent->Void) {
 
     }
