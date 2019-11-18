@@ -1,21 +1,21 @@
 {
+    "version": "1.0.3",
     "contributors": [
         "haxeui",
         "ianharrigan",
         "_ibilon",
         "aW4KeNiNG"
     ],
-    "version": "1.0.2",
-    "dependencies": {
-        "haxeui-core": ""
-    },
-    "releasenote": "right click event and asset krom asset workaround",
+    "license": "MIT",
     "tags": [
         "ui",
         "gui",
         "kha"
     ],
-    "license": "MIT",
+    "releasenote": "fix change event for textfields",
+    "dependencies": {
+        "haxeui-core": ""
+    },
     "name": "haxeui-kha",
     "description": "The Kha backend of the HaxeUI framework",
     "url": "https://github.com/haxeui/haxeui-kha"
