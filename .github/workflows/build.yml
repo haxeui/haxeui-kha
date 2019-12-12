@@ -42,4 +42,4 @@ jobs:
 
     - name: Build app (haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
-        node Kha/make html5
+        node Kha/make html5 --compile
