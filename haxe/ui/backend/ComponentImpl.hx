@@ -13,7 +13,7 @@ import kha.graphics2.Graphics;
 import kha.input.KeyCode;
 import kha.input.Keyboard;
 import kha.input.Mouse;
-
+s
 class ComponentImpl extends ComponentBase {
     //public var parent:ComponentBase;
     private var _eventMap:Map<String, UIEvent->Void>;
