@@ -1,4 +1,4 @@
-name: Build (all targets, all plat
+name: Build (linux, all platforms, all haxe versions)
 
 on: [push]
 
