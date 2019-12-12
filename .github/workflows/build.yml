@@ -10,8 +10,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        #haxe-version: [3.4.4, 4.0.3]
-        haxe-version: [4.0.3]
+        haxe-version: [3.4.4, 4.0.3]
+        target: [html5, linux]
 
     steps:
     - uses: actions/checkout@v1
@@ -40,6 +40,6 @@ jobs:
         cd ..
         cp Libraries/haxeui-kha/khafile.js khafile.js
 
-    - name: Build app (haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
+    - name: Build app (${{ matrix.target }}, haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
-        node Kha/make html5 --compile
+        node Kha/make ${{ matrix.target }} --compile
