@@ -1,5 +1,6 @@
 package haxe.ui.backend;
 
+import haxe.Timer;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen;
@@ -8,6 +9,7 @@ import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
 import haxe.ui.geom.Rectangle;
 import haxe.ui.styles.Style;
+import haxe.ui.util.MathUtil;
 import kha.Color;
 import kha.graphics2.Graphics;
 import kha.input.KeyCode;
@@ -20,6 +22,12 @@ class ComponentImpl extends ComponentBase {
 
     private var lastMouseX = -1;
     private var lastMouseY = -1;
+	
+	// For doubleclick detection
+	private var _lastClickTime:Float = 0;
+	private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
+	private var _lastClickX:Int = -1;
+	private var _lastClickY:Int = -1;
 
     public function new() {
         super();
@@ -261,6 +269,15 @@ class ComponentImpl extends ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+			case MouseEvent.DOUBLE_CLICK:
+                if (_eventMap.exists(MouseEvent.DOUBLE_CLICK) == false) {
+                    _eventMap.set(MouseEvent.DOUBLE_CLICK, listener);
+					
+                    if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
+                        Mouse.get().notify(null, __onDoubleClick, null, null);
+                        _eventMap.set(MouseEvent.MOUSE_UP, listener);
+                    }
+                }
             case MouseEvent.RIGHT_MOUSE_DOWN:
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
                     Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
@@ -371,6 +388,7 @@ class ComponentImpl extends ComponentBase {
             if (hasComponentOver(cast this, x, y) == true) {
                 return;
             }
+			
             if (_mouseDownFlag == true) {
                 var type = button == 0 ? haxe.ui.events.MouseEvent.CLICK: haxe.ui.events.MouseEvent.RIGHT_CLICK;
                 var fn:UIEvent->Void = _eventMap.get(type);
@@ -380,6 +398,15 @@ class ComponentImpl extends ComponentBase {
                     mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
                 }
+				
+				if (type == haxe.ui.events.MouseEvent.CLICK) {
+					_lastClickTimeDiff = Timer.stamp() - _lastClickTime;
+					_lastClickTime = Timer.stamp();
+					if (_lastClickTimeDiff >= 0.5) { // 0.5 seconds
+						_lastClickX = x;
+						_lastClickY = y;
+					}
+				}
             }
 
             _mouseDownFlag = false;
@@ -391,6 +418,31 @@ class ComponentImpl extends ComponentBase {
                 mouseEvent.screenY = y / Toolkit.scaleY;
                 fn(mouseEvent);
             }
+        }
+        _mouseDownFlag = false;
+    }
+	
+	private function __onDoubleClick(button:Int, x:Int, y:Int) {
+        lastMouseX = x;
+        lastMouseY = y;
+        var i = inBounds(x, y);
+        if (i == true && button == 0) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                return;
+            }
+			
+            _mouseDownFlag = false;
+			var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
+			if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
+				var type = haxe.ui.events.MouseEvent.DOUBLE_CLICK;
+				var fn:UIEvent->Void = _eventMap.get(type);
+				if (fn != null) {
+					var mouseEvent = new haxe.ui.events.MouseEvent(type);
+					mouseEvent.screenX = x / Toolkit.scaleX;
+					mouseEvent.screenY = y / Toolkit.scaleY;
+					fn(mouseEvent);
+				}
+			}
         }
         _mouseDownFlag = false;
     }
