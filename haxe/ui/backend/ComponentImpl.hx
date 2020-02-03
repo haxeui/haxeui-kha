@@ -269,9 +269,9 @@ class ComponentImpl extends ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
-			case MouseEvent.DOUBLE_CLICK:
-                if (_eventMap.exists(MouseEvent.DOUBLE_CLICK) == false) {
-                    _eventMap.set(MouseEvent.DOUBLE_CLICK, listener);
+			case MouseEvent.DBL_CLICK:
+                if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
+                    _eventMap.set(MouseEvent.DBL_CLICK, listener);
 					
                     if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
                         Mouse.get().notify(null, __onDoubleClick, null, null);
@@ -434,7 +434,7 @@ class ComponentImpl extends ComponentBase {
             _mouseDownFlag = false;
 			var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
 			if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
-				var type = haxe.ui.events.MouseEvent.DOUBLE_CLICK;
+				var type = haxe.ui.events.MouseEvent.DBL_CLICK;
 				var fn:UIEvent->Void = _eventMap.get(type);
 				if (fn != null) {
 					var mouseEvent = new haxe.ui.events.MouseEvent(type);
