@@ -30,17 +30,28 @@ class StyleHelper {
         var orgH = h;
 
         var alpha:Int = 0xFF000000;
-        if (style.backgroundColor != null) {
-            if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
+        if (style.backgroundColors != null && style.backgroundColors.length > 0) {
+            if (style.backgroundColors.length == 1) { // solid
+                g.color = style.backgroundColors[0].color | alpha;
+                g.fillRect(x, y, w, h);
+                g.color = Color.White;
+            } else { // gradient
                 var gradientType:String = "vertical";
                 if (style.backgroundGradientStyle != null) {
                     gradientType = style.backgroundGradientStyle;
                 }
-
+                
+                var colors:Array<Int> = [];
+                var percents:Array<Float> = [];
+                for (backgroundPair in style.backgroundColors) {
+                    colors.push(backgroundPair.color);
+                    percents.push(backgroundPair.location);
+                }
+                
                 var arr:Array<Int> = null;
                 var n:Int = 0;
                 if (gradientType == "vertical") {
-                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(h));
+                    arr = ColorUtil.buildColorArrayPercents(colors, percents, Std.int(h));
                     for (c in arr) {
                         g.color = c | alpha;
                         g.fillRect(x, y + n, w, 1);
@@ -48,7 +59,7 @@ class StyleHelper {
                         n++;
                     }
                 } else if (gradientType == "horizontal") {
-                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(w));
+                    arr = ColorUtil.buildColorArrayPercents(colors, percents, Std.int(w));
                     for (c in arr) {
                         g.color = c | alpha;
                         g.fillRect(x + n, y, 1, h);
@@ -56,10 +67,6 @@ class StyleHelper {
                         n++;
                     }
                 }
-            } else {
-                g.color = style.backgroundColor | alpha;
-                g.fillRect(x, y, w, h);
-                g.color = Color.White;
             }
         }
         
