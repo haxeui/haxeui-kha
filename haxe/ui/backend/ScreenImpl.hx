@@ -45,14 +45,16 @@ class ScreenImpl extends ScreenBase {
         #end
     }
 
-    public override function addComponent(component:Component) {
+    public override function addComponent(component:Component):Component {
         _topLevelComponents.push(component);
         resizeComponent(component);
         //component.dispatchReady();
+		return component;
     }
 
-    public override function removeComponent(component:Component) {
+    public override function removeComponent(component:Component):Component {
         _topLevelComponents.remove(component);
+		return component;
     }
 
     public function renderTo(g:Graphics) {
