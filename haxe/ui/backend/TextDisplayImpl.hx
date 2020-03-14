@@ -13,7 +13,6 @@ class TextDisplayImpl extends TextBase {
     //***********************************************************************************************************
     // Validation functions
     //***********************************************************************************************************
-    
     private override function validateStyle():Bool {
         var measureTextRequired:Bool = false;
         
@@ -69,6 +68,7 @@ class TextDisplayImpl extends TextBase {
         var maxWidth:Float = _width;
         _lines = new Array<String>();
         var lines = _text.split("\n");
+        var biggestWidth:Float = 0;
         for (line in lines) {
             var tw = _font.width(Std.int(_fontSize), line);
             if (tw > maxWidth) {
@@ -76,10 +76,10 @@ class TextDisplayImpl extends TextBase {
                 while (!words.isEmpty()) {
                     line = words.pop();
                     tw = _font.width(Std.int(_fontSize), line);
-                    _textWidth = Math.max(_textWidth, tw);
+                    biggestWidth = Math.max(biggestWidth, tw);
                     var nextWord = words.pop();
                     while (nextWord != null && (tw = _font.width(Std.int(_fontSize), line + " " + nextWord)) <= maxWidth) {
-                        _textWidth = Math.max(_textWidth, tw);
+                        biggestWidth = Math.max(biggestWidth, tw);
                         line += " " + nextWord;
                         nextWord = words.pop();
                     }
@@ -89,13 +89,14 @@ class TextDisplayImpl extends TextBase {
                     }
                 }
             } else {
-                _textWidth = Math.max(_textWidth, tw);
+                biggestWidth = Math.max(biggestWidth, tw);
                 if (line != '') {
                     _lines.push(line);
                 }
             }
         }
 
+        _textWidth = biggestWidth;
         _textHeight = _font.height(Std.int(_fontSize)) * _lines.length;
     }
 
