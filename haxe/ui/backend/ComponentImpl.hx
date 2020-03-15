@@ -12,6 +12,7 @@ import haxe.ui.styles.Style;
 import haxe.ui.util.MathUtil;
 import kha.Color;
 import kha.graphics2.Graphics;
+import kha.graphics2.ImageScaleQuality;
 import kha.input.KeyCode;
 import kha.input.Keyboard;
 import kha.input.Mouse;
@@ -142,7 +143,15 @@ class ComponentImpl extends ComponentBase {
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
-            g.scissor(Math.floor(x + clipRect.left), Math.floor(y + clipRect.top), Math.ceil(clipRect.width), Math.ceil(clipRect.height));
+            var clipX = (x + clipRect.left) * Toolkit.scaleX;
+            var rx = clipX % Toolkit.scaleX;
+            clipX -= rx;
+            var clipY = (y + clipRect.top + 1) * Toolkit.scaleY;
+            var ry = clipY % Toolkit.scaleY;
+            clipY -= ry;
+            var clipCX = clipRect.width * Toolkit.scaleX - (Toolkit.scaleX - rx);
+            var clipCY = (clipRect.height) * Toolkit.scaleY - (Toolkit.scaleY - ry);
+            g.scissor(Std.int(clipX), Std.int(clipY), Math.ceil(clipCX), Math.ceil(clipCY));
         }
 
         var opacity = calcOpacity();
@@ -150,11 +159,18 @@ class ComponentImpl extends ComponentBase {
         StyleHelper.paintStyle(g, style, x, y, w, h);
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
+            var imageX = (x + _imageDisplay.left) * Toolkit.scaleX;
+            var imageY = (y + _imageDisplay.top) * Toolkit.scaleY;
+            var orgScaleQuality = g.imageScaleQuality;
+            g.imageScaleQuality = ImageScaleQuality.High;
             if (_imageDisplay.scaled == true) {
-                g.drawScaledImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
+                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
+            } else if (Toolkit.scale != 1) {
+                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth * Toolkit.scaleX, _imageDisplay.imageHeight * Toolkit.scaleY);
             } else {
-                g.drawImage(_imageDisplay._buffer, x + _imageDisplay.left, y + _imageDisplay.top);
+                g.drawImage(_imageDisplay._buffer, imageX, imageY);
             }
+            g.imageScaleQuality = orgScaleQuality;
         }
 
         if (style.color != null) {
@@ -164,11 +180,11 @@ class ComponentImpl extends ComponentBase {
         }
 
         if (_textDisplay != null) {
-            _textDisplay.renderTo(g, x, y);
+            _textDisplay.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
 
         if (_textInput != null) {
-            _textInput.renderTo(g, x, y);
+            _textInput.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
 
         g.color = Color.White;

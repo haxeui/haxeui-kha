@@ -10,6 +10,11 @@ class TextDisplayImpl extends TextBase {
     private var _fontName:String;
     private var _color:Int;
 
+    public function new() {
+        super();
+        _fontSize = 14 * Toolkit.scale;
+    }
+    
     //***********************************************************************************************************
     // Validation functions
     //***********************************************************************************************************
@@ -22,7 +27,7 @@ class TextDisplayImpl extends TextBase {
             }
             
             if (_fontSize != _textStyle.fontSize) {
-                _fontSize = _textStyle.fontSize;
+                _fontSize = _textStyle.fontSize * Toolkit.scale;
                 measureTextRequired = true;
             }
             
@@ -65,7 +70,7 @@ class TextDisplayImpl extends TextBase {
         }
 
 
-        var maxWidth:Float = _width;
+        var maxWidth:Float = _width * Toolkit.scale;
         _lines = new Array<String>();
         var lines = _text.split("\n");
         var biggestWidth:Float = 0;
@@ -96,8 +101,8 @@ class TextDisplayImpl extends TextBase {
             }
         }
 
-        _textWidth = biggestWidth;
-        _textHeight = _font.height(Std.int(_fontSize)) * _lines.length;
+        _textWidth = biggestWidth / Toolkit.scale;
+        _textHeight = (_font.height(Std.int(_fontSize)) * _lines.length) / Toolkit.scale;
     }
 
     public function renderTo(g:Graphics, x:Float, y:Float) {
@@ -105,21 +110,21 @@ class TextDisplayImpl extends TextBase {
             g.font = _font;
             g.fontSize = Std.int(_fontSize);
 
-            var tx:Float = x;
             var ty:Float = y + _top;
-            
-            switch(_textAlign) {
-                case "center":
-                    tx += (_width - _textWidth) / 2;
-
-                case "right":
-                    tx += _width - _textWidth;
-
-                default:
-                    tx += _left;
-            }
-
             for (line in _lines) {
+                var tx:Float = x;
+            
+                switch(_textAlign) {
+                    case "center":
+                        tx += ((_width - _textWidth) * Toolkit.scale) / 2;
+
+                    case "right":
+                        tx += (_width - _textWidth) * Toolkit.scale;
+
+                    default:
+                        tx += _left;
+                }
+
                 g.drawString(line, tx, ty);
                 ty += _font.height(Std.int(_fontSize));
             }
