@@ -551,6 +551,9 @@ class ComponentImpl extends ComponentBase {
             }
 
             r = hasChildRecursive(t, child);
+            if (r == true) {
+                break;
+            }
         }
 
         return r;
