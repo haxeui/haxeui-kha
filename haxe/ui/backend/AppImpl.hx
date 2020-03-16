@@ -20,7 +20,7 @@ class AppImpl extends AppBase {
         var height:Int = Toolkit.backendProperties.getPropInt("haxe.ui.kha.height", -1);
         
         #if js
-        var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
+        var canvas = cast(js.Browser.document.getElementById(kha.Macros.canvasId()), js.html.CanvasElement);
         if (width != -1) {
             canvas.width = width;
         }

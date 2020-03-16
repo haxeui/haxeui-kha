@@ -33,6 +33,10 @@ class ComponentImpl extends ComponentBase {
     public function new() {
         super();
         _eventMap = new Map<String, UIEvent->Void>();
+        
+        #if (kha_android || kha_android_native)
+        cast(this, Component).addClass(":mobile");
+        #end
     }
 
     public var screenX(get, null):Float;
@@ -143,14 +147,18 @@ class ComponentImpl extends ComponentBase {
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
+            var bt:Float = Toolkit.scaleY;
+            if (style.borderTopSize != null) {
+                bt = style.borderTopSize * Toolkit.scaleY;
+            }
             var clipX = (x + clipRect.left) * Toolkit.scaleX;
             var rx = clipX % Toolkit.scaleX;
             clipX -= rx;
-            var clipY = (y + clipRect.top + 1) * Toolkit.scaleY;
+            var clipY = (y + clipRect.top + bt) * Toolkit.scaleY;
             var ry = clipY % Toolkit.scaleY;
             clipY -= ry;
-            var clipCX = clipRect.width * Toolkit.scaleX - (Toolkit.scaleX - rx);
-            var clipCY = (clipRect.height) * Toolkit.scaleY - (Toolkit.scaleY - ry);
+            var clipCX = clipRect.width * Toolkit.scaleX;// - (Toolkit.scaleX - rx);
+            var clipCY = (clipRect.height) * Toolkit.scaleY;// - (Toolkit.scaleY - ry);
             g.scissor(Std.int(clipX), Std.int(clipY), Math.ceil(clipCX), Math.ceil(clipCY));
         }
 
