@@ -106,7 +106,7 @@ class TextDisplayImpl extends TextBase {
     }
 
     public function renderTo(g:Graphics, x:Float, y:Float) {
-        if (_lines != null) {
+        if (_lines != null && _lines.length > 0) {
             g.font = _font;
             g.fontSize = Std.int(_fontSize);
 

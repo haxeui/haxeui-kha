@@ -130,7 +130,7 @@ class ComponentImpl extends ComponentBase {
     }
 
     @:access(haxe.ui.core.Component)
-    public function renderTo(g:Graphics) {
+    public function renderStylesTo(g:Graphics) {
         if (cast(this, Component).isReady == false || cast(this, Component).hidden == true) {
             return;
         }
@@ -181,6 +181,89 @@ class ComponentImpl extends ComponentBase {
             g.imageScaleQuality = orgScaleQuality;
         }
 
+        /*
+        if (style.color != null) {
+            g.color = style.color | 0xFF000000;
+        } else {
+            g.color = Color.Black | 0xFF000000;
+        }
+
+        if (_textDisplay != null) {
+            _textDisplay.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
+        }
+
+        if (_textInput != null) {
+            _textInput.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
+        }
+
+        g.color = Color.White;
+        */
+
+        for (c in cast(this, Component).childComponents) {
+            c.renderStylesTo(g);
+        }
+
+        g.opacity = 1;
+        
+        if (clipRect != null) {
+            g.disableScissor();
+        }
+    }
+
+    @:access(haxe.ui.core.Component)
+    public function renderTextsTo(g:Graphics) {
+        if (cast(this, Component).isReady == false || cast(this, Component).hidden == true) {
+            return;
+        }
+
+        var x:Int = Math.floor(screenX);
+        var y:Int = Math.floor(screenY);
+        var w:Int = Math.ceil(cast(this, Component).componentWidth);
+        var h:Int = Math.ceil(cast(this, Component).componentHeight);
+
+        var style:Style = cast(this, Component).style;
+        if (style == null) {
+            return;
+        }
+        var clipRect:Rectangle = cast(this, Component).componentClipRect;
+
+        if (clipRect != null) {
+            var bt:Float = Toolkit.scaleY;
+            if (style.borderTopSize != null) {
+                bt = style.borderTopSize * Toolkit.scaleY;
+            }
+            var clipX = (x + clipRect.left) * Toolkit.scaleX;
+            var rx = clipX % Toolkit.scaleX;
+            clipX -= rx;
+            var clipY = (y + clipRect.top + bt) * Toolkit.scaleY;
+            var ry = clipY % Toolkit.scaleY;
+            clipY -= ry;
+            var clipCX = clipRect.width * Toolkit.scaleX;// - (Toolkit.scaleX - rx);
+            var clipCY = (clipRect.height) * Toolkit.scaleY;// - (Toolkit.scaleY - ry);
+            g.scissor(Std.int(clipX), Std.int(clipY), Math.ceil(clipCX), Math.ceil(clipCY));
+        }
+
+        var opacity = calcOpacity();
+        g.opacity = opacity;
+        /*
+        StyleHelper.paintStyle(g, style, x, y, w, h);
+        */
+
+        if (_imageDisplay != null && _imageDisplay._buffer != null) {
+            var imageX = (x + _imageDisplay.left) * Toolkit.scaleX;
+            var imageY = (y + _imageDisplay.top) * Toolkit.scaleY;
+            var orgScaleQuality = g.imageScaleQuality;
+            g.imageScaleQuality = ImageScaleQuality.High;
+            if (_imageDisplay.scaled == true) {
+                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
+            } else if (Toolkit.scale != 1) {
+                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth * Toolkit.scaleX, _imageDisplay.imageHeight * Toolkit.scaleY);
+            } else {
+                g.drawImage(_imageDisplay._buffer, imageX, imageY);
+            }
+            g.imageScaleQuality = orgScaleQuality;
+        }
+
         if (style.color != null) {
             g.color = style.color | 0xFF000000;
         } else {
@@ -198,7 +281,7 @@ class ComponentImpl extends ComponentBase {
         g.color = Color.White;
 
         for (c in cast(this, Component).childComponents) {
-            c.renderTo(g);
+            c.renderTextsTo(g);
         }
 
         g.opacity = 1;
@@ -207,7 +290,8 @@ class ComponentImpl extends ComponentBase {
             g.disableScissor();
         }
     }
-
+  
+    /*
     private var _componentBuffer:kha.Image;
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
         var cx:Int = Std.int(cast(this, Component).width);
@@ -228,6 +312,7 @@ class ComponentImpl extends ComponentBase {
 
         g.drawScaledImage(_componentBuffer, 0, 0, cx * scaleX, cy * scaleY);
     }
+    */
 
     private override function handleSize(width:Null<Float>, height:Null<Float>, style:Style) {
         if (width == null || height == null || width <= 0 || height <= 0) {
