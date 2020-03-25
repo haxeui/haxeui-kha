@@ -59,12 +59,7 @@ class ScreenImpl extends ScreenBase {
 
     public function renderTo(g:Graphics) {
         for (c in _topLevelComponents) {
-            if (Toolkit.scaleX == 1 && Toolkit.scaleY == 1) {
-                c.renderTo(g);
-            } else {
-                //c.renderToScaled(g, Toolkit.scaleX, Toolkit.scaleY);
-                c.renderTo(g);
-            }
+            c.renderTo(g);
         }
     }
 

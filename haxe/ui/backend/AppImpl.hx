@@ -43,7 +43,6 @@ class AppImpl extends AppBase {
     }
 
     public function render(framebuffers:Array<Framebuffer>):Void {
-
         var g = framebuffers[0].g2;
         g.begin(true, _backgroudColor);
         Screen.instance.renderTo(g);

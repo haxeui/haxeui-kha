@@ -18,7 +18,6 @@ import kha.input.Keyboard;
 import kha.input.Mouse;
 
 class ComponentImpl extends ComponentBase {
-    //public var parent:ComponentBase;
     private var _eventMap:Map<String, UIEvent->Void>;
 
     private var lastMouseX = -1;
@@ -34,40 +33,65 @@ class ComponentImpl extends ComponentBase {
         super();
         _eventMap = new Map<String, UIEvent->Void>();
         
-        #if (kha_android || kha_android_native)
+        #if (kha_android || kha_android_native || kha_ios)
         cast(this, Component).addClass(":mobile");
         #end
     }
 
-    public var screenX(get, null):Float;
-    private function get_screenX():Float {
+    // lets cache certain items so we dont have to loop multiple times per frame
+    private var _cachedScreenX:Null<Float> = null;
+    private var _cachedScreenY:Null<Float> = null;
+    private var _cachedClipComponent:Component = null;
+    private var _cachedClipComponentNone:Null<Bool> = null;
+    
+    private function clearCaches() {
+        _cachedScreenX = null;
+        _cachedScreenY = null;
+        _cachedClipComponent = null;
+        _cachedClipComponentNone = null;
+    }
+    
+    private function cacheScreenPos() {
+        if (_cachedScreenX != null && _cachedScreenY != null) {
+            return;
+        }
+        
         var c:Component = cast(this, Component);
         var xpos:Float = 0;
-        while (c != null) {
-            xpos += Math.fceil(c.left);
-            if (c.componentClipRect != null) {
-                xpos -= Math.fceil(c.componentClipRect.left);
-            }
-            c = c.parentComponent;
-        }
-        return xpos;
-    }
-
-    public var screenY(get, null):Float;
-    private function get_screenY():Float {
-        var c:Component = cast(this, Component);
         var ypos:Float = 0;
         while (c != null) {
+            xpos += c.left;
             ypos += c.top;
             if (c.componentClipRect != null) {
+                xpos -= c.componentClipRect.left;
                 ypos -= c.componentClipRect.top;
             }
             c = c.parentComponent;
         }
-        return ypos;
+        
+        _cachedScreenX = xpos;
+        _cachedScreenY = ypos;
+    }
+    
+    private var screenX(get, null):Float;
+    private function get_screenX():Float {
+        cacheScreenPos();
+        return _cachedScreenX;
     }
 
-    public function findClipComponent():Component {
+    private var screenY(get, null):Float;
+    private function get_screenY():Float {
+        cacheScreenPos();
+        return _cachedScreenY;
+    }
+
+    private function findClipComponent():Component {
+        if (_cachedClipComponent != null) {
+            return _cachedClipComponent;
+        } else if (_cachedClipComponentNone == true) {
+            return null;
+        }
+        
         var c:Component = cast(this, Component);
         var clip:Component = null;
         while (c != null) {
@@ -78,6 +102,11 @@ class ComponentImpl extends ComponentBase {
             c = c.parentComponent;
         }
 
+        _cachedClipComponent = clip;
+        if (clip == null) {
+            _cachedClipComponentNone = true;
+        }
+        
         return clip;
     }
 
@@ -129,39 +158,56 @@ class ComponentImpl extends ComponentBase {
         return opacity;
     }
 
+    private function isOffscreen():Bool {
+        var x:Float = screenX;
+        var y:Float = screenY;
+        var w:Float = this.width;
+        var h:Float = this.height;
+        
+        var clipComponent = findClipComponent();
+        var thisRect = new Rectangle(x, y, w, h);
+        if (clipComponent != null && clipComponent != this) {
+            var screenClipRect = new Rectangle(clipComponent.screenX + clipComponent.componentClipRect.left, clipComponent.screenY + clipComponent.componentClipRect.top, clipComponent.componentClipRect.width, clipComponent.componentClipRect.height);
+        } else {
+            var screenRect = new Rectangle(0, 0, Screen.instance.width, Screen.instance.height);
+            return !screenRect.intersects(thisRect);
+        }
+        
+        return false;
+    }
+    
     @:access(haxe.ui.core.Component)
     public function renderTo(g:Graphics) {
-        if (cast(this, Component).isReady == false || cast(this, Component).hidden == true) {
+        if (this.isReady == false || cast(this, Component).hidden == true) {
             return;
         }
-
-        var x:Int = Math.floor(screenX);
-        var y:Int = Math.floor(screenY);
-        var w:Int = Math.ceil(cast(this, Component).componentWidth);
-        var h:Int = Math.ceil(cast(this, Component).componentHeight);
-
-        var style:Style = cast(this, Component).style;
+        
+        clearCaches();
+        
+        if (isOffscreen() == true) {
+            return;
+        }
+        
+        var x:Float = screenX;
+        var y:Float = screenY;
+        var w:Float = this.width;
+        var h:Float = this.height;
+        
+        var style:Style = this.style;
         if (style == null) {
             return;
         }
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
 
         if (clipRect != null) {
-            var bt:Float = Toolkit.scaleY;
-            if (style.borderTopSize != null) {
-                bt = style.borderTopSize * Toolkit.scaleY;
-            }
-            var clipX = (x + clipRect.left) * Toolkit.scaleX;
-            var rx = clipX % Toolkit.scaleX;
-            clipX -= rx;
-            var clipY = (y + clipRect.top + bt) * Toolkit.scaleY;
-            var ry = clipY % Toolkit.scaleY;
-            clipY -= ry;
-            var clipCX = clipRect.width * Toolkit.scaleX;// - (Toolkit.scaleX - rx);
-            var clipCY = (clipRect.height) * Toolkit.scaleY;// - (Toolkit.scaleY - ry);
-            g.scissor(Std.int(clipX), Std.int(clipY), Math.ceil(clipCX), Math.ceil(clipCY));
+            var clx = (x + clipRect.left) * Toolkit.scaleX;
+            var cly = (y + clipRect.top) * Toolkit.scaleY;
+            var clw = clipRect.width * Toolkit.scaleX;
+            var clh = clipRect.height * Toolkit.scaleY;
+            
+            g.scissor(Std.int(clx), Std.int(cly), Math.ceil(clw), Math.ceil(clh));
         }
-
+        
         var opacity = calcOpacity();
         g.opacity = opacity;
         StyleHelper.paintStyle(g, style, x, y, w, h);
@@ -206,6 +252,8 @@ class ComponentImpl extends ComponentBase {
         if (clipRect != null) {
             g.disableScissor();
         }
+        
+        clearCaches();
     }
 
     private var _componentBuffer:kha.Image;
