@@ -43,12 +43,16 @@ class ComponentImpl extends ComponentBase {
     private var _cachedScreenY:Null<Float> = null;
     private var _cachedClipComponent:Component = null;
     private var _cachedClipComponentNone:Null<Bool> = null;
+    private var _cachedRootComponent:Component = null;
+    private var _cachedOpacity:Null<Float> = null;
     
     private function clearCaches() {
         _cachedScreenX = null;
         _cachedScreenY = null;
         _cachedClipComponent = null;
         _cachedClipComponentNone = null;
+        _cachedRootComponent = null;
+        _cachedOpacity = null;
     }
     
     private function cacheScreenPos() {
@@ -85,6 +89,25 @@ class ComponentImpl extends ComponentBase {
         return _cachedScreenY;
     }
 
+    private function findRootComponent():Component {
+        if (_cachedRootComponent != null) {
+            return _cachedRootComponent;
+        }
+        
+        var c:Component = cast(this, Component);
+        while (c.parentComponent != null) {
+            c = c.parentComponent;
+        }
+        
+        _cachedRootComponent = c;
+        
+        return c;
+    }
+    
+    private function isRootComponent():Bool {
+        return (findRootComponent() == this);
+    }
+    
     private function findClipComponent():Component {
         if (_cachedClipComponent != null) {
             return _cachedClipComponent;
@@ -147,6 +170,10 @@ class ComponentImpl extends ComponentBase {
     // Style related
     //***********************************************************************************************************
     private function calcOpacity():Float {
+        if (_cachedOpacity != null) {
+            return _cachedOpacity;
+        }
+        
         var opacity:Float = 1;
         var c:Component = cast(this, Component);
         while (c != null) {
@@ -155,6 +182,9 @@ class ComponentImpl extends ComponentBase {
             }
             c = c.parentComponent;
         }
+        
+        _cachedOpacity = opacity;
+        
         return opacity;
     }
 
@@ -168,12 +198,41 @@ class ComponentImpl extends ComponentBase {
         var thisRect = new Rectangle(x, y, w, h);
         if (clipComponent != null && clipComponent != this) {
             var screenClipRect = new Rectangle(clipComponent.screenX + clipComponent.componentClipRect.left, clipComponent.screenY + clipComponent.componentClipRect.top, clipComponent.componentClipRect.width, clipComponent.componentClipRect.height);
+            return !screenClipRect.intersects(thisRect);
         } else {
             var screenRect = new Rectangle(0, 0, Screen.instance.width, Screen.instance.height);
             return !screenRect.intersects(thisRect);
         }
         
         return false;
+    }
+    
+    private var _batchStyleOperations:Array<BatchOperation>;
+    private var _batchImageOperations:Array<BatchOperation>;
+    private var _batchTextOperations:Array<BatchOperation>;
+    private function clearBatchOperations() {
+        findRootComponent()._batchStyleOperations = [];
+        findRootComponent()._batchImageOperations = [];
+        findRootComponent()._batchTextOperations = [];
+    }
+    
+    private function addBatchStyleOperation(op:BatchOperation) {
+        findRootComponent()._batchStyleOperations.push(op);
+    }
+
+    private function addBatchImageOperation(op:BatchOperation) {
+        findRootComponent()._batchImageOperations.push(op);
+    }
+
+    private function addBatchTextOperation(op:BatchOperation) {
+        findRootComponent()._batchTextOperations.push(op);
+    }
+
+    private static inline function useBatching() {
+        if (Screen.instance.options.noBatch == true) {
+            return false;
+        }
+        return true;
     }
     
     @:access(haxe.ui.core.Component)
@@ -188,6 +247,10 @@ class ComponentImpl extends ComponentBase {
             return;
         }
         
+        if (useBatching() == true && isRootComponent()) {
+            clearBatchOperations();
+        }
+        
         var x:Float = screenX;
         var y:Float = screenY;
         var w:Float = this.width;
@@ -197,69 +260,159 @@ class ComponentImpl extends ComponentBase {
         if (style == null) {
             return;
         }
+        
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
-
         if (clipRect != null) {
-            var clx = (x + clipRect.left) * Toolkit.scaleX;
-            var cly = (y + clipRect.top) * Toolkit.scaleY;
-            var clw = clipRect.width * Toolkit.scaleX;
-            var clh = clipRect.height * Toolkit.scaleY;
-            
-            g.scissor(Std.int(clx), Std.int(cly), Math.ceil(clw), Math.ceil(clh));
+            var clx = Std.int((x + clipRect.left) * Toolkit.scaleX);
+            var cly = Std.int((y + clipRect.top) * Toolkit.scaleY);
+            var clw = Math.ceil(clipRect.width * Toolkit.scaleX);
+            var clh = Math.ceil(clipRect.height * Toolkit.scaleY);
+            if (useBatching() == true) {
+                addBatchStyleOperation(ApplyScissor(clx, cly, clw, clh));
+                addBatchImageOperation(ApplyScissor(clx, cly, clw, clh));
+                addBatchTextOperation(ApplyScissor(clx, cly, clw, clh));
+            } else {
+                g.scissor(clx, cly, clw, clh);
+            }
         }
         
-        var opacity = calcOpacity();
-        g.opacity = opacity;
-        StyleHelper.paintStyle(g, style, x, y, w, h);
-
-        if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            var imageX = (x + _imageDisplay.left) * Toolkit.scaleX;
-            var imageY = (y + _imageDisplay.top) * Toolkit.scaleY;
-            var orgScaleQuality = g.imageScaleQuality;
-            g.imageScaleQuality = ImageScaleQuality.High;
-            if (_imageDisplay.scaled == true) {
-                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth, _imageDisplay.imageHeight);
-            } else if (Toolkit.scale != 1) {
-                g.drawScaledImage(_imageDisplay._buffer, imageX, imageY, _imageDisplay.imageWidth * Toolkit.scaleX, _imageDisplay.imageHeight * Toolkit.scaleY);
-            } else {
-                g.drawImage(_imageDisplay._buffer, imageX, imageY);
-            }
-            g.imageScaleQuality = orgScaleQuality;
+        if (useBatching() == true) {
+            addBatchStyleOperation(DrawStyle(this));
+        } else {
+            renderStyleTo(g, this);
         }
 
+        if (_imageDisplay != null && _imageDisplay._buffer != null) {
+            if (useBatching() == true) {
+                addBatchImageOperation(DrawImage(this));
+            } else {
+                renderImageTo(g, this);
+            }
+        }
+
+        if (_textDisplay != null || _textInput != null) {
+            if (useBatching() == true) {
+                addBatchTextOperation(DrawText(this));
+            } else {
+                renderTextTo(g, this);
+            }
+        }
+
+        for (c in cast(this, Component).childComponents) {
+            c.renderTo(g);
+        }
+
+        if (useBatching() == false) {
+            g.opacity = 1;
+        }
+        
+        if (clipRect != null) {
+            if (useBatching() == true) {
+                addBatchStyleOperation(ClearScissor);
+                addBatchImageOperation(ClearScissor);
+                addBatchTextOperation(ClearScissor);
+            } else {
+                g.disableScissor();
+            }
+        }
+        
+        if (useBatching() == true && isRootComponent()) {
+            renderToBatch(g);
+        }
+        
+        clearCaches();
+    }
+    
+    private function renderToBatch(g:Graphics) {
+        renderToBatchOperations(g, _batchStyleOperations);
+        renderToBatchOperations(g, _batchImageOperations);
+        renderToBatchOperations(g, _batchTextOperations);
+    }
+    
+    private function renderToBatchOperations(g:Graphics, operations:Array<BatchOperation>) {
+        for (op in operations) {
+            switch (op) {
+                case ApplyScissor(sx, sy, sw, sh):
+                    g.scissor(sx, sy, sw, sh);
+                case DrawStyle(c):
+                    renderStyleTo(g, c);
+                case DrawImage(c):
+                    renderImageTo(g, c);
+                case DrawText(c):    
+                    renderTextTo(g, c);
+                case ClearScissor:
+                    g.disableScissor();
+            }
+        }
+    }
+    
+    private function renderStyleTo(g:Graphics, c:ComponentImpl) {
+        g.opacity = c.calcOpacity();
+        var x:Float = c.screenX;
+        var y:Float = c.screenY;
+        var w:Float = c.width;
+        var h:Float = c.height;
+        var style:Style = c.style;
+        
+        StyleHelper.paintStyle(g, style, x, y, w, h);
+        
+        g.opacity = 1;
+    }
+    
+    private function renderImageTo(g:Graphics, c:ComponentImpl) {
+        g.opacity = c.calcOpacity();
+        
+        var x:Float = c.screenX;
+        var y:Float = c.screenY;
+        var w:Float = c.width;
+        var h:Float = c.height;
+        var imageX = (x + c._imageDisplay.left) * Toolkit.scaleX;
+        var imageY = (y + c._imageDisplay.top) * Toolkit.scaleY;
+        var orgScaleQuality = g.imageScaleQuality;
+        g.imageScaleQuality = ImageScaleQuality.High;
+        if (c._imageDisplay.scaled == true) {
+            g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth, c._imageDisplay.imageHeight);
+        } else if (Toolkit.scale != 1) {
+            g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth * Toolkit.scaleX, c._imageDisplay.imageHeight * Toolkit.scaleY);
+        } else {
+            g.drawImage(c._imageDisplay._buffer, imageX, imageY);
+        }
+        g.imageScaleQuality = orgScaleQuality;
+        
+        g.opacity = 1;
+    }
+    
+    private function renderTextTo(g:Graphics, c:ComponentImpl) {
+        g.opacity = c.calcOpacity();
+        var x:Float = c.screenX;
+        var y:Float = c.screenY;
+        var w:Float = c.width;
+        var h:Float = c.height;
+        var style:Style = c.style;
+        
+        
         if (style.color != null) {
             g.color = style.color | 0xFF000000;
         } else {
             g.color = Color.Black | 0xFF000000;
         }
 
-        if (_textDisplay != null) {
-            _textDisplay.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
+        if (c._textDisplay != null) {
+            c._textDisplay.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
-
-        if (_textInput != null) {
-            _textInput.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
+        
+        if (c._textInput != null) {
+            c._textInput.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
-
+        
         g.color = Color.White;
-
-        for (c in cast(this, Component).childComponents) {
-            c.renderTo(g);
-        }
-
         g.opacity = 1;
-        
-        if (clipRect != null) {
-            g.disableScissor();
-        }
-        
-        clearCaches();
     }
 
     private var _componentBuffer:kha.Image;
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
-        var cx:Int = Std.int(cast(this, Component).width);
-        var cy:Int = Std.int(cast(this, Component).height);
+        var cx:Int = Std.int(cast(this, Component).width * Toolkit.scaleX);
+        var cy:Int = Std.int(cast(this, Component).height * Toolkit.scaleY);
 
         if (_componentBuffer == null || _componentBuffer.width != cx || _componentBuffer.height != cy) {
             if (_componentBuffer != null) {
