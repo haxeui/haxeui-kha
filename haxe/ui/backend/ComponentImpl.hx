@@ -229,6 +229,9 @@ class ComponentImpl extends ComponentBase {
     }
 
     private static inline function useBatching() {
+        if (Screen.instance.options == null) {
+            return true;
+        }
         if (Screen.instance.options.noBatch == true) {
             return false;
         }
