@@ -3,7 +3,11 @@ package haxe.ui.backend;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
+import kha.Assets;
+import kha.Color;
 import kha.Display;
+import kha.Font;
+import kha.Scheduler;
 import kha.System;
 import kha.graphics2.Graphics;
 import kha.input.Mouse;
@@ -61,8 +65,43 @@ class ScreenImpl extends ScreenBase {
         for (c in _topLevelComponents) {
             c.renderTo(g);
         }
+        updateFPS(g);
     }
 
+    private var _deltaTime:Float;
+    private var _lastTime:Float;
+    public var fps:Float = 0;
+    private var _fpsFont:Font = null;
+    private function updateFPS(g:Graphics) {
+        var currentTime = Scheduler.time();
+        _deltaTime = currentTime - _lastTime;
+        _lastTime = currentTime;
+        var nFps = 1.0 / _deltaTime;
+        if (Math.isFinite(nFps)) {
+            fps = Math.round(nFps);
+        }
+
+        var showFPS = options != null ? options.showFPS : false;
+        #if haxeui_show_fps
+        var showFPS = true;
+        #end
+        if (showFPS == true) {
+            g.color = Color.Black;
+            if (_fpsFont == null) {
+                _fpsFont = Font.fromBytes(Resource.getBytes("styles/default/arial.ttf"));
+            }
+            g.font = _fpsFont;
+            g.fontSize = Std.int(14 * Toolkit.scale);
+            var fpsString = "FPS: " + fps;
+            var cy = _fpsFont.height(g.fontSize) + 3;
+            var cx = _fpsFont.width(g.fontSize, fpsString) + 6;
+            g.fillRect(0, 0, cx, cy);
+            g.color = Color.White;
+            g.drawString(fpsString, 2, 2);
+            g.font = null;
+        }
+    }
+    
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
