@@ -72,6 +72,9 @@ class ScreenImpl extends ScreenBase {
     private var _lastTime:Float;
     public var fps:Float = 0;
     private var _fpsFont:Font = null;
+    private var _fpsLowest:Float = 0xFFFFFF;
+    private var _fpsHigest:Float = 0;
+    private var _fpsCountdown:Float = 10;
     private function updateFPS(g:Graphics) {
         var currentTime = Scheduler.time();
         _deltaTime = currentTime - _lastTime;
@@ -79,6 +82,16 @@ class ScreenImpl extends ScreenBase {
         var nFps = 1.0 / _deltaTime;
         if (Math.isFinite(nFps)) {
             fps = Math.round(nFps);
+            _fpsCountdown--;
+            if (_fpsCountdown <= 0) {
+                _fpsCountdown = 0;
+                if (fps > _fpsHigest) {
+                    _fpsHigest = fps;
+                }
+                if (fps < _fpsLowest) {
+                    _fpsLowest = fps;
+                }
+            }
         }
 
         var showFPS = options != null ? options.showFPS : false;
@@ -93,6 +106,9 @@ class ScreenImpl extends ScreenBase {
             g.font = _fpsFont;
             g.fontSize = Std.int(14 * Toolkit.scale);
             var fpsString = "FPS: " + fps;
+            if (_fpsCountdown <= 0) {
+                fpsString += " (L: " + _fpsLowest + ", H: " + _fpsHigest + ")";
+            }
             var cy = _fpsFont.height(g.fontSize) + 3;
             var cx = _fpsFont.width(g.fontSize, fpsString) + 6;
             g.fillRect(0, 0, cx, cy);
