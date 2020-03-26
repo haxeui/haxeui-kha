@@ -122,7 +122,7 @@ class StyleHelper {
             var borderSize:Int = Std.int(style.borderLeftSize * Toolkit.scale);
             g.color = style.borderLeftColor | alpha;
             for (i in 0...borderSize) {
-                g.drawRect(x + 1, y, w - 1, h - 1, 1);
+                g.drawRect(x, y, w, h, 1);
                 x++;
                 y++;
                 w -= 2;
