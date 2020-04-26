@@ -130,10 +130,10 @@ class ScreenImpl extends ScreenBase {
 
         #if js
         _hasListener = true;
-		js.Browser.window.onresize = function(w:Int, h:Int) {
-           for (c in _topLevelComponents) {
-               resizeComponent(c);
-           }
+        js.Browser.window.onresize = function(w:Int, h:Int) {
+            for (c in _topLevelComponents) {
+                resizeComponent(c);
+            }
         };
         #end
     }
