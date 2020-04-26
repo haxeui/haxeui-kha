@@ -51,6 +51,7 @@ class ScreenImpl extends ScreenBase {
 
     public override function addComponent(component:Component):Component {
         _topLevelComponents.push(component);
+        addResizeListener();
         resizeComponent(component);
         //component.dispatchReady();
 		return component;
@@ -121,6 +122,22 @@ class ScreenImpl extends ScreenBase {
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
+    private var _hasListener:Bool = false;
+    private function addResizeListener() {
+        if (_hasListener == true) {
+            return;
+        }
+
+        #if js
+        _hasListener = true;
+		js.Browser.window.onresize = function(w:Int, h:Int) {
+           for (c in _topLevelComponents) {
+               resizeComponent(c);
+           }
+        };
+        #end
+    }
+
     private override function supportsEvent(type:String):Bool {
         if (type == MouseEvent.MOUSE_MOVE
             || type == MouseEvent.MOUSE_DOWN
