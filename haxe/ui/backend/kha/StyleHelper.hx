@@ -121,14 +121,11 @@ class StyleHelper {
 
             var borderSize:Int = Std.int(style.borderLeftSize * Toolkit.scale);
             g.color = style.borderLeftColor | alpha;
-            for (i in 0...borderSize) {
-                g.drawRect(x, y, w, h, 1);
-                x++;
-                y++;
-                w -= 2;
-                h -= 2;
-            }
-            g.color = Color.White;
+            g.fillRect(x, y, w, borderSize); // top
+            g.fillRect(x, y + h - borderSize, w, borderSize); // bottom
+            g.fillRect(x, y, borderSize, h); // left
+            g.fillRect(x + w - borderSize, y, borderSize, h); // right
+            g.color = Color.White;    
         } else { // compound border
             if (style.borderTopSize != null && style.borderTopSize > 0) {
                 g.color = style.borderTopColor | alpha;
