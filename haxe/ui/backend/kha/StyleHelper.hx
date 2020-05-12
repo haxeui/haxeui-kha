@@ -71,6 +71,9 @@ class StyleHelper {
         
         if (style.backgroundImage != null) {
             Toolkit.assets.getImage(style.backgroundImage, function(imageInfo:ImageInfo) {
+                if (imageInfo == null) {
+                    return;
+                }
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
                 if (style.backgroundImageClipTop != null
                     && style.backgroundImageClipLeft != null
@@ -122,7 +125,7 @@ class StyleHelper {
             var borderSize:Int = Std.int(style.borderLeftSize * Toolkit.scale);
             g.color = style.borderLeftColor | alpha;
             for (i in 0...borderSize) {
-                g.drawRect(x, y, w, h, 1);
+                g.drawRect(x + 1, y, w - 1, h - 1, 1);
                 x++;
                 y++;
                 w -= 2;
