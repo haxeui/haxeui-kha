@@ -26,12 +26,12 @@ class TextDisplayImpl extends TextBase {
                 _textAlign = _textStyle.textAlign;
             }
             
-            if (_fontSize != _textStyle.fontSize) {
+            if (_textStyle.fontSize != null && _fontSize != _textStyle.fontSize) {
                 _fontSize = _textStyle.fontSize * Toolkit.scale;
                 measureTextRequired = true;
             }
-            
-            if (_fontName != _textStyle.fontName && _fontInfo != null) {
+
+            if (_fontName != _textStyle.fontName && _fontInfo != null && _fontInfo.data != _font) {
                 _font = _fontInfo.data;
                 measureTextRequired = true;
             }
