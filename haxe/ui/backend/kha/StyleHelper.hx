@@ -46,7 +46,7 @@ class StyleHelper {
                 var arr:Array<Int> = null;
                 var n:Int = 0;
                 if (gradientType == "vertical") {
-                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(h - 1));
+                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(h));
                     for (c in arr) {
                         g.color = c | alpha;
                         g.fillRect(x, y + n, w, 1);
@@ -54,7 +54,7 @@ class StyleHelper {
                         n++;
                     }
                 } else if (gradientType == "horizontal") {
-                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(w - 1));
+                    arr = ColorUtil.buildColorArray(style.backgroundColor, style.backgroundColorEnd, Std.int(w));
                     for (c in arr) {
                         g.color = c | alpha;
                         g.fillRect(x + n, y, 1, h);
