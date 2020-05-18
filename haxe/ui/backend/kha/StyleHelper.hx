@@ -13,17 +13,22 @@ import kha.graphics2.Graphics;
 
 class StyleHelper {
     public static function paintStyle(g:Graphics, style:Style, x:Float, y:Float, w:Float, h:Float):Void {
-        /*
         x = Math.ffloor(x);
         y = Math.ffloor(y);
         w = Math.fceil(w);
         h = Math.fceil(h);
-        */
 
         if (w <= 0 || h <= 0) {
             return;
         }
 
+        /*
+        x = Std.int(x);
+        y = Std.int(y);
+        w = Std.int(w);
+        h = Std.int(h);
+        */
+        
         x *= Toolkit.scaleX;
         y *= Toolkit.scaleY;
         w *= Toolkit.scaleX;
@@ -190,6 +195,7 @@ class StyleHelper {
     }
     
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
+        return;
         size = Std.int(size * Toolkit.scale);
         if (inset == false) {
             for (i in 0...size) {

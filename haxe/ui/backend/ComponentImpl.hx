@@ -275,7 +275,9 @@ class ComponentImpl extends ComponentBase {
                 addBatchImageOperation(ApplyScissor(clx, cly, clw, clh));
                 addBatchTextOperation(ApplyScissor(clx, cly, clw, clh));
             } else {
-                g.scissor(clx, cly, clw, clh);
+                if (clw >= 0 && clh >= 0) {
+                    g.scissor(clx, cly, clw, clh);
+                }
             }
         }
         
@@ -336,7 +338,9 @@ class ComponentImpl extends ComponentBase {
         for (op in operations) {
             switch (op) {
                 case ApplyScissor(sx, sy, sw, sh):
-                    g.scissor(sx, sy, sw, sh);
+                    if (sw >= 0 && sh >= 0) {
+                        g.scissor(sx, sy, sw, sh);
+                    }
                 case DrawStyle(c):
                     renderStyleTo(g, c);
                 case DrawImage(c):

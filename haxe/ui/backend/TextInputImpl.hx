@@ -64,7 +64,7 @@ class TextInputImpl extends TextBase {
                 _textAlign = _textStyle.textAlign;
             }
             
-            if (_fontSize != _textStyle.fontSize) {
+            if (_textStyle.fontSize != null && _fontSize != _textStyle.fontSize) {
                 _fontSize = _textStyle.fontSize;
                 _tf.fontSize = Std.int(_fontSize);
                 measureTextRequired = true;
