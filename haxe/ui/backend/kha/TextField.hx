@@ -431,13 +431,16 @@ class TextField {
                     insertText("");
                 } else {
                     if (_ctrl) {
-                        // Native behaviour is to remove all spaces before word
-                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) == SPACE) {
-                            deleteCharsFromCaret(-1);
-                        }
-                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
-                            deleteCharsFromCaret(-1);
-                        }
+                        var caretIndex = posToIndex(_caretInfo);
+                        var caretDisplacement = 0;
+                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) == SPACE)
+                            caretDisplacement--;
+                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) != SPACE)
+                            caretDisplacement--;
+
+                        deleteCharsFromCaret(caretDisplacement);
+                        scrollToCaret();
+
                     } else {
                         deleteCharsFromCaret(-1);
                     }
@@ -449,12 +452,17 @@ class TextField {
                 } else {
                     if (_ctrl) {
                         // Delete until the start of the next word
-                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
-                            deleteCharsFromCaret(1, false);
-                        }
-                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
-                            deleteCharsFromCaret(1, false);
-                        }
+                        var caretIndex = posToIndex(_caretInfo);
+                        var caretDisplacement = 0;
+                        while (_text.charCodeAt(caretIndex+caretDisplacement) != SPACE && caretIndex+caretDisplacement < _text.length)
+                            caretDisplacement++;
+                        while (_text.charCodeAt(caretIndex+caretDisplacement) == SPACE && caretIndex+caretDisplacement < _text.length)
+                            caretDisplacement++;
+
+                        deleteCharsFromCaret(caretDisplacement, false);
+                        caretPosition = caretIndex; // Updates _caretInfo (text changes may alter row/column, for instance after wrapping)
+                        scrollToCaret();
+
                     } else {
                         deleteCharsFromCaret(1, false);
                     }
