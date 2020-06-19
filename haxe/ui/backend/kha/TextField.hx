@@ -432,13 +432,12 @@ class TextField {
                 } else {
                     if (_ctrl) {
                         // Native behaviour is to remove all spaces before word
-                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE)
+                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) == SPACE) {
                             deleteCharsFromCaret(-1);
-
-                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) == SPACE)
+                        }
+                        while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
                             deleteCharsFromCaret(-1);
-                        
-
+                        }
                     } else {
                         deleteCharsFromCaret(-1);
                     }
@@ -450,12 +449,12 @@ class TextField {
                 } else {
                     if (_ctrl) {
                         // Delete until the start of the next word
-                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE)
+                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
                             deleteCharsFromCaret(1, false);
-
-                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE)
+                        }
+                        while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
                             deleteCharsFromCaret(1, false);
-
+                        }
                     } else {
                         deleteCharsFromCaret(1, false);
                     }
