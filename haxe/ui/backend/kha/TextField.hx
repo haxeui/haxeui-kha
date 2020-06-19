@@ -376,7 +376,7 @@ class TextField {
 
 
                 if (_ctrl) {
-                    while((_caretInfo.column < line.length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
+                    while((_caretInfo.column < line.length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
                         if (_caretInfo.column < line.length) {
                             _caretInfo.column++;
                         } else if (_caretInfo.row < _lines.length - 1) {
