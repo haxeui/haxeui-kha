@@ -317,6 +317,25 @@ class TextField {
         return _lines.length * font.height(fontSize);
     }
 
+    private function moveCaretRight() {
+        if (_caretInfo.column < _lines[_caretInfo.row].length) {
+            _caretInfo.column++;
+        } else if (_caretInfo.row < _lines.length - 1) {
+            _caretInfo.column = 0;
+            _caretInfo.row++;
+        }
+    }
+
+    private function moveCaretLeft() {
+        if (_caretInfo.column > 0) {
+            _caretInfo.column--;
+        } else if (_caretInfo.row > 0) {
+            _caretInfo.row--;
+            var line = _lines[_caretInfo.row];
+            _caretInfo.column = line.length;
+        }
+    }
+
     private function handleNegativeSelection() {
         if (caretPosition <= selectionStart) {
             _selectionInfo.start.row = _caretInfo.row;
@@ -342,23 +361,14 @@ class TextField {
 
         switch (code) {
             case Left:
-                if (_caretInfo.column > 0) {
-                    _caretInfo.column--;
-                } else if (_caretInfo.row > 0) {
-                    _caretInfo.row--;
-                    var line = _lines[_caretInfo.row];
-                    _caretInfo.column = line.length;
-                }
+                moveCaretLeft();
 
                 if (_ctrl) {
+                    while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) == SPACE) {
+                        moveCaretLeft();
+                    }
                     while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
-                        if (_caretInfo.column > 0) {
-                            _caretInfo.column--;
-                        } else if (_caretInfo.row > 0) {
-                            _caretInfo.row--;
-                            var line = _lines[_caretInfo.row];
-                            _caretInfo.column = line.length;
-                        }
+                        moveCaretLeft();
                     }
                 }
 
@@ -371,22 +381,14 @@ class TextField {
                 }
 
             case Right:
-                var line = _lines[_caretInfo.row];
-                if (_caretInfo.column < line.length) {
-                    _caretInfo.column++;
-                } else if (_caretInfo.row < _lines.length - 1) {
-                    _caretInfo.column = 0;
-                    _caretInfo.row++;
-                }
+                moveCaretRight();
 
                 if (_ctrl) {
-                    while((_caretInfo.column < line.length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
-                        if (_caretInfo.column < line.length) {
-                            _caretInfo.column++;
-                        } else if (_caretInfo.row < _lines.length - 1) {
-                            _caretInfo.column = 0;
-                            _caretInfo.row++;
-                        }
+                    while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
+                        moveCaretRight();
+                    }
+                    while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
+                        moveCaretRight();
                     }
                 }
 
