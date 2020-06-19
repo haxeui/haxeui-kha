@@ -434,6 +434,19 @@ class TextField {
                 } else {
                     resetSelection();
                 }
+			case A:
+				if (_ctrl) {
+					_selectionInfo.start.row = 0;
+					_selectionInfo.start.column = 0;
+					
+					var line = _lines[_lines.length-1];
+					
+					_caretInfo.row = _lines.length-1;
+					_caretInfo.column = line.length;
+					_selectionInfo.end.row = _lines.length-1;
+					_selectionInfo.end.column = line.length;
+					scrollToCaret();
+				}
 
             case _:
         }
