@@ -525,10 +525,12 @@ class TextField {
 
         switch (code) {
             case Shift:
-                _selectionInfo.start.row = _caretInfo.row;
-                _selectionInfo.start.column = _caretInfo.column;
-                _selectionInfo.end.row = _caretInfo.row;
-                _selectionInfo.end.column = _caretInfo.column;
+				if (!hasSelection) {
+					_selectionInfo.start.row = _caretInfo.row;
+					_selectionInfo.start.column = _caretInfo.column;
+					_selectionInfo.end.row = _caretInfo.row;
+					_selectionInfo.end.column = _caretInfo.column;
+				}
                 _shift = true;
             case Control:
                 _ctrl = true;
