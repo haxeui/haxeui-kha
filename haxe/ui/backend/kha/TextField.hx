@@ -440,7 +440,6 @@ class TextField {
 
                         deleteCharsFromCaret(caretDisplacement);
                         scrollToCaret();
-
                     } else {
                         deleteCharsFromCaret(-1);
                     }
@@ -537,6 +536,7 @@ class TextField {
 
         caretPosition = endIndex + delta;
         resetSelection();
+        scrollToCaret();
     }
 
     private var caretLeft(get, null):Float;
@@ -875,7 +875,8 @@ class TextField {
 
         var line = _lines[_caretInfo.row];
         if (caretLeft - left > width) {
-            scrollLeft += 50;
+            scrollLeft += caretLeft - left - width + 50;
+
             if (scrollLeft + width > font.widthOfCharacters(fontSize, line, 0, line.length)) {
                 scrollLeft = font.widthOfCharacters(fontSize, line, 0, line.length) - width + caretWidth;
                 if (scrollLeft < 0) {
@@ -883,8 +884,9 @@ class TextField {
                 }
             }
         } else if (caretLeft - left < 0) {
-            scrollLeft += (caretLeft - left);
-            if (font.widthOfCharacters(fontSize, line, 0, line.length) <= width) {
+            scrollLeft += (caretLeft - left) - 50;
+
+            if (scrollLeft < 0 || font.widthOfCharacters(fontSize, line, 0, line.length) <= width) {
                 scrollLeft = 0;
             }
         }
