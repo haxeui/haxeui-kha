@@ -313,7 +313,7 @@ class TextField {
     }
 
     private function handleNegativeSelection() {
-        if (caretPosition < selectionStart) {
+        if (caretPosition <= selectionStart) {
             _selectionInfo.start.row = _caretInfo.row;
             _selectionInfo.start.column = _caretInfo.column;
         } else {
@@ -323,7 +323,7 @@ class TextField {
     }
 
     private function handlePositiveSelection() {
-        if (caretPosition > selectionEnd) {
+        if (caretPosition >= selectionEnd) {
             _selectionInfo.end.row = _caretInfo.row;
             _selectionInfo.end.column = _caretInfo.column;
         } else {
