@@ -345,6 +345,18 @@ class TextField {
                     _caretInfo.column = line.length;
                 }
 
+                if (_ctrl) {
+                    while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
+                        if (_caretInfo.column > 0) {
+                            _caretInfo.column--;
+                        } else if (_caretInfo.row > 0) {
+                            _caretInfo.row--;
+                            var line = _lines[_caretInfo.row];
+                            _caretInfo.column = line.length;
+                        }
+                    }
+                }
+
                 scrollToCaret();
 
                 if (_shift == true) {
@@ -361,6 +373,19 @@ class TextField {
                     _caretInfo.column = 0;
                     _caretInfo.row++;
                 }
+
+
+                if (_ctrl) {
+                    while((_caretInfo.column < line.length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
+                        if (_caretInfo.column < line.length) {
+                            _caretInfo.column++;
+                        } else if (_caretInfo.row < _lines.length - 1) {
+                            _caretInfo.column = 0;
+                            _caretInfo.row++;
+                        }
+                    }
+                }
+
                 scrollToCaret();
 
                 if (_shift == true) {
@@ -434,19 +459,19 @@ class TextField {
                 } else {
                     resetSelection();
                 }
-			case A:
-				if (_ctrl) {
-					_selectionInfo.start.row = 0;
-					_selectionInfo.start.column = 0;
-					
-					var line = _lines[_lines.length-1];
-					
-					_caretInfo.row = _lines.length-1;
-					_caretInfo.column = line.length;
-					_selectionInfo.end.row = _lines.length-1;
-					_selectionInfo.end.column = line.length;
-					scrollToCaret();
-				}
+            case A:
+                if (_ctrl) {
+                    _selectionInfo.start.row = 0;
+                    _selectionInfo.start.column = 0;
+                    
+                    var line = _lines[_lines.length-1];
+                    
+                    _caretInfo.row = _lines.length-1;
+                    _caretInfo.column = line.length;
+                    _selectionInfo.end.row = _lines.length-1;
+                    _selectionInfo.end.column = line.length;
+                    scrollToCaret();
+                }
 
             case _:
         }
@@ -525,12 +550,12 @@ class TextField {
 
         switch (code) {
             case Shift:
-				if (!hasSelection) {
-					_selectionInfo.start.row = _caretInfo.row;
-					_selectionInfo.start.column = _caretInfo.column;
-					_selectionInfo.end.row = _caretInfo.row;
-					_selectionInfo.end.column = _caretInfo.column;
-				}
+                if (!hasSelection) {
+                    _selectionInfo.start.row = _caretInfo.row;
+                    _selectionInfo.start.column = _caretInfo.column;
+                    _selectionInfo.end.row = _caretInfo.row;
+                    _selectionInfo.end.column = _caretInfo.column;
+                }
                 _shift = true;
             case Control:
                 _ctrl = true;
