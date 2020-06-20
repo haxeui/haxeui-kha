@@ -318,6 +318,8 @@ class TextField {
     }
 
     private function moveCaretRight() {
+        if (_caretInfo.column >= _lines.length)
+            return;
         if (_caretInfo.column < _lines[_caretInfo.row].length) {
             _caretInfo.column++;
         } else if (_caretInfo.row < _lines.length - 1) {
@@ -331,8 +333,7 @@ class TextField {
             _caretInfo.column--;
         } else if (_caretInfo.row > 0) {
             _caretInfo.row--;
-            var line = _lines[_caretInfo.row];
-            _caretInfo.column = line.length;
+            _caretInfo.column = _lines[_caretInfo.row].length;
         }
     }
 
@@ -360,6 +361,11 @@ class TextField {
         var orginalCaretPos:CharPosition = { row: _caretInfo.row, column: _caretInfo.column };
 
         switch (code) {
+            case Return:
+                if (multiline) {
+                    insertText("\n");
+                }
+
             case Left:
                 moveCaretLeft();
 
@@ -842,7 +848,11 @@ class TextField {
         var i = 0;
         for (line in _lines) {
             if (i == pos.row) {
-                index += pos.column;
+                var column = pos.column;
+                if (line.length < pos.column) {
+                    column = line.length-1;
+                }
+                index += column;
                 break;
             } else {
                 index += line.length + 1;
