@@ -8,6 +8,7 @@ import kha.graphics2.Graphics;
 import kha.input.KeyCode;
 import kha.input.Keyboard;
 import kha.input.Mouse;
+import kha.System;
 
 typedef CharPosition = {
     row:Int,
@@ -37,6 +38,11 @@ class TextField {
     public function new() {
         Mouse.get().notify(onMouseDown, null, null, null, null);
         Keyboard.get().notify(onKeyDown, onKeyUp, onKeyPress);
+
+        // Only one cutCopyPaste is set at once, as opposed to the listener list for keyboard/mouse.
+        // these functions are overriden by any component stealing focus
+        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+        recalc();
     }
 
     //*****************************************************************************************************************//
@@ -312,8 +318,29 @@ class TextField {
         return _lines.length * font.height(fontSize);
     }
 
+    private function moveCaretRight() {
+        if (_caretInfo.row >= _lines.length) {
+            return;
+        }
+        if (_caretInfo.column < _lines[_caretInfo.row].length) {
+            _caretInfo.column++;
+        } else if (_caretInfo.row < _lines.length - 1) {
+            _caretInfo.column = 0;
+            _caretInfo.row++;
+        }
+    }
+
+    private function moveCaretLeft() {
+        if (_caretInfo.column > 0) {
+            _caretInfo.column--;
+        } else if (_caretInfo.row > 0) {
+            _caretInfo.row--;
+            _caretInfo.column = _lines[_caretInfo.row].length;
+        }
+    }
+
     private function handleNegativeSelection() {
-        if (caretPosition < selectionStart) {
+        if (caretPosition <= selectionStart) {
             _selectionInfo.start.row = _caretInfo.row;
             _selectionInfo.start.column = _caretInfo.column;
         } else {
@@ -323,7 +350,7 @@ class TextField {
     }
 
     private function handlePositiveSelection() {
-        if (caretPosition > selectionEnd) {
+        if (caretPosition >= selectionEnd) {
             _selectionInfo.end.row = _caretInfo.row;
             _selectionInfo.end.column = _caretInfo.column;
         } else {
@@ -336,13 +363,21 @@ class TextField {
         var orginalCaretPos:CharPosition = { row: _caretInfo.row, column: _caretInfo.column };
 
         switch (code) {
+            case Return:
+                if (multiline) {
+                    insertText("\n");
+                }
+
             case Left:
-                if (_caretInfo.column > 0) {
-                    _caretInfo.column--;
-                } else if (_caretInfo.row > 0) {
-                    _caretInfo.row--;
-                    var line = _lines[_caretInfo.row];
-                    _caretInfo.column = line.length;
+                moveCaretLeft();
+
+                if (_ctrl) {
+                    while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) == SPACE) {
+                        moveCaretLeft();
+                    }
+                    while((_caretInfo.column > 0 || _caretInfo.row > 0) && _text.charCodeAt(posToIndex(_caretInfo)-1) != SPACE) {
+                        moveCaretLeft();
+                    }
                 }
 
                 scrollToCaret();
@@ -354,13 +389,17 @@ class TextField {
                 }
 
             case Right:
-                var line = _lines[_caretInfo.row];
-                if (_caretInfo.column < line.length) {
-                    _caretInfo.column++;
-                } else if (_caretInfo.row < _lines.length - 1) {
-                    _caretInfo.column = 0;
-                    _caretInfo.row++;
+                moveCaretRight();
+
+                if (_ctrl) {
+                    while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
+                        moveCaretRight();
+                    }
+                    while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
+                        moveCaretRight();
+                    }
                 }
+
                 scrollToCaret();
 
                 if (_shift == true) {
@@ -399,14 +438,41 @@ class TextField {
                 if (hasSelection) {
                     insertText("");
                 } else {
-                    deleteCharsFromCaret(-1);
+                    if (_ctrl) {
+                        var caretIndex = posToIndex(_caretInfo);
+                        var caretDisplacement = 0;
+                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) == SPACE)
+                            caretDisplacement--;
+                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) != SPACE)
+                            caretDisplacement--;
+
+                        deleteCharsFromCaret(caretDisplacement);
+                        scrollToCaret();
+                    } else {
+                        deleteCharsFromCaret(-1);
+                    }
                 }
 
             case Delete:
                 if (hasSelection) {
                     insertText("");
                 } else {
-                    deleteCharsFromCaret(1, false);
+                    if (_ctrl) {
+                        // Delete until the start of the next word
+                        var caretIndex = posToIndex(_caretInfo);
+                        var caretDisplacement = 0;
+                        while (_text.charCodeAt(caretIndex+caretDisplacement) != SPACE && caretIndex+caretDisplacement < _text.length)
+                            caretDisplacement++;
+                        while (_text.charCodeAt(caretIndex+caretDisplacement) == SPACE && caretIndex+caretDisplacement < _text.length)
+                            caretDisplacement++;
+
+                        deleteCharsFromCaret(caretDisplacement, false);
+                        caretPosition = caretIndex; // Updates _caretInfo (text changes may alter row/column, for instance after wrapping)
+                        scrollToCaret();
+
+                    } else {
+                        deleteCharsFromCaret(1, false);
+                    }
                 }
 
             case Home:
@@ -433,6 +499,19 @@ class TextField {
                     handlePositiveSelection();
                 } else {
                     resetSelection();
+                }
+            case A:
+                if (_ctrl) {
+                    _selectionInfo.start.row = 0;
+                    _selectionInfo.start.column = 0;
+                    
+                    var line = _lines[_lines.length-1];
+                    
+                    _caretInfo.row = _lines.length-1;
+                    _caretInfo.column = line.length;
+                    _selectionInfo.end.row = _lines.length-1;
+                    _selectionInfo.end.column = line.length;
+                    scrollToCaret();
                 }
 
             case _:
@@ -464,6 +543,18 @@ class TextField {
         var delta = s.length - (endIndex - startIndex);
 
         caretPosition = endIndex + delta;
+        notifyCaretMoved();
+        scrollToCaret();
+        
+        Scheduler.addBreakableTimeTask(function () {
+            caretPosition = endIndex + delta;
+            notifyCaretMoved();
+            scrollToCaret();
+        
+            return false;
+        }, .001);
+        
+        
         resetSelection();
     }
 
@@ -501,6 +592,29 @@ class TextField {
     private var _downKey:KeyCode = KeyCode.Unknown;
     private var _shift:Bool = false;
     private var _ctrl:Bool = false;
+    
+    private function onCut() {
+        if (hasSelection) {
+            var cutText = _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
+            insertText("");
+            return cutText;
+        }
+
+        return "";
+    }
+
+    private function onCopy() {
+        if (hasSelection) {
+            return _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
+        }
+
+        return "";
+    }
+    
+    private function onPaste(text:String) {
+        insertText(text);
+    }
+    
     private function onKeyDown(code:KeyCode) {
         if (isActive == false) {
             return;
@@ -512,10 +626,12 @@ class TextField {
 
         switch (code) {
             case Shift:
-                _selectionInfo.start.row = _caretInfo.row;
-                _selectionInfo.start.column = _caretInfo.column;
-                _selectionInfo.end.row = _caretInfo.row;
-                _selectionInfo.end.column = _caretInfo.column;
+                if (!hasSelection) {
+                    _selectionInfo.start.row = _caretInfo.row;
+                    _selectionInfo.start.column = _caretInfo.column;
+                    _selectionInfo.end.row = _caretInfo.row;
+                    _selectionInfo.end.column = _caretInfo.column;
+                }
                 _shift = true;
             case Control:
                 _ctrl = true;
@@ -634,6 +750,8 @@ class TextField {
     }
     
     private function onFocus() {
+        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+
         if (_caretInfo.timerId == -1) {
             _caretInfo.timerId = Scheduler.addTimeTask(function() {
                 _caretInfo.visible = !_caretInfo.visible;
@@ -646,6 +764,8 @@ class TextField {
     }
     
     private function onBlur() {
+        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+        
         Scheduler.removeTimeTask(_caretInfo.timerId);
         _caretInfo.timerId = -1;
         _caretInfo.visible = false;
@@ -724,6 +844,9 @@ class TextField {
             endIndex = fromIndex;
         }
 
+        if (endIndex > text.length)
+            endIndex = text.length;
+
         var before = text.substring(0, startIndex);
         var after = text.substring(endIndex, text.length);
 
@@ -738,7 +861,11 @@ class TextField {
         var i = 0;
         for (line in _lines) {
             if (i == pos.row) {
-                index += pos.column;
+                var column = pos.column;
+                if (line.length < pos.column) {
+                    column = line.length-1;
+                }
+                index += column;
                 break;
             } else {
                 index += line.length + 1;
@@ -769,9 +896,14 @@ class TextField {
     private function scrollToCaret() {
         ensureRowVisible(_caretInfo.row);
 
+        if (_lines.length < maxVisibleLines) {
+            scrollTop = 0;
+        }
+
         var line = _lines[_caretInfo.row];
         if (caretLeft - left > width) {
-            scrollLeft += 50;
+            scrollLeft += caretLeft - left - width + 50;
+
             if (scrollLeft + width > font.widthOfCharacters(fontSize, line, 0, line.length)) {
                 scrollLeft = font.widthOfCharacters(fontSize, line, 0, line.length) - width + caretWidth;
                 if (scrollLeft < 0) {
@@ -779,8 +911,9 @@ class TextField {
                 }
             }
         } else if (caretLeft - left < 0) {
-            scrollLeft += (caretLeft - left);
-            if (font.widthOfCharacters(fontSize, line, 0, line.length) <= width) {
+            scrollLeft += (caretLeft - left) - 50;
+
+            if (scrollLeft < 0 || font.widthOfCharacters(fontSize, line, 0, line.length) <= width) {
                 scrollLeft = 0;
             }
         }
