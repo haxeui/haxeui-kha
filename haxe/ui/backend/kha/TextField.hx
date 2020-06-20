@@ -393,12 +393,9 @@ class TextField {
 
                 if (_ctrl) {
                     while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
-                        trace('Info: $_caretInfo ${_lines[_caretInfo.row]} ${_lines.length}');
-                        trace("A");
                         moveCaretRight();
                     }
                     while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
-                        trace("B");
                         moveCaretRight();
                     }
                 }
@@ -546,8 +543,19 @@ class TextField {
         var delta = s.length - (endIndex - startIndex);
 
         caretPosition = endIndex + delta;
-        resetSelection();
+        notifyCaretMoved();
         scrollToCaret();
+        
+        Scheduler.addBreakableTimeTask(function () {
+            caretPosition = endIndex + delta;
+            notifyCaretMoved();
+            scrollToCaret();
+        
+            return false;
+        }, .001);
+        
+        
+        resetSelection();
     }
 
     private var caretLeft(get, null):Float;
