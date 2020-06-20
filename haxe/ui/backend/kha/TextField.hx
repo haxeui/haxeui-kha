@@ -42,6 +42,7 @@ class TextField {
         // Only one cutCopyPaste is set at once, as opposed to the listener list for keyboard/mouse.
         // these functions are overriden by any component stealing focus
         System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+        recalc();
     }
 
     //*****************************************************************************************************************//
@@ -318,8 +319,9 @@ class TextField {
     }
 
     private function moveCaretRight() {
-        if (_caretInfo.column >= _lines.length)
+        if (_caretInfo.row >= _lines.length) {
             return;
+        }
         if (_caretInfo.column < _lines[_caretInfo.row].length) {
             _caretInfo.column++;
         } else if (_caretInfo.row < _lines.length - 1) {
@@ -390,10 +392,13 @@ class TextField {
                 moveCaretRight();
 
                 if (_ctrl) {
-                    while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
+                    while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) != SPACE) {
+                        trace('Info: $_caretInfo ${_lines[_caretInfo.row]} ${_lines.length}');
+                        trace("A");
                         moveCaretRight();
                     }
-                    while((_caretInfo.column < _lines[_caretInfo.row].length || _caretInfo.row < _lines.length-1) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
+                    while((_caretInfo.column < _lines[_caretInfo.row].length && _caretInfo.row < _lines.length) && _text.charCodeAt(posToIndex(_caretInfo)) == SPACE) {
+                        trace("B");
                         moveCaretRight();
                     }
                 }
@@ -882,6 +887,10 @@ class TextField {
 
     private function scrollToCaret() {
         ensureRowVisible(_caretInfo.row);
+
+        if (_lines.length < maxVisibleLines) {
+            scrollTop = 0;
+        }
 
         var line = _lines[_caretInfo.row];
         if (caretLeft - left > width) {
