@@ -460,6 +460,11 @@ class ComponentImpl extends ComponentBase {
     @:access(haxe.ui.backend.TextInputImpl)
     private override function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
+            case MouseEvent.MOUSE_MOVE:
+                if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false) {
+                    Mouse.get().notify(null, null, __onMouseMove, null);
+                    _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
+                }
             case MouseEvent.MOUSE_OVER:
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
                     Mouse.get().notify(null, null, __onMouseMove, null);
@@ -567,6 +572,15 @@ class ComponentImpl extends ComponentBase {
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
+        if (i == true) {
+            var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_MOVE);
+            if (fn != null) {
+                var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_MOVE);
+                mouseEvent.screenX = x / Toolkit.scaleX;
+                mouseEvent.screenY = y / Toolkit.scaleY;
+                fn(mouseEvent);
+            }
+        }
         if (i == true && _mouseOverFlag == false) {
             if (hasComponentOver(cast this, x, y) == true) {
                 return;
