@@ -195,7 +195,6 @@ class StyleHelper {
     }
     
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
-        return;
         size = Std.int(size * Toolkit.scale);
         if (inset == false) {
             for (i in 0...size) {

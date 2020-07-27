@@ -13,6 +13,7 @@ class TextInputImpl extends TextBase {
     private var _fontSize:Float = 14;
     private var _fontName:String;
     private var _color:Int;
+    private var _backgroundColor:Int;
     
     public function new() {
         super();
@@ -81,6 +82,12 @@ class TextInputImpl extends TextBase {
                 _color = _textStyle.color;
                 _tf.textColor = Color.fromValue(_textStyle.color | 0xFF000000);
             }
+            
+            if (_backgroundColor != _textStyle.backgroundColor) {
+                _backgroundColor = _textStyle.backgroundColor;
+                _tf.backgroundColor = Color.fromValue(_textStyle.backgroundColor | 0xFF000000);
+            }
+            
         }
         
         return measureTextRequired;
@@ -125,6 +132,7 @@ class TextInputImpl extends TextBase {
         if (_textHeight <= 0) {
             _textHeight = _font.height(Std.int(_fontSize));
         }
+        _textHeight += 2;
         
         _inputData.hscrollMax = _tf.requiredWidth - _tf.width;
         _inputData.hscrollPageSize = (_tf.width * _inputData.hscrollMax) / _tf.requiredWidth;
