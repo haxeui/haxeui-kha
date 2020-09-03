@@ -951,7 +951,7 @@ class TextField {
         g.color = backgroundColor;
         g.fillRect(left, top, width, height);
 
-        g.scissor(Math.round(left), Math.round(top), Math.round(width), Math.round(height));
+        ScissorHelper.pushScissor(g, Math.round(left), Math.round(top), Math.round(width), Math.round(height));
 
         g.font = font;
         g.fontSize = fontSize;
@@ -1033,6 +1033,6 @@ class TextField {
             g.fillRect(caretLeft, caretTop, caretWidth, caretHeight);
         }
 
-        g.disableScissor();
+        ScissorHelper.popScissor();
     }
 }

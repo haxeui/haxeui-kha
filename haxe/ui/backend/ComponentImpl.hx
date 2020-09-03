@@ -1,6 +1,7 @@
 package haxe.ui.backend;
 
 import haxe.Timer;
+import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen;
@@ -276,7 +277,7 @@ class ComponentImpl extends ComponentBase {
                 addBatchTextOperation(ApplyScissor(clx, cly, clw, clh));
             } else {
                 if (clw >= 0 && clh >= 0) {
-                    g.scissor(clx, cly, clw, clh);
+                    ScissorHelper.pushScissor(g, clx, cly, clw, clh);
                 }
             }
         }
@@ -317,7 +318,7 @@ class ComponentImpl extends ComponentBase {
                 addBatchImageOperation(ClearScissor);
                 addBatchTextOperation(ClearScissor);
             } else {
-                g.disableScissor();
+                ScissorHelper.popScissor();
             }
         }
         
@@ -339,7 +340,7 @@ class ComponentImpl extends ComponentBase {
             switch (op) {
                 case ApplyScissor(sx, sy, sw, sh):
                     if (sw >= 0 && sh >= 0) {
-                        g.scissor(sx, sy, sw, sh);
+                        ScissorHelper.pushScissor(g, sx, sy, sw, sh);
                     }
                 case DrawStyle(c):
                     renderStyleTo(g, c);
@@ -348,7 +349,7 @@ class ComponentImpl extends ComponentBase {
                 case DrawText(c):    
                     renderTextTo(g, c);
                 case ClearScissor:
-                    g.disableScissor();
+                    ScissorHelper.popScissor();
             }
         }
     }
