@@ -473,7 +473,6 @@ class ComponentImpl extends ComponentBase {
                 }
             case MouseEvent.MOUSE_OUT:
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
-                    //Mouse.get().notify(null, null, __onMouseMove, null);
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
