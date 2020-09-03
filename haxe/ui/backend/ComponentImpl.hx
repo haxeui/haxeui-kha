@@ -1,6 +1,7 @@
 package haxe.ui.backend;
 
 import haxe.Timer;
+import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
@@ -21,14 +22,14 @@ import kha.input.Mouse;
 class ComponentImpl extends ComponentBase {
     private var _eventMap:Map<String, UIEvent->Void>;
 
-    private var lastMouseX = -1;
-    private var lastMouseY = -1;
+    private var lastMouseX:Float = -1;
+    private var lastMouseY:Float = -1;
 	
 	// For doubleclick detection
 	private var _lastClickTime:Float = 0;
 	private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
-	private var _lastClickX:Int = -1;
-	private var _lastClickY:Int = -1;
+	private var _lastClickX:Float = -1;
+	private var _lastClickY:Float = -1;
 
     public function new() {
         super();
@@ -135,7 +136,7 @@ class ComponentImpl extends ComponentBase {
     }
 
     @:access(haxe.ui.core.Component)
-    private function inBounds(x:Int, y:Int):Bool {
+    private function inBounds(x:Float, y:Float):Bool {
         if (cast(this, Component).hidden == true) {
             return false;
         }
@@ -463,14 +464,16 @@ class ComponentImpl extends ComponentBase {
         switch (type) {
             case MouseEvent.MOUSE_MOVE:
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false) {
-                    Mouse.get().notify(null, null, __onMouseMove, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
                 }
+                
             case MouseEvent.MOUSE_OVER:
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
-                    Mouse.get().notify(null, null, __onMouseMove, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
+                
             case MouseEvent.MOUSE_OUT:
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
@@ -478,78 +481,91 @@ class ComponentImpl extends ComponentBase {
 
             case MouseEvent.MOUSE_DOWN:
                 if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false) {
-                    Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                    MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.MOUSE_DOWN, listener);
                 }
 
             case MouseEvent.MOUSE_UP:
                 if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
-                    Mouse.get().notify(null, __onMouseUp, null, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.MOUSE_UP, listener);
                 }
+                
             case MouseEvent.MOUSE_WHEEL:
-                if (!_eventMap.exists(MouseEvent.MOUSE_WHEEL)) {
-                    Mouse.get().notify(null, null, null, __onMouseWheel, null);
+                if (_eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
+                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    MouseHelper.notify(MouseEvent.MOUSE_WHEEL, __onMouseWheel);
                     _eventMap.set(MouseEvent.MOUSE_WHEEL, listener);
                 }
+                
             case MouseEvent.CLICK:
                 if (_eventMap.exists(MouseEvent.CLICK) == false) {
                     _eventMap.set(MouseEvent.CLICK, listener);
 
                     if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false) {
-                        Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                        MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                        MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                         _eventMap.set(MouseEvent.MOUSE_DOWN, listener);
                     }
 
                     if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
-                        Mouse.get().notify(null, __onMouseUp, null, null);
+                        MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+                
 			case MouseEvent.DBL_CLICK:
                 if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
                     _eventMap.set(MouseEvent.DBL_CLICK, listener);
 					
                     if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
-                        Mouse.get().notify(null, __onDoubleClick, null, null);
+                        MouseHelper.notify(MouseEvent.MOUSE_UP, __onDoubleClick);
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
+                
             case MouseEvent.RIGHT_MOUSE_DOWN:
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
-                    Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                    MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.RIGHT_MOUSE_DOWN, listener);
                 }
 
             case MouseEvent.RIGHT_MOUSE_UP:
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
-                    Mouse.get().notify(null, __onMouseUp, null, null);
+                    MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
                 }
+                
             case MouseEvent.RIGHT_CLICK:
                 if (_eventMap.exists(MouseEvent.RIGHT_CLICK) == false) {
                     _eventMap.set(MouseEvent.RIGHT_CLICK, listener);
 
                     if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
-                        Mouse.get().notify(__onMouseDown, __onMouseUp, null, null);
+                        MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                        MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                         _eventMap.set(MouseEvent.RIGHT_MOUSE_DOWN, listener);
                     }
 
                     if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
-                        Mouse.get().notify(null, __onMouseUp, null, null);
+                        MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                         _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
                     }
                 }
+                
 			case KeyboardEvent.KEY_DOWN:
 				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
                     Keyboard.get().notify(__onKeyDown, null, null);
                     _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
                 }
+                
 			case KeyboardEvent.KEY_UP:
 				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
                     Keyboard.get().notify(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);
                 }
+                
             case UIEvent.CHANGE: 
                 if (_eventMap.exists(type) == false) {
                     if (hasTextInput() == true) {
@@ -558,17 +574,101 @@ class ComponentImpl extends ComponentBase {
                 }
         }
     }
-
+    
     private function onTextInputChanged(s:String) {
         dispatch(new UIEvent(UIEvent.CHANGE));
     }
     
+    @:access(haxe.ui.backend.TextInputImpl)
     private override function unmapEvent(type:String, listener:UIEvent->Void) {
+        switch (type) {
+            case MouseEvent.MOUSE_MOVE:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                }
+                
+            case MouseEvent.MOUSE_OVER:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                }
+                
+            case MouseEvent.MOUSE_OUT:
+                _eventMap.remove(type);
 
+            case MouseEvent.MOUSE_DOWN:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false
+                    && _eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                }
+
+            case MouseEvent.MOUSE_UP:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_UP) == false
+                    && _eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_UP, __onMouseUp);
+                }
+                
+            case MouseEvent.MOUSE_WHEEL:
+                _eventMap.remove(type);
+                MouseHelper.remove(MouseEvent.MOUSE_WHEEL, __onMouseWheel);
+                if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
+                    && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                }
+                
+            case MouseEvent.CLICK:
+                _eventMap.remove(type);
+                
+			case MouseEvent.DBL_CLICK:
+                _eventMap.remove(type);
+                MouseHelper.remove(MouseEvent.MOUSE_UP, __onDoubleClick);
+                
+            case MouseEvent.RIGHT_MOUSE_DOWN:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false
+                    && _eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_DOWN, __onMouseDown);
+                }
+
+            case MouseEvent.RIGHT_MOUSE_UP:
+                _eventMap.remove(type);
+                if (_eventMap.exists(MouseEvent.MOUSE_UP) == false
+                    && _eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
+                    MouseHelper.remove(MouseEvent.MOUSE_UP, __onMouseUp);
+                }
+                
+            case MouseEvent.RIGHT_CLICK:
+                _eventMap.remove(type);
+                
+			case KeyboardEvent.KEY_DOWN:
+                _eventMap.remove(type);
+                Keyboard.get().remove(__onKeyDown, null, null);
+                
+			case KeyboardEvent.KEY_UP:
+                _eventMap.remove(type);
+                Keyboard.get().remove(null, __onKeyUp, null);
+                
+            case UIEvent.CHANGE: 
+                _eventMap.remove(type);
+                if (hasTextInput() == true) {
+                    getTextInput()._tf.remove(onTextInputChanged, null);
+                }
+        }
     }
 
     private var _mouseOverFlag:Bool = false;
-    private function __onMouseMove(x:Int, y:Int, movementX:Int, movementY:Int) {
+    private function __onMouseMove(event:MouseEvent) {
+        var x = event.screenX;
+        var y = event.screenY;
+        
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -606,7 +706,11 @@ class ComponentImpl extends ComponentBase {
     }
 
     private var _mouseDownFlag:Bool = false;
-    private function __onMouseDown(button:Int, x:Int, y:Int) {
+    private function __onMouseDown(event:MouseEvent) {
+        var button:Int = event.data;
+        var x = event.screenX;
+        var y = event.screenY;
+        
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -626,7 +730,11 @@ class ComponentImpl extends ComponentBase {
         }
     }
 
-    private function __onMouseUp(button:Int, x:Int, y:Int) {
+    private function __onMouseUp(event:MouseEvent) {
+        var button:Int = event.data;
+        var x = event.screenX;
+        var y = event.screenY;
+        
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -668,7 +776,11 @@ class ComponentImpl extends ComponentBase {
         _mouseDownFlag = false;
     }
 	
-	private function __onDoubleClick(button:Int, x:Int, y:Int) {
+	private function __onDoubleClick(event:MouseEvent) {
+        var button:Int = event.data;
+        var x = event.screenX;
+        var y = event.screenY;
+        
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -693,7 +805,8 @@ class ComponentImpl extends ComponentBase {
         _mouseDownFlag = false;
     }
 
-    private function __onMouseWheel(delta: Int) {
+    private function __onMouseWheel(event:MouseEvent) {
+        var delta = event.delta;
         var fn = _eventMap.get(MouseEvent.MOUSE_WHEEL);
 
         if (fn == null) {
@@ -743,7 +856,7 @@ class ComponentImpl extends ComponentBase {
 		fn(keyEvent);
 	}
 
-    private function hasComponentOver(ref:Component, x:Int, y:Int):Bool {
+    private function hasComponentOver(ref:Component, x:Float, y:Float):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);
         if (array.length == 0) {
             return false;
@@ -752,7 +865,7 @@ class ComponentImpl extends ComponentBase {
         return !hasChildRecursive(cast ref, cast array[array.length - 1]);
     }
 
-    private function getComponentsAtPoint(x:Int, y:Int):Array<Component> {
+    private function getComponentsAtPoint(x:Float, y:Float):Array<Component> {
         var array:Array<Component> = new Array<Component>();
         for (r in Screen.instance.rootComponents) {
             findChildrenAtPoint(r, x, y, array);
@@ -760,7 +873,7 @@ class ComponentImpl extends ComponentBase {
         return array;
     }
 
-    private function findChildrenAtPoint(child:Component, x:Int, y:Int, array:Array<Component>) {
+    private function findChildrenAtPoint(child:Component, x:Float, y:Float, array:Array<Component>) {
         if (child.inBounds(x, y) == true) {
             array.push(child);
             for (c in child.childComponents) {
