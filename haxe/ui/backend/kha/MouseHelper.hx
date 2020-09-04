@@ -81,9 +81,11 @@ class MouseHelper {
     
     private static function onMouseDown(button:Int, x:Int, y:Int) {
         var list = _callbacks.get(MouseEvent.MOUSE_DOWN);
-        if (list == null) {
+        if (list == null || list.length == 0) {
             return;
         }
+        
+        list = list.copy();
         
         var event = new MouseEvent(MouseEvent.MOUSE_DOWN);
         event.screenX = x;
@@ -96,9 +98,11 @@ class MouseHelper {
     
     private static function onMouseUp(button:Int, x:Int, y:Int) {
         var list = _callbacks.get(MouseEvent.MOUSE_UP);
-        if (list == null) {
+        if (list == null || list.length == 0) {
             return;
         }
+        
+        list = list.copy();
         
         var event = new MouseEvent(MouseEvent.MOUSE_UP);
         event.screenX = x;
@@ -117,9 +121,11 @@ class MouseHelper {
         currentMouseY = y;
         
         var list = _callbacks.get(MouseEvent.MOUSE_MOVE);
-        if (list == null) {
+        if (list == null || list.length == 0) {
             return;
         }
+        
+        list = list.copy();
         
         var event = new MouseEvent(MouseEvent.MOUSE_MOVE);
         event.screenX = x;
@@ -131,9 +137,11 @@ class MouseHelper {
     
     private static function onMouseWheel(delta:Float) {
         var list = _callbacks.get(MouseEvent.MOUSE_WHEEL);
-        if (list == null) {
+        if (list == null || list.length == 0) {
             return;
         }
+        
+        list = list.copy();
         
         var event = new MouseEvent(MouseEvent.MOUSE_WHEEL);
         event.delta = delta;
