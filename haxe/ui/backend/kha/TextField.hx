@@ -73,6 +73,15 @@ class TextField {
         }
     }
 
+    public function remove(textChanged:String->Void, caretMoved:CharPosition->Void) {
+        if (textChanged != null) {
+            _textChanged.remove(textChanged);
+        }
+        if (caretMoved != null) {
+            _caretMoved.remove(caretMoved);
+        }
+    }
+    
     private function notifyTextChanged() {
         for (l in _textChanged) {
             l(_text);
