@@ -19,3 +19,7 @@
 .numberstepper {
     padding: 1px;
 }
+
+.optionbox .image {
+    margin-left: -1px;
+}
