@@ -104,6 +104,10 @@ class StyleHelper {
                 if (slice == null) {
                     if (style.backgroundImageRepeat == null) {
                         g.drawSubImage(imageInfo.data, x, y, 0, 0, trc.width, trc.height);
+                    } else if (style.backgroundImageRepeat == "stretch") {
+                        g.drawScaledImage(imageInfo.data, x, y, w, h);
+                    } else {
+                        g.drawSubImage(imageInfo.data, x, y, 0, 0, trc.width, trc.height);
                     }
                 } else {
                     var rects:Slice9Rects = Slice9.buildRects(w, h, trc.width, trc.height, slice);
