@@ -9,15 +9,28 @@ import kha.Image;
 
 class AssetsImpl extends AssetsBase {
     private override function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
-        if (resourceId.indexOf(".") != -1) {
-            var parts = resourceId.split(".");
-            parts.pop();
-            resourceId = parts.join(".");
+        final fieldName = switch ToolkitAssets.instance.options.flattenAssetPaths {
+            case null, true:
+                var name = resourceId;
+                if (name.indexOf(".") != -1) {
+                    var parts = name.split(".");
+                    parts.pop();
+                    name = parts.join(".");
+                }
+                if (name.indexOf("/") != -1) {
+                    name = name.split("/").pop();
+                }
+
+                name;
+
+            case false:
+                var name = haxe.io.Path.withoutExtension(resourceId);
+                name = StringTools.replace(name, '-', '_');
+                name = StringTools.replace(name, '.', '_');
+                name = StringTools.replace(name, '/', '_');
+                name = StringTools.replace(name, '\\', '_');
         }
-        if (resourceId.indexOf("/") != -1) {
-            resourceId = resourceId.split("/").pop();
-        }
-        var img:Image = Reflect.field(Assets.images, resourceId);
+        var img:Image = Reflect.field(Assets.images, fieldName);
         if (img != null) {
             var imageInfo:ImageInfo = {
                 width: img.realWidth,
