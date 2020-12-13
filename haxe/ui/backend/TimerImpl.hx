@@ -13,7 +13,7 @@ class TimerImpl {
             }
 
             return !_stopped;
-        }, 0, delay / 1000);
+        }, delay / 1000, 0, 0);
     }
 
     public function stop() {
