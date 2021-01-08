@@ -305,6 +305,12 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
+        if (useBatching() == true) {
+            addBatchStyleOperation(DrawCustom(this));
+        } else {
+            renderCustom(g);
+        }
+        
         for (c in cast(this, Component).childComponents) {
             c.renderTo(g);
         }
@@ -330,6 +336,10 @@ class ComponentImpl extends ComponentBase {
         clearCaches();
     }
     
+    private function renderCustom(g:Graphics) {
+        
+    }
+    
     private function renderToBatch(g:Graphics) {
         renderToBatchOperations(g, _batchStyleOperations);
         renderToBatchOperations(g, _batchImageOperations);
@@ -349,6 +359,8 @@ class ComponentImpl extends ComponentBase {
                     renderImageTo(g, c);
                 case DrawText(c):    
                     renderTextTo(g, c);
+                case DrawCustom(c):
+                    c.renderCustom(g);
                 case ClearScissor:
                     ScissorHelper.popScissor();
             }
