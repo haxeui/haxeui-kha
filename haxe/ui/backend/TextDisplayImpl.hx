@@ -103,6 +103,16 @@ class TextDisplayImpl extends TextBase {
 
         _textWidth = biggestWidth / Toolkit.scale;
         _textHeight = (_font.height(Std.int(_fontSize)) * _lines.length) / Toolkit.scale;
+        
+        _textWidth = Math.round(_textWidth + 1);
+        _textHeight = Math.round(_textHeight + 1);
+        
+        if (_textWidth % 2 != 0) {
+            _textWidth++;
+        }
+        if (_textHeight % 2 != 0) {
+            _textHeight++;
+        }
     }
 
     public function renderTo(g:Graphics, x:Float, y:Float) {

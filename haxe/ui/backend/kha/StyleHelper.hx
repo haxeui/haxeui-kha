@@ -13,21 +13,21 @@ import kha.graphics2.Graphics;
 
 class StyleHelper {
     public static function paintStyle(g:Graphics, style:Style, x:Float, y:Float, w:Float, h:Float):Void {
+        /*
         x = Math.ffloor(x);
         y = Math.ffloor(y);
         w = Math.fceil(w);
         h = Math.fceil(h);
+        */
 
         if (w <= 0 || h <= 0) {
             return;
         }
 
-        /*
         x = Std.int(x);
         y = Std.int(y);
         w = Std.int(w);
         h = Std.int(h);
-        */
         
         x *= Toolkit.scaleX;
         y *= Toolkit.scaleY;
@@ -126,7 +126,12 @@ class StyleHelper {
             });
         }
         
-        if (style.borderLeftColor != null
+        if (style.borderLeftSize != null &&
+            style.borderLeftSize == style.borderRightSize &&
+            style.borderLeftSize == style.borderBottomSize &&
+            style.borderLeftSize == style.borderTopSize
+            
+            && style.borderLeftColor != null
             && style.borderLeftColor == style.borderRightColor
             && style.borderLeftColor == style.borderBottomColor
             && style.borderLeftColor == style.borderTopColor) { // full border
