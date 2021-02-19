@@ -171,7 +171,7 @@ class StyleHelper {
         
         if (style.filter != null) {
             var f:Filter = style.filter[0];
-            if (Std.is(f, DropShadow)) {
+            if ((f is DropShadow)) {
                 var dropShadow:DropShadow = cast(f, DropShadow);
                 if (dropShadow.inner == true) {
                     drawShadow(g, dropShadow.color, x, y, w, h, Std.int(dropShadow.distance), dropShadow.inner);
