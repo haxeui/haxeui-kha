@@ -1,21 +1,21 @@
 {
+    "version": "1.2.1",
     "contributors": [
         "haxeui",
         "ianharrigan",
         "_ibilon",
         "aW4KeNiNG"
     ],
-    "version": "1.2.0",
-    "dependencies": {
-        "haxeui-core": ""
-    },
-    "releasenote": "1.2 release",
+    "license": "MIT",
     "tags": [
         "ui",
         "gui",
         "kha"
     ],
-    "license": "MIT",
+    "releasenote": "text tweaks",
+    "dependencies": {
+        "haxeui-core": ""
+    },
     "name": "haxeui-kha",
     "description": "The Kha backend of the HaxeUI framework",
     "url": "https://github.com/haxeui/haxeui-kha"
