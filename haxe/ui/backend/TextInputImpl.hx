@@ -12,8 +12,8 @@ class TextInputImpl extends TextBase {
     private var _textAlign:String;
     private var _fontSize:Float = 14;
     private var _fontName:String;
-    private var _color:Int;
-    private var _backgroundColor:Int;
+    private var _color:Int = -1;
+    private var _backgroundColor:Int = -1;
     
     public function new() {
         super();
@@ -78,12 +78,13 @@ class TextInputImpl extends TextBase {
                 measureTextRequired = true;
             }
             
-            if (_color != _textStyle.color) {
+            if (_textStyle.color != null && _color != _textStyle.color) {
                 _color = _textStyle.color;
                 _tf.textColor = Color.fromValue(_textStyle.color | 0xFF000000);
             }
             
-            if (_backgroundColor != _textStyle.backgroundColor) {
+            if (_textStyle.backgroundColor != null && _backgroundColor != _textStyle.backgroundColor) {
+                trace("---------------> " + _textStyle.backgroundColor);
                 _backgroundColor = _textStyle.backgroundColor;
                 _tf.backgroundColor = Color.fromValue(_textStyle.backgroundColor | 0xFF000000);
             }
