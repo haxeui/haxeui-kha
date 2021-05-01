@@ -76,29 +76,42 @@ class AssetsImpl extends AssetsBase {
         });
         #end
     }
-    
+
+    override function imageFromFile(filename: String, callback:ImageInfo->Void) {
+        kha.Assets.loadImageFromPath(filename, false, function( img ) {
+            callback({
+                data: img,
+                width: img.width,
+                height: img.height,
+            });
+        }, function( err ) {
+            #if debug trace(err); #end
+            callback(null);
+        });
+    }
+
     // .jpg:  FF D8 FF
     // .png:  89 50 4E 47 0D 0A 1A 0A
-    // .gif:  GIF87a      
+    // .gif:  GIF87a
     //        GIF89a
     // .tiff: 49 49 2A 00
     //        4D 4D 00 2A
-    // .bmp:  BM 
-    // .webp: RIFF ???? WEBP 
+    // .bmp:  BM
+    // .webp: RIFF ???? WEBP
     // .ico   00 00 01 00
     //        00 00 02 00 ( cursor files )
     private function extensionFromMagicBytes(bytes:Bytes):String {
         var ext = "";
-        
+
         if (compareBytes(bytes, [0xFF, 0xD8, 0xFF]) == true) {
             ext = "jpeg";
         } else if (compareBytes(bytes, [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) == true) {
             ext = "png";
         }
-        
+
         return ext;
     }
-    
+
     private function compareBytes(bytes:Bytes, startsWith:Array<Int>):Bool {
         var b = true;
         var i = 0;
@@ -111,13 +124,13 @@ class AssetsImpl extends AssetsBase {
         }
         return b;
     }
-    
+
     private override function getFontInternal(resourceId:String, callback:FontInfo->Void):Void {
         var font = Assets.fonts.get(resourceId);
         if (font != null) {
             callback({ data: font });
         } else {
-            callback(null);            
+            callback(null);
         }
     }
 
