@@ -1,6 +1,7 @@
 package haxe.ui.backend;
 
 import haxe.Timer;
+import haxe.ui.backend.kha.ImageCache;
 import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
@@ -17,7 +18,6 @@ import kha.graphics2.Graphics;
 import kha.graphics2.ImageScaleQuality;
 import kha.input.KeyCode;
 import kha.input.Keyboard;
-import kha.input.Mouse;
 
 class ComponentImpl extends ComponentBase {
     private var _eventMap:Map<String, UIEvent->Void>;
@@ -367,6 +367,7 @@ class ComponentImpl extends ComponentBase {
         }
     }
     
+    private var _prevStyle:Style = null;
     private function renderStyleTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
         var x:Float = c.screenX;
@@ -375,7 +376,17 @@ class ComponentImpl extends ComponentBase {
         var h:Float = c.height;
         var style:Style = c.style;
         
-        StyleHelper.paintStyle(g, style, x, y, w, h);
+        var usePrevStyle:Bool = false;
+        if (style.backgroundImage != null) {
+            usePrevStyle = !ImageCache.has(style.backgroundImage);
+        }
+        
+        if (usePrevStyle == false) {
+            StyleHelper.paintStyle(g, style, x, y, w, h);
+            c._prevStyle = style;
+        } else if (c._prevStyle != null) {
+            StyleHelper.paintStyle(g, c._prevStyle, x, y, w, h);
+        }
         
         g.opacity = 1;
     }

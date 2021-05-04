@@ -1,13 +1,12 @@
 package haxe.ui.backend.kha;
 
-import haxe.ui.assets.ImageInfo;
-import haxe.ui.styles.Style;
-import haxe.ui.util.ColorUtil;
-import haxe.ui.geom.Rectangle;
-import haxe.ui.geom.Slice9;
+import haxe.ui.backend.kha.ImageCache;
 import haxe.ui.filters.DropShadow;
 import haxe.ui.filters.Filter;
-import haxe.ui.filters.FilterParser;
+import haxe.ui.geom.Rectangle;
+import haxe.ui.geom.Slice9;
+import haxe.ui.styles.Style;
+import haxe.ui.util.ColorUtil;
 import kha.Color;
 import kha.graphics2.Graphics;
 
@@ -39,7 +38,6 @@ class StyleHelper {
         var orgW = w;
         var orgH = h;
 
-        
         var alpha:Int = 0xFF000000;
         if (style.backgroundColor != null) {
             if (style.backgroundColorEnd != null && style.backgroundColor != style.backgroundColorEnd) {
@@ -75,10 +73,9 @@ class StyleHelper {
         }
         
         if (style.backgroundImage != null) {
-            Toolkit.assets.getImage(style.backgroundImage, function(imageInfo:ImageInfo) {
-                if (imageInfo == null) {
-                    return;
-                }
+            if (ImageCache.has(style.backgroundImage)) {
+                var imageInfo = ImageCache.get(style.backgroundImage);
+                
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
                 if (style.backgroundImageClipTop != null
                     && style.backgroundImageClipLeft != null
@@ -123,7 +120,7 @@ class StyleHelper {
                                                              x + dstRect.left, y + dstRect.top, dstRect.width, dstRect.height);
                     }
                 }
-            });
+            }
         }
         
         if (style.borderLeftSize != null &&
@@ -180,29 +177,8 @@ class StyleHelper {
                 }
             }
         }
-
-        /*
-        drawCircle(g, x, y, 2 * Toolkit.scale + 1);
-        */
     }
 
-    private static function drawCircle(g:Graphics, xm:Float, ym:Float, r:Float) {
-        var x = -r;
-        var y = 0;
-        var err = 2 - 2 * r;
-        do {
-            g.drawRect(xm - x, ym + y, Toolkit.scale - 1, Toolkit.scale - 1); // BR
-            g.drawRect(xm - y, ym - x, Toolkit.scale - 1, Toolkit.scale - 1); // BL
-            g.drawRect(xm + x, ym - y, Toolkit.scale - 1, Toolkit.scale - 1); // TL
-            g.drawRect(xm + y, ym + x, Toolkit.scale - 1, Toolkit.scale - 1); // TR
-            
-            
-            r = err;
-            if (r <= y) err += ++y * 2 + 1;
-            if (r > x || err > y) err += ++x * 2 + 1;
-        } while (x < 0);
-    }
-    
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
         size = Std.int(size * Toolkit.scale);
         if (inset == false) {
