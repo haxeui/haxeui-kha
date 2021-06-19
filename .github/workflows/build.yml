@@ -43,7 +43,7 @@ jobs:
         cd src
         printf "package;\n\nclass Main {\npublic static function main() {\n}\n}" > Main.hx
         cd ..
-        cp Libraries/haxeui-kha/khafile.js khafile.js
+        cp Libraries/haxeui-kha/.github/workflows/khafile.js khafile.js
 
     - name: Build app (${{ matrix.target }}, haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
