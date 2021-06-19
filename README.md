@@ -1,8 +1,10 @@
+![build status](https://github.com/haxeui/haxeui-kha/actions/workflows/build.yml/badge.svg)
+
 # haxeui-kha
 
 This is the [Kha](https://github.com/Kode/Kha) backend for [HaxeUI](https://github.com/haxeui/haxeui-core)
 
-![](https://github.com/haxeui/haxeui-kha/raw/master/screen.png)
+![](https://github.com/haxeui/haxeui-kha/raw/master/.github/images/screen.png)
 
 ## Installation
 
