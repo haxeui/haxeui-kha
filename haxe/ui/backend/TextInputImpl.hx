@@ -84,7 +84,6 @@ class TextInputImpl extends TextBase {
             }
             
             if (_textStyle.backgroundColor != null && _backgroundColor != _textStyle.backgroundColor) {
-                trace("---------------> " + _textStyle.backgroundColor);
                 _backgroundColor = _textStyle.backgroundColor;
                 _tf.backgroundColor = Color.fromValue(_textStyle.backgroundColor | 0xFF000000);
             }
