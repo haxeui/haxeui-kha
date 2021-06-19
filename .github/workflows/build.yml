@@ -28,6 +28,8 @@ jobs:
         sudo apt-get install libxi-dev
         sudo apt-get install zip
         sudo apt-get install libxrandr-dev
+        sudo apt-get install libusb-1.0-0-dev
+        sudo apt-get install libudev-dev
         git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
         mkdir Libraries
         cd Libraries
