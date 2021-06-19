@@ -1,5 +1,6 @@
 package haxe.ui.backend;
 
+import haxe.ui.Toolkit;
 import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
@@ -26,6 +27,14 @@ class ScreenImpl extends ScreenBase {
         return System.windowHeight() / Toolkit.scaleY;
     }
 
+    private override function get_actualWidth():Float {
+        return System.windowWidth();
+    }
+
+    private override function get_actualHeight():Float {
+        return System.windowHeight();
+    }
+    
     private override function get_dpi():Float {
         return Display.primary.pixelsPerInch;
     }

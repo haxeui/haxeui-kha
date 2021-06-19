@@ -1,6 +1,7 @@
 package haxe.ui.backend;
 
 import haxe.Timer;
+import haxe.ui.Toolkit;
 import haxe.ui.backend.kha.ImageCache;
 import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.backend.kha.ScissorHelper;
@@ -66,8 +67,13 @@ class ComponentImpl extends ComponentBase {
         var xpos:Float = 0;
         var ypos:Float = 0;
         while (c != null) {
-            xpos += c.left;
-            ypos += c.top;
+            if (c.parentComponent == null) {
+                xpos += c.left / Toolkit.scaleX;
+                ypos += c.top / Toolkit.scaleY;
+            } else {
+                xpos += c.left;
+                ypos += c.top;
+            }
             if (c.componentClipRect != null) {
                 xpos -= c.componentClipRect.left;
                 ypos -= c.componentClipRect.top;
