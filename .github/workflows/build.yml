@@ -15,13 +15,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Setup Haxe (haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
-      if: ${{ !(matrix.os == 'windows-latest' && matrix.haxe-version == '3.4.7') }}
       uses: krdlab/setup-haxe@v1
       with:
         haxe-version: ${{ matrix.haxe-version }}
 
     - name: Setup app (haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
-      if: ${{ !(matrix.os == 'windows-latest' && matrix.haxe-version == '3.4.7') }}
       run: |
         sudo apt-get install libxinerama-dev
         sudo apt-get install libasound2-dev
@@ -44,6 +42,5 @@ jobs:
         cp Libraries/haxeui-kha/khafile.js khafile.js
 
     - name: Build app (${{ matrix.target }}, haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
-      if: ${{ !(matrix.os == 'windows-latest' && matrix.haxe-version == '3.4.7') }}
       run: |
         node Kha/make ${{ matrix.target }} --compile
