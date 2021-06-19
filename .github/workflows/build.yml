@@ -29,6 +29,7 @@ jobs:
         sudo apt-get install libgl-dev
         sudo apt-get install libxi-dev
         sudo apt-get install zip
+        sudo apt-get install libxrandr-dev
         git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
         mkdir Libraries
         cd Libraries
