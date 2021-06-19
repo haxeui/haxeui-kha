@@ -31,6 +31,7 @@ jobs:
         sudo apt-get install libxrandr-dev
         sudo apt-get install libudev-dev
         sudo apt-get install libx11-dev
+        sudo apt-get install libxcursor-dev
         git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
         mkdir Libraries
         cd Libraries
