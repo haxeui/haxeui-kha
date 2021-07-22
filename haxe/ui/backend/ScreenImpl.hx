@@ -11,9 +11,12 @@ import kha.Font;
 import kha.Scheduler;
 import kha.System;
 import kha.graphics2.Graphics;
+import kha.System;
+import kha.input.Mouse;
 
 class ScreenImpl extends ScreenBase {
     private var _mapping:Map<String, UIEvent->Void>;
+    private var cursorLocked:Bool = false;
 
     public function new() {
         _mapping = new Map<String, UIEvent->Void>();
@@ -75,6 +78,31 @@ class ScreenImpl extends ScreenBase {
             c.renderTo(g);
         }
         updateFPS(g);
+    }
+
+    public function setCursor(cursor:String, lock=false) {
+        if (cursorLocked) {
+            return;
+        }
+        cursorLocked = lock;
+
+        if (cursor == "pointer") {
+            kha.input.Mouse.get().setSystemCursor(MouseCursor.Pointer);
+        } else if (cursor == "text") {
+            kha.input.Mouse.get().setSystemCursor(MouseCursor.Text);
+        } else if (cursor == "col-resize") {
+            kha.input.Mouse.get().setSystemCursor(MouseCursor.EastWestResize);
+        } else if (cursor == "row-resize") {
+            kha.input.Mouse.get().setSystemCursor(MouseCursor.NorthSouthResize);
+        }else {
+            kha.input.Mouse.get().setSystemCursor(MouseCursor.Default);
+        }
+    }
+    public function lockCursor() {
+        cursorLocked = true;
+    }
+    public function unlockCursor() {
+        cursorLocked = false;
     }
 
     private var _deltaTime:Float;
