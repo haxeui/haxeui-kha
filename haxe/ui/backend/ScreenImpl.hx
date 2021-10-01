@@ -21,6 +21,10 @@ class ScreenImpl extends ScreenBase {
 
     public function new() {
         _mapping = new Map<String, UIEvent->Void>();
+
+        if (!MouseHelper.isInitialized()) {
+            MouseHelper.init(options != null ? options.mouseInput : null);
+        }
     }
 
     public override function get_width():Float {
@@ -38,7 +42,7 @@ class ScreenImpl extends ScreenBase {
     private override function get_actualHeight():Float {
         return System.windowHeight();
     }
-    
+
     private override function get_dpi():Float {
         return Display.primary.pixelsPerInch;
     }
@@ -158,7 +162,7 @@ class ScreenImpl extends ScreenBase {
             g.font = null;
         }
     }
-    
+
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
@@ -190,13 +194,13 @@ class ScreenImpl extends ScreenBase {
                     _mapping.set(type, listener);
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                 }
-                
+
             case MouseEvent.MOUSE_DOWN:
                 if (_mapping.exists(type) == false) {
                     _mapping.set(type, listener);
                     MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
                 }
-                
+
             case MouseEvent.MOUSE_UP:
                 if (_mapping.exists(type) == false) {
                     _mapping.set(type, listener);
@@ -211,17 +215,17 @@ class ScreenImpl extends ScreenBase {
             case MouseEvent.MOUSE_MOVE:
                 _mapping.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
-                
+
             case MouseEvent.MOUSE_DOWN:
                 _mapping.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_DOWN, __onMouseDown);
-                
+
             case MouseEvent.MOUSE_UP:
                 _mapping.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_UP, __onMouseUp);
         }
     }
-    
+
     private function __onMouseMove(event:MouseEvent) {
         if (_mapping.exists(MouseEvent.MOUSE_MOVE) == false) {
             return;
@@ -229,7 +233,7 @@ class ScreenImpl extends ScreenBase {
 
         var x = event.screenX;
         var y = event.screenY;
-        
+
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
         mouseEvent.screenX = x / Toolkit.scaleX;
         mouseEvent.screenY = y / Toolkit.scaleY;
@@ -243,7 +247,7 @@ class ScreenImpl extends ScreenBase {
 
         var x = event.screenX;
         var y = event.screenY;
-        
+
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_DOWN);
         mouseEvent.screenX = x / Toolkit.scaleX;
         mouseEvent.screenY = y / Toolkit.scaleY;
@@ -257,7 +261,7 @@ class ScreenImpl extends ScreenBase {
 
         var x = event.screenX;
         var y = event.screenY;
-        
+
         var mouseEvent = new MouseEvent(MouseEvent.MOUSE_UP);
         mouseEvent.screenX = x / Toolkit.scaleX;
         mouseEvent.screenY = y / Toolkit.scaleY;
