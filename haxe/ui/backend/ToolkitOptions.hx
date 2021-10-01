@@ -8,6 +8,7 @@ typedef ToolkitOptions = {
     ?flattenAssetPaths:Bool,
 
     ?mouseInput: MouseInputOptions,
+    ?keyboardInput: KeyboardInputOptions,
 }
 
 typedef MouseListenerCallback = (
@@ -21,4 +22,15 @@ typedef MouseListenerCallback = (
 typedef MouseInputOptions = {
     final ?listen: MouseListenerCallback;
     final ?unlisten: MouseListenerCallback;
+}
+
+typedef KeyListenerCallback = (
+    kha.input.KeyCode -> Void,
+    kha.input.KeyCode -> Void,
+    String -> Void
+) -> Void;
+
+typedef KeyboardInputOptions = {
+    final ?listen: KeyListenerCallback;
+    final ?unlisten: KeyListenerCallback;
 }

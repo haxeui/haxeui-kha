@@ -25,6 +25,10 @@ class ScreenImpl extends ScreenBase {
         if (!MouseHelper.isInitialized()) {
             MouseHelper.init(options != null ? options.mouseInput : null);
         }
+
+        if (!haxe.ui.backend.kha.KeyboardHelper.isInitialized()) {
+            haxe.ui.backend.kha.KeyboardHelper.init(options != null ? options.keyboardInput : null);
+        }
     }
 
     public override function get_width():Float {
