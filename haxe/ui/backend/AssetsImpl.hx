@@ -8,29 +8,36 @@ import kha.Font;
 import kha.Image;
 
 class AssetsImpl extends AssetsBase {
-    private override function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
-        final fieldName = switch ToolkitAssets.instance.options.flattenAssetPaths {
-            case null, true:
-                var name = resourceId;
-                if (name.indexOf(".") != -1) {
-                    var parts = name.split(".");
-                    parts.pop();
-                    name = parts.join(".");
-                }
-                if (name.indexOf("/") != -1) {
-                    name = name.split("/").pop();
-                }
-
-                name;
-
-            case false:
-                var name = haxe.io.Path.withoutExtension(resourceId);
-                name = StringTools.replace(name, '-', '_');
-                name = StringTools.replace(name, '.', '_');
-                name = StringTools.replace(name, '/', '_');
-                name = StringTools.replace(name, '\\', '_');
+    inline function flattenPaths( options: ToolkitOptions ) {
+        return switch options {
+            case null: false;
+            case { flattenAssetPaths: true }: true;
+            default: false;
         }
-        var img:Image = Reflect.field(Assets.images, fieldName);
+    }
+
+    private override function getImageInternal(resourceId:String, callback:ImageInfo->Void):Void {
+        final fieldName = if (flattenPaths(ToolkitAssets.instance.options)) {
+            var name = resourceId;
+            if (name.indexOf(".") != -1) {
+                var parts = name.split(".");
+                parts.pop();
+                name = parts.join(".");
+            }
+            if (name.indexOf("/") != -1) {
+                name = name.split("/").pop();
+            }
+
+            name;
+        } else {
+            var name = haxe.io.Path.withoutExtension(resourceId);
+            name = StringTools.replace(name, '-', '_');
+            name = StringTools.replace(name, '.', '_');
+            name = StringTools.replace(name, '/', '_');
+            name = StringTools.replace(name, '\\', '_');
+        }
+
+        var img:Image = Assets.images.get(fieldName);
         if (img != null) {
             var imageInfo:ImageInfo = {
                 width: img.realWidth,
@@ -39,7 +46,13 @@ class AssetsImpl extends AssetsBase {
             }
             callback(imageInfo);
         } else {
-            callback(null);
+            if (Resource.getBytes(resourceId) != null) {
+                getImageFromHaxeResource(resourceId, function( _, info ) {
+                    callback(info);
+                });
+            } else {
+                imageFromFile(resourceId, callback);
+            }
         }
     }
 
