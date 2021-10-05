@@ -27,12 +27,12 @@ class StyleHelper {
         y = Std.int(y);
         w = Std.int(w);
         h = Std.int(h);
-        
+
         x *= Toolkit.scaleX;
         y *= Toolkit.scaleY;
         w *= Toolkit.scaleX;
         h *= Toolkit.scaleY;
-        
+
         var orgX = x;
         var orgY = y;
         var orgW = w;
@@ -66,16 +66,21 @@ class StyleHelper {
                     }
                 }
             } else {
+                final oo = g.opacity;
+                if (style.backgroundOpacity != null) {
+                    g.opacity = style.backgroundOpacity;
+                }
                 g.color = style.backgroundColor | alpha;
                 g.fillRect(x, y, w, h);
                 g.color = Color.White;
+                g.opacity = oo;
             }
         }
-        
+
         if (style.backgroundImage != null) {
             if (ImageCache.has(style.backgroundImage)) {
                 var imageInfo = ImageCache.get(style.backgroundImage);
-                
+
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
                 if (style.backgroundImageClipTop != null
                     && style.backgroundImageClipLeft != null
@@ -122,12 +127,12 @@ class StyleHelper {
                 }
             }
         }
-        
+
         if (style.borderLeftSize != null &&
             style.borderLeftSize == style.borderRightSize &&
             style.borderLeftSize == style.borderBottomSize &&
             style.borderLeftSize == style.borderTopSize
-            
+
             && style.borderLeftColor != null
             && style.borderLeftColor == style.borderRightColor
             && style.borderLeftColor == style.borderBottomColor
@@ -139,14 +144,14 @@ class StyleHelper {
             g.fillRect(x, y + h - borderSize, w, borderSize); // bottom
             g.fillRect(x, y, borderSize, h); // left
             g.fillRect(x + w - borderSize, y, borderSize, h); // right
-            g.color = Color.White;    
+            g.color = Color.White;
         } else { // compound border
             if (style.borderTopSize != null && style.borderTopSize > 0) {
                 g.color = style.borderTopColor | alpha;
                 g.fillRect(x, y, w, (style.borderTopSize * Toolkit.scale)); // top
                 g.color = Color.White;
             }
-            
+
             if (style.borderBottomSize != null && style.borderBottomSize > 0) {
                 g.color = style.borderBottomColor | alpha;
                 g.fillRect(x, y + h - (style.borderBottomSize * Toolkit.scale), w, (style.borderBottomSize * Toolkit.scale)); // bottom
@@ -158,14 +163,14 @@ class StyleHelper {
                 g.fillRect(x, y, (style.borderLeftSize * Toolkit.scale), h); // left
                 g.color = Color.White;
             }
-            
+
             if (style.borderRightSize != null && style.borderRightSize > 0) {
                 g.color = style.borderRightColor | alpha;
                 g.fillRect(x + w - (style.borderRightSize * Toolkit.scale), y, (style.borderRightSize * Toolkit.scale), h); // right
                 g.color = Color.White;
             }
-        }        
-        
+        }
+
         if (style.filter != null) {
             var f:Filter = style.filter[0];
             if ((f is DropShadow)) {
