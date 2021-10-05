@@ -81,6 +81,12 @@ class StyleHelper {
             if (ImageCache.has(style.backgroundImage)) {
                 var imageInfo = ImageCache.get(style.backgroundImage);
 
+                final oo = g.opacity;
+
+                if (style.backgroundOpacity != null) {
+                    g.opacity = style.backgroundOpacity;
+                }
+
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
                 if (style.backgroundImageClipTop != null
                     && style.backgroundImageClipLeft != null
@@ -125,6 +131,8 @@ class StyleHelper {
                                                              x + dstRect.left, y + dstRect.top, dstRect.width, dstRect.height);
                     }
                 }
+
+                g.opacity = oo;
             }
         }
 
