@@ -68,7 +68,7 @@ class StyleHelper {
             } else {
                 final oo = g.opacity;
                 if (style.backgroundOpacity != null) {
-                    g.opacity = style.backgroundOpacity;
+                    g.opacity *= style.backgroundOpacity;
                 }
                 g.color = style.backgroundColor | alpha;
                 g.fillRect(x, y, w, h);
@@ -84,7 +84,7 @@ class StyleHelper {
                 final oo = g.opacity;
 
                 if (style.backgroundOpacity != null) {
-                    g.opacity = style.backgroundOpacity;
+                    g.opacity *= style.backgroundOpacity;
                 }
 
                 var trc:Rectangle = new Rectangle(0, 0, imageInfo.width, imageInfo.height);
