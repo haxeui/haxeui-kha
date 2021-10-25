@@ -405,8 +405,8 @@ class ComponentImpl extends ComponentBase {
         var y:Float = c.screenY;
         var w:Float = c.width;
         var h:Float = c.height;
-        var imageX = (x + c._imageDisplay.left) * Toolkit.scaleX;
-        var imageY = (y + c._imageDisplay.top) * Toolkit.scaleY;
+        var imageX = Std.int((x + c._imageDisplay.left) * Toolkit.scaleX);
+        var imageY = Std.int((y + c._imageDisplay.top) * Toolkit.scaleY);
         var orgScaleQuality = g.imageScaleQuality;
         g.imageScaleQuality = ImageScaleQuality.Low;
         if (c._imageDisplay.scaled == true) {

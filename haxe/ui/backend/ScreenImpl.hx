@@ -78,10 +78,13 @@ class ScreenImpl extends ScreenBase {
     }
 
     public function renderTo(g:Graphics) {
+        var oldColor = g.color;
+        g.color = Color.White;
         for (c in rootComponents) {
             c.renderTo(g);
         }
         updateFPS(g);
+        g.color = oldColor;
     }
 
     public function setCursor(cursor:String, lock=false) {
