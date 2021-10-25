@@ -3,6 +3,7 @@ package haxe.ui.backend;
 import haxe.Timer;
 import haxe.ui.Toolkit;
 import haxe.ui.backend.kha.ImageCache;
+import haxe.ui.backend.kha.KeyboardHelper;
 import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
@@ -18,15 +19,13 @@ import kha.Color;
 import kha.graphics2.Graphics;
 import kha.graphics2.ImageScaleQuality;
 import kha.input.KeyCode;
-import kha.input.Keyboard;
-import kha.System;
 
 class ComponentImpl extends ComponentBase {
     private var _eventMap:Map<String, UIEvent->Void>;
 
     private var lastMouseX:Float = -1;
     private var lastMouseY:Float = -1;
-	
+
 	// For doubleclick detection
 	private var _lastClickTime:Float = 0;
 	private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
@@ -36,7 +35,7 @@ class ComponentImpl extends ComponentBase {
     public function new() {
         super();
         _eventMap = new Map<String, UIEvent->Void>();
-        
+
         #if (kha_android || kha_android_native || kha_ios)
         cast(this, Component).addClass(":mobile");
         #end
@@ -49,7 +48,7 @@ class ComponentImpl extends ComponentBase {
     private var _cachedClipComponentNone:Null<Bool> = null;
     private var _cachedRootComponent:Component = null;
     private var _cachedOpacity:Null<Float> = null;
-    
+
     private function clearCaches() {
         _cachedScreenX = null;
         _cachedScreenY = null;
@@ -58,12 +57,12 @@ class ComponentImpl extends ComponentBase {
         _cachedRootComponent = null;
         _cachedOpacity = null;
     }
-    
+
     private function cacheScreenPos() {
         if (_cachedScreenX != null && _cachedScreenY != null) {
             return;
         }
-        
+
         var c:Component = cast(this, Component);
         var xpos:Float = 0;
         var ypos:Float = 0;
@@ -81,11 +80,11 @@ class ComponentImpl extends ComponentBase {
             }
             c = c.parentComponent;
         }
-        
+
         _cachedScreenX = xpos;
         _cachedScreenY = ypos;
     }
-    
+
     private var screenX(get, null):Float;
     private function get_screenX():Float {
         cacheScreenPos();
@@ -102,28 +101,28 @@ class ComponentImpl extends ComponentBase {
         if (_cachedRootComponent != null) {
             return _cachedRootComponent;
         }
-        
+
         var c:Component = cast(this, Component);
         while (c.parentComponent != null) {
             c = c.parentComponent;
         }
-        
+
         _cachedRootComponent = c;
-        
+
         return c;
     }
-    
+
     private function isRootComponent():Bool {
         return (findRootComponent() == this);
     }
-    
+
     private function findClipComponent():Component {
         if (_cachedClipComponent != null) {
             return _cachedClipComponent;
         } else if (_cachedClipComponentNone == true) {
             return null;
         }
-        
+
         var c:Component = cast(this, Component);
         var clip:Component = null;
         while (c != null) {
@@ -138,7 +137,7 @@ class ComponentImpl extends ComponentBase {
         if (clip == null) {
             _cachedClipComponentNone = true;
         }
-        
+
         return clip;
     }
 
@@ -182,7 +181,7 @@ class ComponentImpl extends ComponentBase {
         if (_cachedOpacity != null) {
             return _cachedOpacity;
         }
-        
+
         var opacity:Float = 1;
         var c:Component = cast(this, Component);
         while (c != null) {
@@ -191,9 +190,9 @@ class ComponentImpl extends ComponentBase {
             }
             c = c.parentComponent;
         }
-        
+
         _cachedOpacity = opacity;
-        
+
         return opacity;
     }
 
@@ -202,7 +201,7 @@ class ComponentImpl extends ComponentBase {
         var y:Float = screenY;
         var w:Float = this.width;
         var h:Float = this.height;
-        
+
         var clipComponent = findClipComponent();
         var thisRect = new Rectangle(x, y, w, h);
         if (clipComponent != null && clipComponent != this) {
@@ -212,10 +211,10 @@ class ComponentImpl extends ComponentBase {
             var screenRect = new Rectangle(0, 0, Screen.instance.width, Screen.instance.height);
             return !screenRect.intersects(thisRect);
         }
-        
+
         return false;
     }
-    
+
     private var _batchStyleOperations:Array<BatchOperation>;
     private var _batchImageOperations:Array<BatchOperation>;
     private var _batchTextOperations:Array<BatchOperation>;
@@ -224,7 +223,7 @@ class ComponentImpl extends ComponentBase {
         findRootComponent()._batchImageOperations = [];
         findRootComponent()._batchTextOperations = [];
     }
-    
+
     private function addBatchStyleOperation(op:BatchOperation) {
         findRootComponent()._batchStyleOperations.push(op);
     }
@@ -246,33 +245,33 @@ class ComponentImpl extends ComponentBase {
         }
         return true;
     }
-    
+
     @:access(haxe.ui.core.Component)
     public function renderTo(g:Graphics) {
         if (this.isReady == false || cast(this, Component).hidden == true) {
             return;
         }
-        
+
         clearCaches();
-        
+
         if (isOffscreen() == true) {
             return;
         }
-        
+
         if (useBatching() == true && isRootComponent()) {
             clearBatchOperations();
         }
-        
+
         var x:Float = screenX;
         var y:Float = screenY;
         var w:Float = this.width;
         var h:Float = this.height;
-        
+
         var style:Style = this.style;
         if (style == null) {
             return;
         }
-        
+
         var clipRect:Rectangle = cast(this, Component).componentClipRect;
         if (clipRect != null) {
             var clx = Std.int((x + clipRect.left) * Toolkit.scaleX);
@@ -289,7 +288,7 @@ class ComponentImpl extends ComponentBase {
                 }
             }
         }
-        
+
         if (useBatching() == true) {
             addBatchStyleOperation(DrawStyle(this));
         } else {
@@ -317,7 +316,7 @@ class ComponentImpl extends ComponentBase {
         } else {
             renderCustom(g);
         }
-        
+
         for (c in cast(this, Component).childComponents) {
             c.renderTo(g);
         }
@@ -325,7 +324,7 @@ class ComponentImpl extends ComponentBase {
         if (useBatching() == false) {
             g.opacity = 1;
         }
-        
+
         if (clipRect != null) {
             if (useBatching() == true) {
                 addBatchStyleOperation(ClearScissor);
@@ -335,24 +334,24 @@ class ComponentImpl extends ComponentBase {
                 ScissorHelper.popScissor();
             }
         }
-        
+
         if (useBatching() == true && isRootComponent()) {
             renderToBatch(g);
         }
-        
+
         clearCaches();
     }
-    
+
     private function renderCustom(g:Graphics) {
-        
+
     }
-    
+
     private function renderToBatch(g:Graphics) {
         renderToBatchOperations(g, _batchStyleOperations);
         renderToBatchOperations(g, _batchImageOperations);
         renderToBatchOperations(g, _batchTextOperations);
     }
-    
+
     private function renderToBatchOperations(g:Graphics, operations:Array<BatchOperation>) {
         for (op in operations) {
             switch (op) {
@@ -364,7 +363,7 @@ class ComponentImpl extends ComponentBase {
                     renderStyleTo(g, c);
                 case DrawImage(c):
                     renderImageTo(g, c);
-                case DrawText(c):    
+                case DrawText(c):
                     renderTextTo(g, c);
                 case DrawCustom(c):
                     c.renderCustom(g);
@@ -373,7 +372,7 @@ class ComponentImpl extends ComponentBase {
             }
         }
     }
-    
+
     private var _prevStyle:Style = null;
     private function renderStyleTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
@@ -382,25 +381,25 @@ class ComponentImpl extends ComponentBase {
         var w:Float = c.width;
         var h:Float = c.height;
         var style:Style = c.style;
-        
+
         var usePrevStyle:Bool = false;
         if (style.backgroundImage != null) {
             usePrevStyle = !ImageCache.has(style.backgroundImage);
         }
-        
+
         if (usePrevStyle == false) {
             StyleHelper.paintStyle(g, style, x, y, w, h);
             c._prevStyle = style;
         } else if (c._prevStyle != null) {
             StyleHelper.paintStyle(g, c._prevStyle, x, y, w, h);
         }
-        
+
         g.opacity = 1;
     }
-    
+
     private function renderImageTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
-        
+
         var x:Float = c.screenX;
         var y:Float = c.screenY;
         var w:Float = c.width;
@@ -417,10 +416,10 @@ class ComponentImpl extends ComponentBase {
             g.drawImage(c._imageDisplay._buffer, imageX, imageY);
         }
         g.imageScaleQuality = orgScaleQuality;
-        
+
         g.opacity = 1;
     }
-    
+
     private function renderTextTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
         var x:Float = c.screenX;
@@ -428,8 +427,8 @@ class ComponentImpl extends ComponentBase {
         var w:Float = c.width;
         var h:Float = c.height;
         var style:Style = c.style;
-        
-        
+
+
         if (style.color != null) {
             g.color = style.color | 0xFF000000;
         } else {
@@ -439,11 +438,11 @@ class ComponentImpl extends ComponentBase {
         if (c._textDisplay != null) {
             c._textDisplay.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
-        
+
         if (c._textInput != null) {
             c._textInput.renderTo(g, x * Toolkit.scaleX, y * Toolkit.scaleY);
         }
-        
+
         g.color = Color.White;
         g.opacity = 1;
     }
@@ -473,7 +472,7 @@ class ComponentImpl extends ComponentBase {
         if (width == null || height == null || width <= 0 || height <= 0) {
             return;
         }
-        
+
         if (style.clip != null && style.clip == true) {
             cast(this, Component).componentClipRect = new Rectangle(0, 0, width, height);
         }
@@ -497,13 +496,13 @@ class ComponentImpl extends ComponentBase {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
                 }
-                
+
             case MouseEvent.MOUSE_OVER:
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
-                
+
             case MouseEvent.MOUSE_OUT:
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
@@ -521,14 +520,14 @@ class ComponentImpl extends ComponentBase {
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.MOUSE_UP, listener);
                 }
-                
+
             case MouseEvent.MOUSE_WHEEL:
                 if (_eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     MouseHelper.notify(MouseEvent.MOUSE_WHEEL, __onMouseWheel);
                     _eventMap.set(MouseEvent.MOUSE_WHEEL, listener);
                 }
-                
+
             case MouseEvent.CLICK:
                 if (_eventMap.exists(MouseEvent.CLICK) == false) {
                     _eventMap.set(MouseEvent.CLICK, listener);
@@ -544,17 +543,17 @@ class ComponentImpl extends ComponentBase {
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
-                
+
 			case MouseEvent.DBL_CLICK:
                 if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
                     _eventMap.set(MouseEvent.DBL_CLICK, listener);
-					
+
                     if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
                         MouseHelper.notify(MouseEvent.MOUSE_UP, __onDoubleClick);
                         _eventMap.set(MouseEvent.MOUSE_UP, listener);
                     }
                 }
-                
+
             case MouseEvent.RIGHT_MOUSE_DOWN:
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
@@ -567,7 +566,7 @@ class ComponentImpl extends ComponentBase {
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
                 }
-                
+
             case MouseEvent.RIGHT_CLICK:
                 if (_eventMap.exists(MouseEvent.RIGHT_CLICK) == false) {
                     _eventMap.set(MouseEvent.RIGHT_CLICK, listener);
@@ -583,20 +582,20 @@ class ComponentImpl extends ComponentBase {
                         _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
                     }
                 }
-                
+
 			case KeyboardEvent.KEY_DOWN:
 				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
-                    Keyboard.get().notify(__onKeyDown, null, null);
+                    KeyboardHelper.listen(__onKeyDown, null, null);
                     _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
                 }
-                
+
 			case KeyboardEvent.KEY_UP:
 				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
-                    Keyboard.get().notify(null, __onKeyUp, null);
+                    KeyboardHelper.listen(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);
                 }
-                
-            case UIEvent.CHANGE: 
+
+            case UIEvent.CHANGE:
                 if (_eventMap.exists(type) == false) {
                     if (hasTextInput() == true) {
                         getTextInput()._tf.notify(onTextInputChanged, null);
@@ -604,11 +603,11 @@ class ComponentImpl extends ComponentBase {
                 }
         }
     }
-    
+
     private function onTextInputChanged(s:String) {
         dispatch(new UIEvent(UIEvent.CHANGE));
     }
-    
+
     @:access(haxe.ui.backend.TextInputImpl)
     private override function unmapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
@@ -619,7 +618,7 @@ class ComponentImpl extends ComponentBase {
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
                     MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
                 }
-                
+
             case MouseEvent.MOUSE_OVER:
                 _eventMap.remove(type);
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
@@ -627,7 +626,7 @@ class ComponentImpl extends ComponentBase {
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
                     MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
                 }
-                
+
             case MouseEvent.MOUSE_OUT:
                 _eventMap.remove(type);
 
@@ -644,7 +643,7 @@ class ComponentImpl extends ComponentBase {
                     && _eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
                     MouseHelper.remove(MouseEvent.MOUSE_UP, __onMouseUp);
                 }
-                
+
             case MouseEvent.MOUSE_WHEEL:
                 _eventMap.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_WHEEL, __onMouseWheel);
@@ -653,14 +652,14 @@ class ComponentImpl extends ComponentBase {
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
                     MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
                 }
-                
+
             case MouseEvent.CLICK:
                 _eventMap.remove(type);
-                
+
 			case MouseEvent.DBL_CLICK:
                 _eventMap.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_UP, __onDoubleClick);
-                
+
             case MouseEvent.RIGHT_MOUSE_DOWN:
                 _eventMap.remove(type);
                 if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false
@@ -674,19 +673,19 @@ class ComponentImpl extends ComponentBase {
                     && _eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
                     MouseHelper.remove(MouseEvent.MOUSE_UP, __onMouseUp);
                 }
-                
+
             case MouseEvent.RIGHT_CLICK:
                 _eventMap.remove(type);
-                
+
 			case KeyboardEvent.KEY_DOWN:
                 _eventMap.remove(type);
-                Keyboard.get().remove(__onKeyDown, null, null);
-                
+                KeyboardHelper.unlisten(__onKeyDown, null, null);
+
 			case KeyboardEvent.KEY_UP:
                 _eventMap.remove(type);
-                Keyboard.get().remove(null, __onKeyUp, null);
-                
-            case UIEvent.CHANGE: 
+                KeyboardHelper.unlisten(null, __onKeyUp, null);
+
+            case UIEvent.CHANGE:
                 _eventMap.remove(type);
                 if (hasTextInput() == true) {
                     getTextInput()._tf.remove(onTextInputChanged, null);
@@ -698,7 +697,7 @@ class ComponentImpl extends ComponentBase {
     private function __onMouseMove(event:MouseEvent) {
         var x = event.screenX;
         var y = event.screenY;
-        
+
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -744,7 +743,7 @@ class ComponentImpl extends ComponentBase {
         var button:Int = event.data;
         var x = event.screenX;
         var y = event.screenY;
-        
+
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -773,7 +772,7 @@ class ComponentImpl extends ComponentBase {
         var button:Int = event.data;
         var x = event.screenX;
         var y = event.screenY;
-        
+
         lastMouseX = x;
         lastMouseY = y;
 
@@ -788,7 +787,7 @@ class ComponentImpl extends ComponentBase {
             if (hasComponentOver(cast this, x, y) == true) {
                 return;
             }
-			
+
             if (_mouseDownFlag == true) {
                 var type = button == 0 ? haxe.ui.events.MouseEvent.CLICK: haxe.ui.events.MouseEvent.RIGHT_CLICK;
                 var fn:UIEvent->Void = _eventMap.get(type);
@@ -798,7 +797,7 @@ class ComponentImpl extends ComponentBase {
                     mouseEvent.screenY = y / Toolkit.scaleY;
                     fn(mouseEvent);
                 }
-				
+
 				if (type == haxe.ui.events.MouseEvent.CLICK) {
 					_lastClickTimeDiff = Timer.stamp() - _lastClickTime;
 					_lastClickTime = Timer.stamp();
@@ -821,12 +820,12 @@ class ComponentImpl extends ComponentBase {
         }
         _mouseDownFlag = false;
     }
-	
+
 	private function __onDoubleClick(event:MouseEvent) {
         var button:Int = event.data;
         var x = event.screenX;
         var y = event.screenY;
-        
+
         lastMouseX = x;
         lastMouseY = y;
         var i = inBounds(x, y);
@@ -834,7 +833,7 @@ class ComponentImpl extends ComponentBase {
             if (hasComponentOver(cast this, x, y) == true) {
                 return;
             }
-			
+
             _mouseDownFlag = false;
 			var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
 			if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
@@ -869,34 +868,34 @@ class ComponentImpl extends ComponentBase {
         mouseEvent.delta = Math.max(-1, Math.min(1, -delta));
         fn(mouseEvent);
     }
-	
+
 	private function __onKeyDown(key:KeyCode) {
 		if (cast(this, Component).hasClass(":active") == false) {
 			return;
 		}
-		
+
 		var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
-		
+
 		if (fn == null) {
             return;
         }
-		
+
 		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
 		keyEvent.keyCode = key;
 		fn(keyEvent);
 	}
-	
+
 	private function __onKeyUp(key:KeyCode) {
 		if (cast(this, Component).hasClass(":active") == false) {
 			return;
 		}
-		
+
 		var fn = _eventMap.get(KeyboardEvent.KEY_UP);
-		
+
 		if (fn == null) {
             return;
         }
-		
+
 		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
 		keyEvent.keyCode = key;
 		fn(keyEvent);
