@@ -202,18 +202,21 @@ class ScreenImpl extends ScreenBase {
     private override function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
             case MouseEvent.MOUSE_MOVE:
+                initMouse();
                 if (_mapping.exists(type) == false) {
                     _mapping.set(type, listener);
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                 }
 
             case MouseEvent.MOUSE_DOWN:
+                initMouse();
                 if (_mapping.exists(type) == false) {
                     _mapping.set(type, listener);
                     MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
                 }
 
             case MouseEvent.MOUSE_UP:
+                initMouse();
                 if (_mapping.exists(type) == false) {
                     _mapping.set(type, listener);
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
