@@ -400,6 +400,11 @@ class ComponentImpl extends ComponentBase {
     private function renderImageTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
 
+        var imageScaleQuality = ImageScaleQuality.High;
+        if (c.style != null && c.style.imageRendering == "pixelated") {
+            imageScaleQuality = ImageScaleQuality.Low;
+        }
+        
         var x:Float = c.screenX;
         var y:Float = c.screenY;
         var w:Float = c.width;
@@ -407,7 +412,7 @@ class ComponentImpl extends ComponentBase {
         var imageX = Std.int((x + c._imageDisplay.left) * Toolkit.scaleX);
         var imageY = Std.int((y + c._imageDisplay.top) * Toolkit.scaleY);
         var orgScaleQuality = g.imageScaleQuality;
-        g.imageScaleQuality = ImageScaleQuality.Low;
+        g.imageScaleQuality = imageScaleQuality;
         if (c._imageDisplay.scaled == true || Toolkit.scale != 1) {
             g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth * Toolkit.scaleX, c._imageDisplay.imageHeight * Toolkit.scaleY);
         } else {
