@@ -492,23 +492,27 @@ class ComponentImpl extends ComponentBase {
     private override function mapEvent(type:String, listener:UIEvent->Void) {
         switch (type) {
             case MouseEvent.MOUSE_MOVE:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
                 }
 
             case MouseEvent.MOUSE_OVER:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
 
             case MouseEvent.MOUSE_OUT:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
             case MouseEvent.MOUSE_DOWN:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_DOWN) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
@@ -516,12 +520,14 @@ class ComponentImpl extends ComponentBase {
                 }
 
             case MouseEvent.MOUSE_UP:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_UP) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.MOUSE_UP, listener);
                 }
 
             case MouseEvent.MOUSE_WHEEL:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
                     MouseHelper.notify(MouseEvent.MOUSE_WHEEL, __onMouseWheel);
@@ -529,6 +535,7 @@ class ComponentImpl extends ComponentBase {
                 }
 
             case MouseEvent.CLICK:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.CLICK) == false) {
                     _eventMap.set(MouseEvent.CLICK, listener);
 
@@ -545,6 +552,7 @@ class ComponentImpl extends ComponentBase {
                 }
 
 			case MouseEvent.DBL_CLICK:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
                     _eventMap.set(MouseEvent.DBL_CLICK, listener);
 
@@ -555,6 +563,7 @@ class ComponentImpl extends ComponentBase {
                 }
 
             case MouseEvent.RIGHT_MOUSE_DOWN:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_DOWN) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_DOWN, __onMouseDown);
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
@@ -562,12 +571,14 @@ class ComponentImpl extends ComponentBase {
                 }
 
             case MouseEvent.RIGHT_MOUSE_UP:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.RIGHT_MOUSE_UP) == false) {
                     MouseHelper.notify(MouseEvent.MOUSE_UP, __onMouseUp);
                     _eventMap.set(MouseEvent.RIGHT_MOUSE_UP, listener);
                 }
 
             case MouseEvent.RIGHT_CLICK:
+                Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.RIGHT_CLICK) == false) {
                     _eventMap.set(MouseEvent.RIGHT_CLICK, listener);
 
@@ -584,12 +595,14 @@ class ComponentImpl extends ComponentBase {
                 }
 
 			case KeyboardEvent.KEY_DOWN:
+                Screen.instance.initKeyboard();
 				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
                     KeyboardHelper.listen(__onKeyDown, null, null);
                     _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
                 }
 
 			case KeyboardEvent.KEY_UP:
+                Screen.instance.initKeyboard();
 				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
                     KeyboardHelper.listen(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);

@@ -1,6 +1,7 @@
 package haxe.ui.backend;
 
 import haxe.ui.Toolkit;
+import haxe.ui.backend.kha.KeyboardHelper;
 import haxe.ui.backend.kha.MouseHelper;
 import haxe.ui.core.Component;
 import haxe.ui.events.MouseEvent;
@@ -11,26 +12,30 @@ import kha.Font;
 import kha.Scheduler;
 import kha.System;
 import kha.graphics2.Graphics;
-import kha.System;
 import kha.input.Mouse;
 
 @:access(haxe.ui.backend.ComponentImpl)
+@:allow(haxe.ui.backend.ComponentImpl)
 class ScreenImpl extends ScreenBase {
     private var _mapping:Map<String, UIEvent->Void>;
     private var cursorLocked:Bool = false;
 
     public function new() {
         _mapping = new Map<String, UIEvent->Void>();
+    }
 
+    private function initMouse() {
         if (!MouseHelper.isInitialized()) {
             MouseHelper.init(options != null ? options.mouseInput : null);
         }
-
-        if (!haxe.ui.backend.kha.KeyboardHelper.isInitialized()) {
-            haxe.ui.backend.kha.KeyboardHelper.init(options != null ? options.keyboardInput : null);
+    }
+    
+    private function initKeyboard() {
+        if (!KeyboardHelper.isInitialized()) {
+            KeyboardHelper.init(options != null ? options.keyboardInput : null);
         }
     }
-
+    
     public override function get_width():Float {
         return System.windowWidth() / Toolkit.scaleX;
     }

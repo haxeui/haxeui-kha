@@ -16,11 +16,14 @@ class MouseHelper {
     static var listen: MouseListenerCallback;
     static var unlisten: MouseListenerCallback;
 
-    public static function isInitialized() {
+    public static inline function isInitialized() {
         return listen != null;
     }
 
     public static function init( ?opts: MouseInputOptions ) {
+        if (opts != null && opts.listen == null && Mouse.get() == null) {
+            return;
+        }
         listen = opts != null && opts.listen != null ? opts.listen : Mouse.get().notify;
         unlisten = opts != null && opts.unlisten != null ? opts.unlisten : Mouse.get().remove;
     }

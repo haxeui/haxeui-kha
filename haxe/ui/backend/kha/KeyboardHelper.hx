@@ -1,17 +1,21 @@
 package haxe.ui.backend.kha;
 
 import haxe.ui.backend.ToolkitOptions;
+import kha.input.Keyboard;
 
 class KeyboardHelper {
     public static var listen: KeyListenerCallback;
     public static var unlisten: KeyListenerCallback;
 
-    public static function isInitialized() {
+    public static inline function isInitialized() {
         return listen != null;
     }
 
     public static function init( ?opts: KeyboardInputOptions ) {
-        listen = opts != null && opts.listen != null ? opts.listen : kha.input.Keyboard.get().notify;
-        unlisten = opts != null && opts.unlisten != null ? opts.unlisten : kha.input.Keyboard.get().remove;
+        if (opts != null && opts.listen == null && Keyboard.get() == null) {
+            return;
+        }
+        listen = opts != null && opts.listen != null ? opts.listen : Keyboard.get().notify;
+        unlisten = opts != null && opts.unlisten != null ? opts.unlisten : Keyboard.get().remove;
     }
 }
