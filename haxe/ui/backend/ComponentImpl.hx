@@ -408,9 +408,7 @@ class ComponentImpl extends ComponentBase {
         var imageY = Std.int((y + c._imageDisplay.top) * Toolkit.scaleY);
         var orgScaleQuality = g.imageScaleQuality;
         g.imageScaleQuality = ImageScaleQuality.Low;
-        if (c._imageDisplay.scaled == true) {
-            g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth, c._imageDisplay.imageHeight);
-        } else if (Toolkit.scale != 1) {
+        if (c._imageDisplay.scaled == true || Toolkit.scale != 1) {
             g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth * Toolkit.scaleX, c._imageDisplay.imageHeight * Toolkit.scaleY);
         } else {
             g.drawImage(c._imageDisplay._buffer, imageX, imageY);
