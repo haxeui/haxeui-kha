@@ -49,7 +49,4 @@ jobs:
 
     - name: Build app (${{ matrix.target }}, haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
-        echo "-------------------------------------------"
-        wayland-scanner --version
-        echo "-------------------------------------------"
         node Kha/make ${{ matrix.target }} --compile
