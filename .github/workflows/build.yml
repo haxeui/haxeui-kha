@@ -32,6 +32,8 @@ jobs:
         sudo apt-get install libudev-dev
         sudo apt-get install libx11-dev
         sudo apt-get install libxcursor-dev
+        sudo apt-get install libgl1-mesa-dev
+        sudo apt-get install libxkbcommon-dev
         sudo apt-get install libwayland-dev
         sudo apt-get install wayland-protocols
         git clone --recursive --single-branch --depth=1 https://github.com/Kode/Kha.git
