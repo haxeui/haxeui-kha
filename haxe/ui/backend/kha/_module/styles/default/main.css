@@ -12,18 +12,6 @@
     padding-bottom: 3px;
 }
 
-.scrollview {
-    padding: 1px;
-}
-
-.numberstepper {
-    padding: 1px;
-}
-
-.optionbox .image {
-    margin-left: -1px;
-}
-
 .tooltip {
     filter: none;
 }

@@ -56,6 +56,6 @@ class ScissorHelper {
                 y = Std.int(entry.rect.top);
             }
         }
-        g.scissor(x, y, w - 1, h);
+        g.scissor(x, y, w, h);
     }
 }    
