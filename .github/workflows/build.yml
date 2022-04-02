@@ -21,9 +21,6 @@ jobs:
 
     - name: Setup app (haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
-        echo "-------------------------------------------"
-        echo wayland-scanner --version
-        echo "-------------------------------------------"
         sudo apt-get update
         sudo apt-get install libxinerama-dev
         sudo apt-get install libasound2-dev
@@ -50,4 +47,7 @@ jobs:
 
     - name: Build app (${{ matrix.target }}, haxe ${{ matrix.haxe-version }}, ${{ matrix.os }})
       run: |
+        echo "-------------------------------------------"
+        wayland-scanner --version
+        echo "-------------------------------------------"
         node Kha/make ${{ matrix.target }} --compile
