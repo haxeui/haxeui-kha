@@ -27,6 +27,7 @@ class AppImpl extends AppBase {
         if (height != -1) {
             canvas.height = height;      
         }
+        canvas.style.outline = "none";
         #end
         
         _backgroudColor = ColorUtil.parseColor(Toolkit.backendProperties.getProp("haxe.ui.kha.background.color", "0xFFFFFF"));
