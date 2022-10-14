@@ -147,6 +147,11 @@ class ComponentImpl extends ComponentBase {
             return false;
         }
 
+        // component might not be destroyed but not actually onscreen
+        if (Screen.instance.rootComponents.indexOf(findRootComponent()) == -1) {
+            return false;
+        }
+
         var b:Bool = false;
         var sx = screenX * Toolkit.scaleX;
         var sy = screenY * Toolkit.scaleY;
