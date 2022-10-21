@@ -26,11 +26,11 @@ class ComponentImpl extends ComponentBase {
     private var lastMouseX:Float = -1;
     private var lastMouseY:Float = -1;
 
-	// For doubleclick detection
-	private var _lastClickTime:Float = 0;
-	private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
-	private var _lastClickX:Float = -1;
-	private var _lastClickY:Float = -1;
+    // For doubleclick detection
+    private var _lastClickTime:Float = 0;
+    private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
+    private var _lastClickX:Float = -1;
+    private var _lastClickY:Float = -1;
 
     public function new() {
         super();
@@ -559,7 +559,7 @@ class ComponentImpl extends ComponentBase {
                     }
                 }
 
-			case MouseEvent.DBL_CLICK:
+            case MouseEvent.DBL_CLICK:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
                     _eventMap.set(MouseEvent.DBL_CLICK, listener);
@@ -602,16 +602,16 @@ class ComponentImpl extends ComponentBase {
                     }
                 }
 
-			case KeyboardEvent.KEY_DOWN:
+            case KeyboardEvent.KEY_DOWN:
                 Screen.instance.initKeyboard();
-				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
+                if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
                     KeyboardHelper.listen(__onKeyDown, null, null);
                     _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
                 }
 
-			case KeyboardEvent.KEY_UP:
+            case KeyboardEvent.KEY_UP:
                 Screen.instance.initKeyboard();
-				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
+                if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
                     KeyboardHelper.listen(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);
                 }
@@ -677,7 +677,7 @@ class ComponentImpl extends ComponentBase {
             case MouseEvent.CLICK:
                 _eventMap.remove(type);
 
-			case MouseEvent.DBL_CLICK:
+            case MouseEvent.DBL_CLICK:
                 _eventMap.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_UP, __onDoubleClick);
 
@@ -698,11 +698,11 @@ class ComponentImpl extends ComponentBase {
             case MouseEvent.RIGHT_CLICK:
                 _eventMap.remove(type);
 
-			case KeyboardEvent.KEY_DOWN:
+            case KeyboardEvent.KEY_DOWN:
                 _eventMap.remove(type);
                 KeyboardHelper.unlisten(__onKeyDown, null, null);
 
-			case KeyboardEvent.KEY_UP:
+            case KeyboardEvent.KEY_UP:
                 _eventMap.remove(type);
                 KeyboardHelper.unlisten(null, __onKeyUp, null);
 
@@ -819,14 +819,14 @@ class ComponentImpl extends ComponentBase {
                     fn(mouseEvent);
                 }
 
-				if (type == haxe.ui.events.MouseEvent.CLICK) {
-					_lastClickTimeDiff = Timer.stamp() - _lastClickTime;
-					_lastClickTime = Timer.stamp();
-					if (_lastClickTimeDiff >= 0.5) { // 0.5 seconds
-						_lastClickX = x;
-						_lastClickY = y;
-					}
-				}
+                if (type == haxe.ui.events.MouseEvent.CLICK) {
+                    _lastClickTimeDiff = Timer.stamp() - _lastClickTime;
+                    _lastClickTime = Timer.stamp();
+                    if (_lastClickTimeDiff >= 0.5) { // 0.5 seconds
+                        _lastClickX = x;
+                        _lastClickY = y;
+                    }
+                }
             }
 
             _mouseDownFlag = false;
@@ -842,7 +842,7 @@ class ComponentImpl extends ComponentBase {
         _mouseDownFlag = false;
     }
 
-	private function __onDoubleClick(event:MouseEvent) {
+    private function __onDoubleClick(event:MouseEvent) {
         var button:Int = event.data;
         var x = event.screenX;
         var y = event.screenY;
@@ -856,17 +856,17 @@ class ComponentImpl extends ComponentBase {
             }
 
             _mouseDownFlag = false;
-			var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
-			if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
-				var type = haxe.ui.events.MouseEvent.DBL_CLICK;
-				var fn:UIEvent->Void = _eventMap.get(type);
-				if (fn != null) {
-					var mouseEvent = new haxe.ui.events.MouseEvent(type);
-					mouseEvent.screenX = x / Toolkit.scaleX;
-					mouseEvent.screenY = y / Toolkit.scaleY;
-					fn(mouseEvent);
-				}
-			}
+            var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
+            if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
+                var type = haxe.ui.events.MouseEvent.DBL_CLICK;
+                var fn:UIEvent->Void = _eventMap.get(type);
+                if (fn != null) {
+                    var mouseEvent = new haxe.ui.events.MouseEvent(type);
+                    mouseEvent.screenX = x / Toolkit.scaleX;
+                    mouseEvent.screenY = y / Toolkit.scaleY;
+                    fn(mouseEvent);
+                }
+            }
         }
         _mouseDownFlag = false;
     }
@@ -890,37 +890,37 @@ class ComponentImpl extends ComponentBase {
         fn(mouseEvent);
     }
 
-	private function __onKeyDown(key:KeyCode) {
-		if (cast(this, Component).hasClass(":active") == false) {
-			return;
-		}
-
-		var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
-
-		if (fn == null) {
+    private function __onKeyDown(key:KeyCode) {
+        if (cast(this, Component).hasClass(":active") == false) {
             return;
         }
 
-		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
-		keyEvent.keyCode = key;
-		fn(keyEvent);
-	}
+        var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
 
-	private function __onKeyUp(key:KeyCode) {
-		if (cast(this, Component).hasClass(":active") == false) {
-			return;
-		}
-
-		var fn = _eventMap.get(KeyboardEvent.KEY_UP);
-
-		if (fn == null) {
+        if (fn == null) {
             return;
         }
 
-		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
-		keyEvent.keyCode = key;
-		fn(keyEvent);
-	}
+        var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
+        keyEvent.keyCode = key;
+        fn(keyEvent);
+    }
+
+    private function __onKeyUp(key:KeyCode) {
+        if (cast(this, Component).hasClass(":active") == false) {
+            return;
+        }
+
+        var fn = _eventMap.get(KeyboardEvent.KEY_UP);
+
+        if (fn == null) {
+            return;
+        }
+
+        var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
+        keyEvent.keyCode = key;
+        fn(keyEvent);
+    }
 
     private function hasComponentOver(ref:Component, x:Float, y:Float):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);

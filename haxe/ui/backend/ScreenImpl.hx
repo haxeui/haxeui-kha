@@ -79,7 +79,7 @@ class ScreenImpl extends ScreenBase {
         addResizeListener();
         resizeComponent(component);
         //component.dispatchReady();
-		return component;
+        return component;
     }
 
     public override function removeComponent(component:Component, dispose:Bool = true):Component {
@@ -87,7 +87,7 @@ class ScreenImpl extends ScreenBase {
         if (component.inBounds(MouseHelper.currentMouseX, MouseHelper.currentMouseY)) {
             setCursor(null);
         }
-		return component;
+        return component;
     }
 
     public function renderTo(g:Graphics) {
