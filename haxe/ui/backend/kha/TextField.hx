@@ -36,7 +36,7 @@ class TextField {
     private var _caretInfo:CaretInfo = {row: -1, column: -1, visible: false, force: false, timerId: -1};
 
     public function new() {
-        Mouse.get().notify(onMouseDown, null, null, null, null);
+        Mouse.get().notify(onMouseDown, onMouseUp, onMouseMove, null, null);
         Keyboard.get().notify(onKeyDown, onKeyUp, onKeyPress);
 
         // Only one cutCopyPaste is set at once, as opposed to the listener list for keyboard/mouse.
@@ -704,6 +704,7 @@ class TextField {
         Scheduler.removeTimeTasks(REPEAT_TIMER_GROUP);
     }
 
+    private var _mouseDownPos:CharPosition = null;
     private function onMouseDown(button:Int, x:Int, y:Int) {
         if (_font == null || inBounds(x, y) == false) {
             return;
@@ -718,14 +719,30 @@ class TextField {
         var localY = y - top;
 
         resetSelection();
-
-        _caretInfo.row = scrollTop + Std.int(localY / font.height(fontSize));
-        if (_caretInfo.row > _lines.length - 1) {
-            _caretInfo.row = _lines.length - 1;
+        var pos = coordsToPos(localX, localY);
+        if (pos != null) {
+            _caretInfo.row = pos.row;
+            _caretInfo.column = pos.column;
+            scrollToCaret();
+            _currentFocus.onFocus();
         }
-        var line = _lines[_caretInfo.row];
+        _mouseDownPos = pos;
+
+    }
+
+    private function coordsToPos(localX:Float, localY:Float):CharPosition {
+        var pos = {
+            row: 0,
+            column: 0
+        }
+
+        pos.row = scrollTop + Std.int(localY / font.height(fontSize));
+        if (pos.row > _lines.length - 1) {
+            pos.row = _lines.length - 1;
+        }
+        var line = _lines[pos.row];
         if (line == null) {
-            return;
+            return null;
         }
         var totalWidth:Float = 0;
         var i = 0;
@@ -733,10 +750,10 @@ class TextField {
         for (ch in line) {
             var charWidth = font.widthOfCharacters(fontSize, [ch], 0, 1);
             if (totalWidth + charWidth > localX) {
-                _caretInfo.column = i;
+                pos.column = i;
                 var delta = localX - totalWidth;
                 if (delta > charWidth * 0.6) {
-                    _caretInfo.column++;
+                    pos.column++;
                 }
                 inText = true;
                 break;
@@ -747,11 +764,62 @@ class TextField {
         }
 
         if (inText == false) {
-            _caretInfo.column = line.length;
+            pos.column = line.length;
         }
 
-        scrollToCaret();
-        _currentFocus.onFocus();
+        return pos;
+    }
+
+    private function onMouseUp(button:Int, x:Int, y:Int) {
+        _mouseDownPos = null;
+    }
+
+    private function onMouseMove(x:Int, y:Int, moveX:Int, moveY:Int) {
+        if (_font == null) {
+            return;
+        }
+
+        if (_mouseDownPos == null) {
+            return;
+        }
+
+        if (isActive == false) {
+            return;
+        }
+
+        if (inBounds(x, y) == false) {
+            if (y < top && scrollTop == 0) {
+                y = Std.int(top);
+            } else if (y > top + height) {
+                y = Std.int(top + height);
+            }
+        }
+
+        var localX = x - left + scrollLeft;
+        var localY = y - top;
+        var pos = coordsToPos(localX, localY);
+        if (pos != null) {
+            var startIndex = posToIndex(_mouseDownPos);
+            var endIndex = posToIndex(pos);
+
+            if (endIndex > startIndex) {
+                _selectionInfo.start.row = _mouseDownPos.row;
+                _selectionInfo.start.column = _mouseDownPos.column;
+                _selectionInfo.end = pos;
+
+                _caretInfo.row = pos.row;
+                _caretInfo.column = pos.column;
+                scrollToCaret();
+            } else {
+                _selectionInfo.start.row = pos.row;
+                _selectionInfo.start.column = pos.column;
+                _selectionInfo.end = _mouseDownPos;
+
+                _caretInfo.row = pos.row;
+                _caretInfo.column = pos.column;
+                scrollToCaret();
+            }
+        }
     }
 
     public function focus() {
@@ -778,6 +846,8 @@ class TextField {
         Scheduler.removeTimeTask(_caretInfo.timerId);
         _caretInfo.timerId = -1;
         _caretInfo.visible = false;
+
+        resetSelection();
     }
 
     //*****************************************************************************************************************//
@@ -926,6 +996,7 @@ class TextField {
                 scrollLeft = 0;
             }
         }
+        notifyCaretMoved();
     }
 
     private function ensureRowVisible(row:Int) {

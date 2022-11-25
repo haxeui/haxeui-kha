@@ -51,6 +51,7 @@ class TextInputImpl extends TextBase {
         
         _tf.scrollLeft = _inputData.hscrollPos;
         _tf.scrollTop = Std.int(_inputData.vscrollPos);
+        trace(_inputData.vscrollPos, _inputData.vscrollMax, _inputData.vscrollPageStep, _inputData.vscrollPageSize);
     }
     
     private override  function validateStyle():Bool {
@@ -104,7 +105,7 @@ class TextInputImpl extends TextBase {
 
     public function renderTo(g:Graphics, x:Float, y:Float) {
         _tf.left = x + _left;
-        _tf.top = y + _top;
+        _tf.top = y + _top + 1;
         _tf.render(g);
     }
     
