@@ -23,6 +23,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ninja-build
+        sudo apt-get install -y libvulkan-dev
         sudo apt-get install libxinerama-dev
         sudo apt-get install libasound2-dev
         sudo apt-get install mesa-common-dev
