@@ -767,6 +767,16 @@ class ComponentImpl extends ComponentBase {
         lastMouseY = y;
         var i = inBounds(x, y);
         if (i == true) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OUT);
+                if (fn != null) {
+                    var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OUT);
+                    mouseEvent.screenX = x / Toolkit.scaleX;
+                    mouseEvent.screenY = y / Toolkit.scaleY;
+                    fn(mouseEvent);
+                }
+                return;
+            }
             if (this.style != null) {
                 Screen.instance.setCursor(this.style.cursor);
             }
