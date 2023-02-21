@@ -96,7 +96,9 @@ class ScreenImpl extends ScreenBase {
         for (c in rootComponents) {
             c.renderTo(g);
         }
+        #if haxeui_calc_fps
         updateFPS(g);
+        #end
         g.color = oldColor;
     }
 
