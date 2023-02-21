@@ -56,8 +56,13 @@ class TextDisplayImpl extends TextBase {
     private var _lines:Array<String>;
     private override function measureText() {
         if (_text == null || _text.length == 0 || _font == null) {
-            _textWidth = 0;
-            _textHeight = 0;
+            if (_font != null) {
+                _textWidth = 0;
+                _textHeight = _font.height(Std.int(_fontSize));
+            } else {
+                _textWidth = 0;
+                _textHeight = 0;
+            }
             return;
         }
 
