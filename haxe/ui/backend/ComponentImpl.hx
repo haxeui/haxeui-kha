@@ -241,6 +241,11 @@ class ComponentImpl extends ComponentBase {
         findRootComponent()._batchTextOperations.push(op);
     }
 
+    private var _hasBatchBreaker:Null<Bool> = false;
+    private inline function hasBatchBreaker():Bool {
+        return findRootComponent()._hasBatchBreaker;
+    }
+
     private static inline function useBatching() {
         if (Screen.instance.options == null) {
             return true;
@@ -263,7 +268,9 @@ class ComponentImpl extends ComponentBase {
             return;
         }
 
-        if (useBatching() == true && isRootComponent()) {
+        var batch = (useBatching() == true && hasBatchBreaker() == false);
+
+        if (batch && isRootComponent()) {
             clearBatchOperations();
         }
 
@@ -283,7 +290,7 @@ class ComponentImpl extends ComponentBase {
             var cly = Std.int((y + clipRect.top) * Toolkit.scaleY);
             var clw = Math.ceil(clipRect.width * Toolkit.scaleX);
             var clh = Math.ceil(clipRect.height * Toolkit.scaleY);
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchStyleOperation(ApplyScissor(clx, cly, clw, clh));
                 addBatchImageOperation(ApplyScissor(clx, cly, clw, clh));
                 addBatchTextOperation(ApplyScissor(clx, cly, clw, clh));
@@ -294,14 +301,14 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
-        if (useBatching() == true) {
+        if (batch) {
             addBatchStyleOperation(DrawStyle(this));
         } else {
             renderStyleTo(g, this);
         }
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchImageOperation(DrawImage(this));
             } else {
                 renderImageTo(g, this);
@@ -309,14 +316,14 @@ class ComponentImpl extends ComponentBase {
         }
 
         if (_textDisplay != null || _textInput != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchTextOperation(DrawText(this));
             } else {
                 renderTextTo(g, this);
             }
         }
 
-        if (useBatching() == true) {
+        if (batch) {
             addBatchStyleOperation(DrawCustom(this));
         } else {
             renderCustom(g);
@@ -326,12 +333,12 @@ class ComponentImpl extends ComponentBase {
             c.renderTo(g);
         }
 
-        if (useBatching() == false) {
+        if (!batch) {
             g.opacity = 1;
         }
 
         if (clipRect != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchStyleOperation(ClearScissor);
                 addBatchImageOperation(ClearScissor);
                 addBatchTextOperation(ClearScissor);
@@ -340,7 +347,7 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
-        if (useBatching() == true && isRootComponent()) {
+        if (batch && isRootComponent()) {
             renderToBatch(g);
         }
 
@@ -491,6 +498,43 @@ class ComponentImpl extends ComponentBase {
         for (child in c.childComponents) {
             child.handleVisibility(show);
         }
+    }
+
+    private var _batchBreakerCount:Int = 0;
+    private function checkIncrementBatchBreaker(child:Component) {
+        if ((child is haxe.ui.containers.windows.Window) || (child is haxe.ui.containers.dialogs.Dialog)) {
+            findRootComponent()._batchBreakerCount++;
+            findRootComponent()._hasBatchBreaker = true;
+        }
+    }
+
+    private function checkDeincrementBatchBreaker(child:Component) {
+        if ((child is haxe.ui.containers.windows.Window) || (child is haxe.ui.containers.dialogs.Dialog)) {
+            findRootComponent()._batchBreakerCount--;
+            if (findRootComponent()._batchBreakerCount == 0) {
+                findRootComponent()._hasBatchBreaker = false;
+            }
+        }
+    }
+
+    private override function handleAddComponent(child:Component):Component {
+        checkIncrementBatchBreaker(child);
+        return super.handleAddComponent(child);
+    }
+
+    private override function handleAddComponentAt(child:Component, index:Int):Component {
+        checkIncrementBatchBreaker(child);
+        return super.handleAddComponentAt(child, index);
+    }
+
+    private override function handleRemoveComponent(child:Component, dispose:Bool = true):Component {
+        checkDeincrementBatchBreaker(child);
+        return super.handleRemoveComponent(child, dispose);
+    }
+
+    private override function handleRemoveComponentAt(index:Int, dispose:Bool = true):Component {
+        checkDeincrementBatchBreaker(cast(this,Component).childComponents[index]);
+        return super.handleRemoveComponentAt(index, dispose);
     }
 
     //***********************************************************************************************************
