@@ -116,7 +116,7 @@ class TextInputImpl extends TextBase {
         
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
-            _textHeight = _font.height(Std.int(_fontSize));
+            _textHeight = _font.height(Std.int(_fontSize)) + 2;
             return;
         }
 
