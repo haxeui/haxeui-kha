@@ -11,8 +11,11 @@ import kha.graphics4.Usage;
 import kha.Color as Kolor;
 import haxe.ui.util.Color;
 
+using haxe.ui.backend.kha.GraphicsExtension;
 
 class ComponentGraphicsImpl extends ComponentGraphicsBase {
+    static inline final BEZIER_SEGMENTS = 20;
+
     public function new(component:Component) {
         super(component);
     }
@@ -82,40 +85,28 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     }
                 case Circle(x, y, radius):
                     if (currentFillColor != -1) {
-                        //TODO
-                        // DrawCircleGradient(Std.int(sx + x),
-                        //                    Std.int(sy + y),
-                        //                    radius + currentStrokeThickness - 1,
-                        //                    getFillKolor(),
-                        //                    getFillKolor());
+                        g.color = getFillKolor();
+                        g.fillCircle(sx + x, sy + y, radius + currentStrokeThickness);
                     }
                     if (currentStrokeColor != -1) {
-                        //TODO
-                        // DrawCircle(Std.int(sx + x),
-                        //            Std.int(sy + y),
-                        //            radius + currentStrokeThickness - 1,
-                        //            getStrokeKolor());
+                        g.color = getStrokeKolor();
+                        g.drawCircle(sx + x, sy + y, radius + currentStrokeThickness, currentStrokeThickness);
                     }
                 case CurveTo(controlX, controlY, anchorX, anchorY):
                     if (currentStrokeColor != -1) {
-                        //TODO
-                        // DrawLineBezierQuad(new Vector2(sx + currentPosition.x, sy + currentPosition.y),
-                        //                    new Vector2(sx + anchorX, sy + anchorY),
-                        //                    new Vector2(sx + controlX, sy + controlY),
-                        //                    currentStrokeThickness + .5,
-                        //                    getStrokeKolor());
+                        g.color = getStrokeKolor();
+                        final bezX = [sx + currentPosition.x, sx + controlX, sx + anchorX];
+                        final bezY = [sy + currentPosition.y, sy + controlY, sy + anchorY];
+                        g.drawQuadraticBezier(bezX, bezY, BEZIER_SEGMENTS, currentStrokeThickness);
                     }
                     currentPosition.x = anchorX;
                     currentPosition.y = anchorY;
                 case CubicCurveTo(controlX1, controlY1, controlX2, controlY2, anchorX, anchorY):
                     if (currentStrokeColor != -1) {
-                        //TODO
-                        // DrawLineBezierCubic(new Vector2(sx + currentPosition.x, sy + currentPosition.y),
-                        //                     new Vector2(sx + anchorX, sy + anchorY),
-                        //                     new Vector2(sx + controlX1, sy + controlY1),
-                        //                     new Vector2(sx + controlX2, sy + controlY2),
-                        //                     currentStrokeThickness + .5,
-                        //                     getStrokeKolor());
+                        g.color = getStrokeKolor();
+                        final bezX = [sx + currentPosition.x, sx + controlX1, sx + controlX2, sx + anchorX];
+                        final bezY = [sy + currentPosition.y, sy + controlY1, sy + controlY2, sy + anchorY];
+                        g.drawCubicBezier(bezX, bezY, BEZIER_SEGMENTS, currentStrokeThickness);
                     }
                     currentPosition.x = anchorX;
                     currentPosition.y = anchorY;
@@ -123,6 +114,10 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     if (currentFillColor != -1) {
                         g.color = getFillKolor();
                         g.fillRect(sx + x, sy + y, width, height);
+                    }
+                    if (currentStrokeColor != -1) {
+                        g.color = getStrokeKolor();
+                        g.drawRect(sx + x, sy + y, width, height, currentStrokeThickness);
                     }
                case SetPixel(x, y, color):
                     g.color = getKolor(color);
