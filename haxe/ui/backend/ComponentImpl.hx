@@ -262,6 +262,11 @@ class ComponentImpl extends ComponentBase {
             return;
         }
 
+        if ((this is haxe.ui.components.Canvas)) {
+            cast(this, haxe.ui.components.Canvas).componentGraphics.renderTo(g);
+            return;
+        }
+
         clearCaches();
 
         if (isOffscreen() == true) {
