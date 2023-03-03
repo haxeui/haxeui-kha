@@ -7,9 +7,14 @@ import kha.graphics2.VerTextAlignment;
 import kha.graphics2.HorTextAlignment;
 
 /**
- * Static extension functions for Graphics2.
- * Usage: "using kha.graphics2.GraphicsExtension;"
+ * Copied directly from kha.graphics2.GraphicsExtension per the suggestions in the @:deprecated metadata.
+ * My only additions were the quadratic bezier functions, derived from the cubic bezier functions.
  */
+
+/**
+ * Static extension functions for Graphics2.
+ * Usage: "using haxe.ui.backend.kha.GraphicsExtension;"
+ **/
 class GraphicsExtension {
 	/**
 	 * Draws a arc.
@@ -309,7 +314,7 @@ class GraphicsExtension {
 
 	/**
 	 * Draws a quadratic bezier using 3 pairs of points. 
-	 * Provide x and y in the following order: startPoint, controlPoint, controlPoint, endPoint
+	 * Provide x and y in the following order: startPoint, controlPoint, endPoint
 	 */
 	public static function drawQuadraticBezier(g2: Graphics, x: Array<Float>, y: Array<Float>, segments: Int = 20, strength: Float = 1.0): Void {
 		var t: Float;

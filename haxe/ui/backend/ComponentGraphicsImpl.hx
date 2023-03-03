@@ -10,6 +10,7 @@ import kha.graphics4.TextureFormat;
 import kha.graphics4.Usage;
 import kha.Color as Kolor;
 import haxe.ui.util.Color;
+import haxe.ui.util.Variant.VariantType;
 
 using haxe.ui.backend.kha.GraphicsExtension;
 
@@ -20,10 +21,6 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
         super(component);
     }
     
-    private var _image:Image = null;
-    private var _hasImage:Bool = false;
-    private var _lastBytes:Bytes = null;
-
     inline function getKolor(c:Color, a:Int=255) 
         return Kolor.fromBytes(c.r, c.g, c.b, a);
     
@@ -58,7 +55,7 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                                    sy + currentPosition.y,
                                    sx + x,
                                    sy + y,
-                                   currentStrokeThickness /* + .5 */);
+                                   currentStrokeThickness);
                     }
                     currentPosition.x = x;
                     currentPosition.y = y;
@@ -123,28 +120,18 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     g.color = getKolor(color);
                     g.fillRect(sx + x, sy + y, 1.0, 1.0); // probably not right
                case SetPixels(pixels):   
-                // TODO
-                //    if (_hasTexture == false) {
-                //        _hasTexture = true;
-                //        var image = Image.fromBytes(data, 
-                //                                    Std.int(_component.width), 
-                //                                    Std.int(_component.height), 
-                //                                    TextureFormat.RGBA32,
-                //                                    Usage.DynamicUsage,
-                //                                    true);
-                //        _texture = LoadTextureFromImage(image);
-                //        _lastBytes = pixels;
-                //        //UnloadImage(image);
-                //    } else if (_lastBytes != pixels) {
-                //        _lastBytes = pixels;
-                //        var data = NativeArray.address(pixels.getData(), 0);
-                //        UpdateTexture(_texture, data.rawCast());
-                //    }
-                   
-
-                //    DrawTexture(_texture, sx, sy, Colors.WHITE);
+                    final img = Image.fromBytes(pixels, 
+                                                Std.int(w), 
+                                                Std.int(h),
+                                                TextureFormat.RGBA32,
+                                                Usage.StaticUsage);
+                    g.drawImage(img, sx, sy);
                case Image(resource, x, y, width, height):
-                // TODO
+                    switch (resource) {
+                        case VT_ImageData(img):
+                            g.drawScaledImage(img, sx + x, sy + y, width, height);
+                        default:
+                    }
             }
         }
     }
