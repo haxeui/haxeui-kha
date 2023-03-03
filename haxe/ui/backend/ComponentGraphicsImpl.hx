@@ -8,7 +8,6 @@ import kha.Image;
 import kha.graphics2.Graphics;
 import kha.graphics4.TextureFormat;
 import kha.graphics4.Usage;
-import kha.Color as Kolor;
 import haxe.ui.util.Color;
 import haxe.ui.util.Variant.VariantType;
 
@@ -20,9 +19,6 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
     public function new(component:Component) {
         super(component);
     }
-    
-    inline function getKolor(c:Color, a:Int=255) 
-        return Kolor.fromBytes(c.r, c.g, c.b, a);
     
     public function renderTo(g:Graphics) {
         var currentPosition:Point = new Point();
@@ -37,20 +33,27 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
         var w = _component.width;
         var h = _component.height;
 
-        final getFillKolor = () -> getKolor(currentFillColor, currentFillAlpha);
-        final getStrokeKolor = () -> getKolor(currentStrokeColor, currentStrokeAlpha);
+        final getFillColor = () -> kha.Color.fromBytes(currentFillColor.r, 
+                                                       currentFillColor.g, 
+                                                       currentFillColor.b, 
+                                                       currentFillAlpha);
+
+        final getStrokeColor = () -> kha.Color.fromBytes(currentStrokeColor.r, 
+                                                         currentStrokeColor.g, 
+                                                         currentStrokeColor.b, 
+                                                         currentStrokeAlpha);
         
         for (command in _drawCommands) {
             switch (command) {
                 case Clear:
-                    g.color = Kolor.White;
+                    g.color = kha.Color.White;
                     g.fillRect(sx, sy, w, h);
                 case MoveTo(x, y):
                     currentPosition.x = x;
                     currentPosition.y = y;
                 case LineTo(x, y):
                     if (currentStrokeColor != -1) {
-                        g.color = getStrokeKolor();
+                        g.color = getStrokeColor();
                         g.drawLine(sx + currentPosition.x,
                                    sy + currentPosition.y,
                                    sx + x,
@@ -82,16 +85,16 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     }
                 case Circle(x, y, radius):
                     if (currentFillColor != -1) {
-                        g.color = getFillKolor();
+                        g.color = getFillColor();
                         g.fillCircle(sx + x, sy + y, radius + currentStrokeThickness);
                     }
                     if (currentStrokeColor != -1) {
-                        g.color = getStrokeKolor();
+                        g.color = getStrokeColor();
                         g.drawCircle(sx + x, sy + y, radius + currentStrokeThickness, currentStrokeThickness);
                     }
                 case CurveTo(controlX, controlY, anchorX, anchorY):
                     if (currentStrokeColor != -1) {
-                        g.color = getStrokeKolor();
+                        g.color = getStrokeColor();
                         final bezX = [sx + currentPosition.x, sx + controlX, sx + anchorX];
                         final bezY = [sy + currentPosition.y, sy + controlY, sy + anchorY];
                         g.drawQuadraticBezier(bezX, bezY, BEZIER_SEGMENTS, currentStrokeThickness);
@@ -100,7 +103,7 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     currentPosition.y = anchorY;
                 case CubicCurveTo(controlX1, controlY1, controlX2, controlY2, anchorX, anchorY):
                     if (currentStrokeColor != -1) {
-                        g.color = getStrokeKolor();
+                        g.color = getStrokeColor();
                         final bezX = [sx + currentPosition.x, sx + controlX1, sx + controlX2, sx + anchorX];
                         final bezY = [sy + currentPosition.y, sy + controlY1, sy + controlY2, sy + anchorY];
                         g.drawCubicBezier(bezX, bezY, BEZIER_SEGMENTS, currentStrokeThickness);
@@ -109,15 +112,15 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                     currentPosition.y = anchorY;
                case Rectangle(x, y, width, height):
                     if (currentFillColor != -1) {
-                        g.color = getFillKolor();
+                        g.color = getFillColor();
                         g.fillRect(sx + x, sy + y, width, height);
                     }
                     if (currentStrokeColor != -1) {
-                        g.color = getStrokeKolor();
+                        g.color = getStrokeColor();
                         g.drawRect(sx + x, sy + y, width, height, currentStrokeThickness);
                     }
                case SetPixel(x, y, color):
-                    g.color = getKolor(color);
+                    g.color = kha.Color.fromValue(color);
                     g.fillRect(sx + x, sy + y, 1.0, 1.0); // probably not right
                case SetPixels(pixels):   
                     final img = Image.fromBytes(pixels, 
