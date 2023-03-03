@@ -9,6 +9,7 @@ import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen;
+import haxe.ui.components.Canvas;
 import haxe.ui.events.KeyboardEvent;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
@@ -323,6 +324,14 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
+        if (this is haxe.ui.components.Canvas) {
+            if (batch) {
+                addBatchStyleOperation(DrawComponentGraphics(cast this));
+            } else {
+                renderComponentGraphicsTo(g, cast this);
+            }
+        }
+
         if (batch) {
             addBatchStyleOperation(DrawCustom(this));
         } else {
@@ -379,6 +388,8 @@ class ComponentImpl extends ComponentBase {
                     renderTextTo(g, c);
                 case DrawCustom(c):
                     c.renderCustom(g);
+                case DrawComponentGraphics(c):
+                    renderComponentGraphicsTo(g, c);
                 case ClearScissor:
                     ScissorHelper.popScissor();
             }
@@ -460,6 +471,10 @@ class ComponentImpl extends ComponentBase {
 
         g.color = Color.White;
         g.opacity = 1;
+    }
+
+    private function renderComponentGraphicsTo(g:Graphics, c:Canvas) {
+        c.componentGraphics.renderTo(g);
     }
 
     private var _componentBuffer:kha.Image;
