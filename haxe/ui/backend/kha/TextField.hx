@@ -585,7 +585,7 @@ class TextField {
 
     private var caretWidth(get, null):Float;
     private function get_caretWidth():Float {
-        return 2;
+        return 1;
     }
 
     private var caretHeight(get, null):Float;
@@ -829,6 +829,11 @@ class TextField {
     private function onFocus() {
         System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
 
+        if (_currentFocus != null && _currentFocus != this) {
+            _currentFocus.onBlur();
+        }
+        _currentFocus = this;
+        
         if (_caretInfo.timerId == -1) {
             _caretInfo.timerId = Scheduler.addTimeTask(function() {
                 _caretInfo.visible = !_caretInfo.visible;
