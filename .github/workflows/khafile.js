@@ -4,7 +4,7 @@ let project = new Project('Main');
 project.addSources('./src');
 
 project.addLibrary('haxeui-core');
-await project.addProject('haxeui-kha');
+await project.addProject('haxeui-kha/haxeui-kha');
 
 project.addParameter("--macro haxe.macro.Compiler.include('haxe.ui', ['haxe.ui.macros'])");
 
