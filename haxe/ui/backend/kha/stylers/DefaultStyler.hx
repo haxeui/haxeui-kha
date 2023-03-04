@@ -1,5 +1,6 @@
 package haxe.ui.backend.kha.stylers;
 
+import kha.Image;
 import haxe.ui.backend.kha.ImageCache;
 import haxe.ui.filters.DropShadow;
 import haxe.ui.filters.Filter;
@@ -37,6 +38,34 @@ class DefaultStyler {
         var orgY = y;
         var orgW = w;
         var orgH = h;
+
+        #if !(haxeui_no_sdf)
+        if (SdfAtlasHelper.isEligible(style)) {
+            var info = SdfAtlasHelper.getInfo(g, style);
+            if (info != null) {
+                if (style.filter != null) {
+                    var f:Filter = style.filter[0];
+                    if ((f is DropShadow)) {
+                        var dropShadow:DropShadow = cast(f, DropShadow);
+                        var shadowStyle:Style = {}; // TODO: might want to cache this?
+                        shadowStyle.apply(style);
+                        shadowStyle.borderColor = 0x000000;
+                        shadowStyle.backgroundColor = 0x000000;
+                        shadowStyle.opacity = .15;
+                        if (dropShadow.inner == false) {
+                            var shadowInfo = SdfAtlasHelper.getInfo(g, shadowStyle);
+                            var dstRects = Slice9.buildDstRects(w, h, shadowInfo.srcRects);
+                            drawSlice9(g, {src: info.srcRects, dst: dstRects}, shadowInfo.altlas.buffer, shadowInfo.offsetX, shadowInfo.offsetY, x + 3, y + 3);
+                        }
+                    }
+                }
+
+                var dstRects = Slice9.buildDstRects(w, h, info.srcRects);
+                drawSlice9(g, {src: info.srcRects, dst: dstRects}, info.altlas.buffer, info.offsetX, info.offsetY, x, y);
+                return;
+            }
+        }
+        #end
 
         var alpha:Int = 0xFF000000;
         if (style.backgroundColor != null) {
@@ -119,17 +148,7 @@ class DefaultStyler {
                     }
                 } else {
                     var rects:Slice9Rects = Slice9.buildRects(w, h, trc.width, trc.height, slice);
-                    var srcRects:Array<Rectangle> = rects.src;
-                    var dstRects:Array<Rectangle> = rects.dst;
-                    for (i in 0...srcRects.length) {
-                        var srcRect = new Rectangle(srcRects[i].left + trc.left,
-                                                    srcRects[i].top + trc.top,
-                                                    srcRects[i].width,
-                                                    srcRects[i].height);
-                        var dstRect = dstRects[i];
-                        g.drawScaledSubImage(imageInfo.data, srcRect.left, srcRect.top, srcRect.width, srcRect.height,
-                                                             x + dstRect.left, y + dstRect.top, dstRect.width, dstRect.height);
-                    }
+                    drawSlice9(g, rects, imageInfo.data, trc.left, trc.top, x, y);
                 }
 
                 g.opacity = oo;
@@ -192,17 +211,31 @@ class DefaultStyler {
         }
     }
 
+    private static function drawSlice9(g:Graphics, rects:Slice9Rects, img:Image, srcX:Float, srcY:Float, dstX:Float, dstY:Float) {
+        var srcRects:Array<Rectangle> = rects.src;
+        var dstRects:Array<Rectangle> = rects.dst;
+        for (i in 0...srcRects.length) {
+            var srcRect = new Rectangle(srcRects[i].left + srcX,
+                                        srcRects[i].top + srcY,
+                                        srcRects[i].width,
+                                        srcRects[i].height);
+            var dstRect = dstRects[i];
+            g.drawScaledSubImage(img, srcRect.left, srcRect.top, srcRect.width, srcRect.height,
+                                      dstX + dstRect.left, dstY + dstRect.top, dstRect.width, dstRect.height);
+        }
+    }
+
     private static function drawShadow(g:Graphics, color:Int, x:Float, y:Float, w:Float, h:Float, size:Int, inset:Bool = false):Void {
         size = Std.int(size * Toolkit.scale);
         if (inset == false) {
             for (i in 0...size) {
-                g.color = color | 0x30000000;
+                g.color = color | 0x09000000;
                 g.fillRect(x + i + 1, y + h + 1 + i, w + 0, 1); // bottom
                 g.fillRect(x + w + 1 + i, y + i + 1, 1, h + 1); // right
             }
         } else {
             for (i in 0...size) {
-                g.color = color | 0x30000000;
+                g.color = color | 0x09000000;
                 g.fillRect(x + i, y + i, w - i, 1); // top
                 g.fillRect(x + i, y + i, 1, h - i); // left
             }
