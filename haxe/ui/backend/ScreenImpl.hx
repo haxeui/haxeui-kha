@@ -116,7 +116,7 @@ class ScreenImpl extends ScreenBase {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.EastWestResize);
         } else if (cursor == "row-resize") {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.NorthSouthResize);
-        }else {
+        } else {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.Default);
         }
     }

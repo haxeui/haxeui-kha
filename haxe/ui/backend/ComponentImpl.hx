@@ -552,6 +552,13 @@ class ComponentImpl extends ComponentBase {
         return super.handleRemoveComponentAt(index, dispose);
     }
 
+    private override function applyStyle(style:Style) {
+        super.applyStyle(style);
+        if (style != null && style.cursor != null) {
+            notifyMouseMove();
+        }
+    }
+
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
@@ -561,20 +568,21 @@ class ComponentImpl extends ComponentBase {
             case MouseEvent.MOUSE_MOVE:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false) {
-                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
                 }
 
             case MouseEvent.MOUSE_OVER:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
-                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
 
             case MouseEvent.MOUSE_OUT:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
@@ -773,6 +781,16 @@ class ComponentImpl extends ComponentBase {
         }
     }
 
+    private var _hasOnMouseMove:Bool = false;
+    private function notifyMouseMove() {
+        if (_hasOnMouseMove) {
+            return;
+        }
+
+        _hasOnMouseMove = true;
+        MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+    }
+
     private var _mouseOverFlag:Bool = false;
     private function __onMouseMove(event:MouseEvent) {
         var x = event.screenX;
@@ -792,7 +810,7 @@ class ComponentImpl extends ComponentBase {
                 }
                 return;
             }
-            if (this.style != null) {
+            if (this.style != null && this.style.cursor != null) {
                 Screen.instance.setCursor(this.style.cursor);
             }
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_MOVE);
@@ -868,8 +886,8 @@ class ComponentImpl extends ComponentBase {
 
         // Regardless of whether the mouse was released within the component, unlock the cursor if this component was selected
         if (_mouseDownFlag) {
-            Screen.instance.unlockCursor();
-            Screen.instance.setCursor("default");
+            //Screen.instance.unlockCursor();
+            //Screen.instance.setCursor("default");
         }
 
         var i = inBounds(x, y);
