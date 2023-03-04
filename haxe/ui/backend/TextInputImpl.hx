@@ -51,7 +51,6 @@ class TextInputImpl extends TextBase {
         
         _tf.scrollLeft = _inputData.hscrollPos;
         _tf.scrollTop = Std.int(_inputData.vscrollPos);
-        trace(_inputData.vscrollPos, _inputData.vscrollMax, _inputData.vscrollPageStep, _inputData.vscrollPageSize);
     }
     
     private override  function validateStyle():Bool {
