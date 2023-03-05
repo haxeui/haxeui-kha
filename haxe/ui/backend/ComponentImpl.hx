@@ -704,7 +704,7 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.MOUSE_OVER:
@@ -712,7 +712,7 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.MOUSE_OUT:
@@ -738,7 +738,7 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.CLICK:
@@ -789,6 +789,11 @@ class ComponentImpl extends ComponentBase {
 
         _hasOnMouseMove = true;
         MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+    }
+
+    private function unnotifyMouseMove() {
+        _hasOnMouseMove = false;
+        MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
     }
 
     private var _mouseOverFlag:Bool = false;
