@@ -34,7 +34,6 @@ Simply add the following lines to your `khamake.js` and rebuild your project fil
 ```js
 project.addLibrary('haxeui-core');
 await project.addProject("Libraries/haxeui-kha");
-project.addLibrary('hscript');
 ```
 
 Note that `haxeui-kha` must be added as as a [subproject](https://github.com/Kode/Kha/wiki/khafile.js#add-a-subproject), instead of as a library, in order to include HaxeUI-specific shaders.
