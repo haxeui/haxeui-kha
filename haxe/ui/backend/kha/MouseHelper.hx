@@ -24,12 +24,31 @@ class MouseHelper {
         if (opts != null && opts.listen == null && Mouse.get() == null) {
             return;
         }
+        if (opts == null && Mouse.get() == null) {
+            return;
+        }
         listen = opts != null && opts.listen != null ? opts.listen : Mouse.get().notify;
         unlisten = opts != null && opts.unlisten != null ? opts.unlisten : Mouse.get().remove;
+
+        if (_cachedCallbacks != null) {
+            for (item in _cachedCallbacks) {
+                notify(item.event, item.callback);
+            }
+            _cachedCallbacks = null;
+        }
     }
 
     private static var _callbacks:Map<String, Array<MouseEvent->Void>> = new Map<String, Array<MouseEvent->Void>>();
+    private static var _cachedCallbacks:Array<{event:String, callback:MouseEvent->Void}> = null;
     public static function notify(event:String, callback:MouseEvent->Void) {
+        if (!isInitialized()) {
+            if (_cachedCallbacks == null) {
+                _cachedCallbacks = [];
+            }
+            _cachedCallbacks.push({event: event, callback: callback});
+            return;
+        }
+
         switch (event) {
             case MouseEvent.MOUSE_DOWN:
                 if (_hasOnMouseDown == false) {
@@ -63,6 +82,22 @@ class MouseHelper {
     }
 
     public static function remove(event:String, callback:MouseEvent->Void) {
+        if (!isInitialized()) {
+            if (_cachedCallbacks != null) {
+                var itemToRemove = null;
+                for (item in _cachedCallbacks) {
+                    if (item.event == event && item.callback == callback) {
+                        itemToRemove = item;
+                        break;
+                    }
+                }
+                if (itemToRemove != null) {
+                    _cachedCallbacks.remove(itemToRemove);
+                }
+            }
+            return;
+        }
+
         var list = _callbacks.get(event);
         if (list != null) {
             list.remove(callback);

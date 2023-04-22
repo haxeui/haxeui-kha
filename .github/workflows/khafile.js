@@ -4,8 +4,7 @@ let project = new Project('Main');
 project.addSources('./src');
 
 project.addLibrary('haxeui-core');
-project.addLibrary('haxeui-kha');
-project.addLibrary('hscript');
+await project.addProject('Libraries/haxeui-kha');
 
 project.addParameter("--macro haxe.macro.Compiler.include('haxe.ui', ['haxe.ui.macros'])");
 

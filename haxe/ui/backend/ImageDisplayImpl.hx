@@ -15,7 +15,6 @@ class ImageDisplayImpl extends ImageBase {
 
     private override function validateData() {
         if (_imageInfo != null) {
-            dispose();
             _buffer = _imageInfo.data;
             if (_imageWidth <= 0) {
                 _imageWidth = _imageInfo.width;

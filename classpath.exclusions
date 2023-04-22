@@ -2,4 +2,5 @@
 ; speeds up build
 Kha\/Sources\/
 Kha\/Backends\/
+Kha\/Tools\/
 

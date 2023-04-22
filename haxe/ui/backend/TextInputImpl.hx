@@ -104,7 +104,7 @@ class TextInputImpl extends TextBase {
 
     public function renderTo(g:Graphics, x:Float, y:Float) {
         _tf.left = x + _left;
-        _tf.top = y + _top;
+        _tf.top = y + _top + 1;
         _tf.render(g);
     }
     
@@ -115,7 +115,7 @@ class TextInputImpl extends TextBase {
         
         if (_text == null || _text.length == 0 || _font == null) {
             _textWidth = 0;
-            _textHeight = _font.height(Std.int(_fontSize));
+            _textHeight = _font.height(Std.int(_fontSize)) + 2;
             return;
         }
 

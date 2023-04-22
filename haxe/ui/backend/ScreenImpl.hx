@@ -79,7 +79,7 @@ class ScreenImpl extends ScreenBase {
         addResizeListener();
         resizeComponent(component);
         //component.dispatchReady();
-		return component;
+        return component;
     }
 
     public override function removeComponent(component:Component, dispose:Bool = true):Component {
@@ -87,7 +87,7 @@ class ScreenImpl extends ScreenBase {
         if (component.inBounds(MouseHelper.currentMouseX, MouseHelper.currentMouseY)) {
             setCursor(null);
         }
-		return component;
+        return component;
     }
 
     public function renderTo(g:Graphics) {
@@ -96,7 +96,9 @@ class ScreenImpl extends ScreenBase {
         for (c in rootComponents) {
             c.renderTo(g);
         }
+        #if haxeui_calc_fps
         updateFPS(g);
+        #end
         g.color = oldColor;
     }
 
@@ -114,7 +116,7 @@ class ScreenImpl extends ScreenBase {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.EastWestResize);
         } else if (cursor == "row-resize") {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.NorthSouthResize);
-        }else {
+        } else {
             kha.input.Mouse.get().setSystemCursor(MouseCursor.Default);
         }
     }

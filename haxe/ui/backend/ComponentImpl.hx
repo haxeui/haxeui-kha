@@ -9,6 +9,7 @@ import haxe.ui.backend.kha.ScissorHelper;
 import haxe.ui.backend.kha.StyleHelper;
 import haxe.ui.core.Component;
 import haxe.ui.core.Screen;
+import haxe.ui.components.Canvas;
 import haxe.ui.events.KeyboardEvent;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.UIEvent;
@@ -26,11 +27,11 @@ class ComponentImpl extends ComponentBase {
     private var lastMouseX:Float = -1;
     private var lastMouseY:Float = -1;
 
-	// For doubleclick detection
-	private var _lastClickTime:Float = 0;
-	private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
-	private var _lastClickX:Float = -1;
-	private var _lastClickY:Float = -1;
+    // For doubleclick detection
+    private var _lastClickTime:Float = 0;
+    private var _lastClickTimeDiff:Float = MathUtil.MAX_INT;
+    private var _lastClickX:Float = -1;
+    private var _lastClickY:Float = -1;
 
     public function new() {
         super();
@@ -147,6 +148,11 @@ class ComponentImpl extends ComponentBase {
             return false;
         }
 
+        // component might not be destroyed but not actually onscreen
+        if (Screen.instance.rootComponents.indexOf(findRootComponent()) == -1) {
+            return false;
+        }
+
         var b:Bool = false;
         var sx = screenX * Toolkit.scaleX;
         var sy = screenY * Toolkit.scaleY;
@@ -236,6 +242,11 @@ class ComponentImpl extends ComponentBase {
         findRootComponent()._batchTextOperations.push(op);
     }
 
+    private var _hasBatchBreaker:Null<Bool> = false;
+    private inline function hasBatchBreaker():Bool {
+        return findRootComponent()._hasBatchBreaker;
+    }
+
     private static inline function useBatching() {
         if (Screen.instance.options == null) {
             return true;
@@ -258,7 +269,9 @@ class ComponentImpl extends ComponentBase {
             return;
         }
 
-        if (useBatching() == true && isRootComponent()) {
+        var batch = (useBatching() == true && hasBatchBreaker() == false);
+
+        if (batch && isRootComponent()) {
             clearBatchOperations();
         }
 
@@ -278,7 +291,7 @@ class ComponentImpl extends ComponentBase {
             var cly = Std.int((y + clipRect.top) * Toolkit.scaleY);
             var clw = Math.ceil(clipRect.width * Toolkit.scaleX);
             var clh = Math.ceil(clipRect.height * Toolkit.scaleY);
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchStyleOperation(ApplyScissor(clx, cly, clw, clh));
                 addBatchImageOperation(ApplyScissor(clx, cly, clw, clh));
                 addBatchTextOperation(ApplyScissor(clx, cly, clw, clh));
@@ -289,14 +302,14 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
-        if (useBatching() == true) {
+        if (batch) {
             addBatchStyleOperation(DrawStyle(this));
         } else {
             renderStyleTo(g, this);
         }
 
         if (_imageDisplay != null && _imageDisplay._buffer != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchImageOperation(DrawImage(this));
             } else {
                 renderImageTo(g, this);
@@ -304,14 +317,22 @@ class ComponentImpl extends ComponentBase {
         }
 
         if (_textDisplay != null || _textInput != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchTextOperation(DrawText(this));
             } else {
                 renderTextTo(g, this);
             }
         }
 
-        if (useBatching() == true) {
+        if (this is haxe.ui.components.Canvas) {
+            if (batch) {
+                addBatchStyleOperation(DrawComponentGraphics(cast this));
+            } else {
+                renderComponentGraphicsTo(g, cast this);
+            }
+        }
+
+        if (batch) {
             addBatchStyleOperation(DrawCustom(this));
         } else {
             renderCustom(g);
@@ -321,12 +342,12 @@ class ComponentImpl extends ComponentBase {
             c.renderTo(g);
         }
 
-        if (useBatching() == false) {
+        if (!batch) {
             g.opacity = 1;
         }
 
         if (clipRect != null) {
-            if (useBatching() == true) {
+            if (batch) {
                 addBatchStyleOperation(ClearScissor);
                 addBatchImageOperation(ClearScissor);
                 addBatchTextOperation(ClearScissor);
@@ -335,7 +356,7 @@ class ComponentImpl extends ComponentBase {
             }
         }
 
-        if (useBatching() == true && isRootComponent()) {
+        if (batch && isRootComponent()) {
             renderToBatch(g);
         }
 
@@ -367,6 +388,8 @@ class ComponentImpl extends ComponentBase {
                     renderTextTo(g, c);
                 case DrawCustom(c):
                     c.renderCustom(g);
+                case DrawComponentGraphics(c):
+                    renderComponentGraphicsTo(g, c);
                 case ClearScissor:
                     ScissorHelper.popScissor();
             }
@@ -450,6 +473,10 @@ class ComponentImpl extends ComponentBase {
         g.opacity = 1;
     }
 
+    private function renderComponentGraphicsTo(g:Graphics, c:Canvas) {
+        c.componentGraphics.renderTo(g);
+    }
+
     private var _componentBuffer:kha.Image;
     public function renderToScaled(g:Graphics, scaleX:Float, scaleY:Float) {
         var cx:Int = Std.int(cast(this, Component).width * Toolkit.scaleX);
@@ -488,6 +515,50 @@ class ComponentImpl extends ComponentBase {
         }
     }
 
+    private var _batchBreakerCount:Int = 0;
+    private function checkIncrementBatchBreaker(child:Component) {
+        if ((child is haxe.ui.containers.windows.Window) || (child is haxe.ui.containers.dialogs.Dialog)) {
+            findRootComponent()._batchBreakerCount++;
+            findRootComponent()._hasBatchBreaker = true;
+        }
+    }
+
+    private function checkDeincrementBatchBreaker(child:Component) {
+        if ((child is haxe.ui.containers.windows.Window) || (child is haxe.ui.containers.dialogs.Dialog)) {
+            findRootComponent()._batchBreakerCount--;
+            if (findRootComponent()._batchBreakerCount == 0) {
+                findRootComponent()._hasBatchBreaker = false;
+            }
+        }
+    }
+
+    private override function handleAddComponent(child:Component):Component {
+        checkIncrementBatchBreaker(child);
+        return super.handleAddComponent(child);
+    }
+
+    private override function handleAddComponentAt(child:Component, index:Int):Component {
+        checkIncrementBatchBreaker(child);
+        return super.handleAddComponentAt(child, index);
+    }
+
+    private override function handleRemoveComponent(child:Component, dispose:Bool = true):Component {
+        checkDeincrementBatchBreaker(child);
+        return super.handleRemoveComponent(child, dispose);
+    }
+
+    private override function handleRemoveComponentAt(index:Int, dispose:Bool = true):Component {
+        checkDeincrementBatchBreaker(cast(this,Component).childComponents[index]);
+        return super.handleRemoveComponentAt(index, dispose);
+    }
+
+    private override function applyStyle(style:Style) {
+        super.applyStyle(style);
+        if (style != null && style.cursor != null) {
+            notifyMouseMove();
+        }
+    }
+
     //***********************************************************************************************************
     // Events
     //***********************************************************************************************************
@@ -497,20 +568,21 @@ class ComponentImpl extends ComponentBase {
             case MouseEvent.MOUSE_MOVE:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false) {
-                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_MOVE, listener);
                 }
 
             case MouseEvent.MOUSE_OVER:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OVER) == false) {
-                    MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_OVER, listener);
                 }
 
             case MouseEvent.MOUSE_OUT:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.MOUSE_OUT) == false) {
+                    notifyMouseMove();
                     _eventMap.set(MouseEvent.MOUSE_OUT, listener);
                 }
 
@@ -554,7 +626,7 @@ class ComponentImpl extends ComponentBase {
                     }
                 }
 
-			case MouseEvent.DBL_CLICK:
+            case MouseEvent.DBL_CLICK:
                 Screen.instance.initMouse();
                 if (_eventMap.exists(MouseEvent.DBL_CLICK) == false) {
                     _eventMap.set(MouseEvent.DBL_CLICK, listener);
@@ -597,16 +669,16 @@ class ComponentImpl extends ComponentBase {
                     }
                 }
 
-			case KeyboardEvent.KEY_DOWN:
+            case KeyboardEvent.KEY_DOWN:
                 Screen.instance.initKeyboard();
-				if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
+                if (_eventMap.exists(KeyboardEvent.KEY_DOWN) == false) {
                     KeyboardHelper.listen(__onKeyDown, null, null);
                     _eventMap.set(KeyboardEvent.KEY_DOWN, listener);
                 }
 
-			case KeyboardEvent.KEY_UP:
+            case KeyboardEvent.KEY_UP:
                 Screen.instance.initKeyboard();
-				if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
+                if (_eventMap.exists(KeyboardEvent.KEY_UP) == false) {
                     KeyboardHelper.listen(null, __onKeyUp, null);
                     _eventMap.set(KeyboardEvent.KEY_UP, listener);
                 }
@@ -632,7 +704,7 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.MOUSE_OVER:
@@ -640,7 +712,7 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.MOUSE_OUT:
@@ -666,13 +738,13 @@ class ComponentImpl extends ComponentBase {
                 if (_eventMap.exists(MouseEvent.MOUSE_MOVE) == false
                     && _eventMap.exists(MouseEvent.MOUSE_OVER) == false
                     && _eventMap.exists(MouseEvent.MOUSE_WHEEL) == false) {
-                    MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+                    unnotifyMouseMove();
                 }
 
             case MouseEvent.CLICK:
                 _eventMap.remove(type);
 
-			case MouseEvent.DBL_CLICK:
+            case MouseEvent.DBL_CLICK:
                 _eventMap.remove(type);
                 MouseHelper.remove(MouseEvent.MOUSE_UP, __onDoubleClick);
 
@@ -693,11 +765,11 @@ class ComponentImpl extends ComponentBase {
             case MouseEvent.RIGHT_CLICK:
                 _eventMap.remove(type);
 
-			case KeyboardEvent.KEY_DOWN:
+            case KeyboardEvent.KEY_DOWN:
                 _eventMap.remove(type);
                 KeyboardHelper.unlisten(__onKeyDown, null, null);
 
-			case KeyboardEvent.KEY_UP:
+            case KeyboardEvent.KEY_UP:
                 _eventMap.remove(type);
                 KeyboardHelper.unlisten(null, __onKeyUp, null);
 
@@ -709,6 +781,21 @@ class ComponentImpl extends ComponentBase {
         }
     }
 
+    private var _hasOnMouseMove:Bool = false;
+    private function notifyMouseMove() {
+        if (_hasOnMouseMove) {
+            return;
+        }
+
+        _hasOnMouseMove = true;
+        MouseHelper.notify(MouseEvent.MOUSE_MOVE, __onMouseMove);
+    }
+
+    private function unnotifyMouseMove() {
+        _hasOnMouseMove = false;
+        MouseHelper.remove(MouseEvent.MOUSE_MOVE, __onMouseMove);
+    }
+
     private var _mouseOverFlag:Bool = false;
     private function __onMouseMove(event:MouseEvent) {
         var x = event.screenX;
@@ -718,7 +805,17 @@ class ComponentImpl extends ComponentBase {
         lastMouseY = y;
         var i = inBounds(x, y);
         if (i == true) {
-            if (this.style != null) {
+            if (hasComponentOver(cast this, x, y) == true) {
+                var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_OUT);
+                if (fn != null) {
+                    var mouseEvent = new haxe.ui.events.MouseEvent(haxe.ui.events.MouseEvent.MOUSE_OUT);
+                    mouseEvent.screenX = x / Toolkit.scaleX;
+                    mouseEvent.screenY = y / Toolkit.scaleY;
+                    fn(mouseEvent);
+                }
+                return;
+            }
+            if (this.style != null && this.style.cursor != null) {
                 Screen.instance.setCursor(this.style.cursor);
             }
             var fn:UIEvent->Void = _eventMap.get(haxe.ui.events.MouseEvent.MOUSE_MOVE);
@@ -794,8 +891,8 @@ class ComponentImpl extends ComponentBase {
 
         // Regardless of whether the mouse was released within the component, unlock the cursor if this component was selected
         if (_mouseDownFlag) {
-            Screen.instance.unlockCursor();
-            Screen.instance.setCursor("default");
+            //Screen.instance.unlockCursor();
+            //Screen.instance.setCursor("default");
         }
 
         var i = inBounds(x, y);
@@ -814,14 +911,14 @@ class ComponentImpl extends ComponentBase {
                     fn(mouseEvent);
                 }
 
-				if (type == haxe.ui.events.MouseEvent.CLICK) {
-					_lastClickTimeDiff = Timer.stamp() - _lastClickTime;
-					_lastClickTime = Timer.stamp();
-					if (_lastClickTimeDiff >= 0.5) { // 0.5 seconds
-						_lastClickX = x;
-						_lastClickY = y;
-					}
-				}
+                if (type == haxe.ui.events.MouseEvent.CLICK) {
+                    _lastClickTimeDiff = Timer.stamp() - _lastClickTime;
+                    _lastClickTime = Timer.stamp();
+                    if (_lastClickTimeDiff >= 0.5) { // 0.5 seconds
+                        _lastClickX = x;
+                        _lastClickY = y;
+                    }
+                }
             }
 
             _mouseDownFlag = false;
@@ -837,7 +934,7 @@ class ComponentImpl extends ComponentBase {
         _mouseDownFlag = false;
     }
 
-	private function __onDoubleClick(event:MouseEvent) {
+    private function __onDoubleClick(event:MouseEvent) {
         var button:Int = event.data;
         var x = event.screenX;
         var y = event.screenY;
@@ -851,17 +948,17 @@ class ComponentImpl extends ComponentBase {
             }
 
             _mouseDownFlag = false;
-			var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
-			if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
-				var type = haxe.ui.events.MouseEvent.DBL_CLICK;
-				var fn:UIEvent->Void = _eventMap.get(type);
-				if (fn != null) {
-					var mouseEvent = new haxe.ui.events.MouseEvent(type);
-					mouseEvent.screenX = x / Toolkit.scaleX;
-					mouseEvent.screenY = y / Toolkit.scaleY;
-					fn(mouseEvent);
-				}
-			}
+            var mouseDelta:Float = MathUtil.distance(x, y, _lastClickX, _lastClickY);
+            if (_lastClickTimeDiff < 0.5 && mouseDelta < 5) { // 0.5 seconds
+                var type = haxe.ui.events.MouseEvent.DBL_CLICK;
+                var fn:UIEvent->Void = _eventMap.get(type);
+                if (fn != null) {
+                    var mouseEvent = new haxe.ui.events.MouseEvent(type);
+                    mouseEvent.screenX = x / Toolkit.scaleX;
+                    mouseEvent.screenY = y / Toolkit.scaleY;
+                    fn(mouseEvent);
+                }
+            }
         }
         _mouseDownFlag = false;
     }
@@ -885,37 +982,37 @@ class ComponentImpl extends ComponentBase {
         fn(mouseEvent);
     }
 
-	private function __onKeyDown(key:KeyCode) {
-		if (cast(this, Component).hasClass(":active") == false) {
-			return;
-		}
-
-		var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
-
-		if (fn == null) {
+    private function __onKeyDown(key:KeyCode) {
+        if (cast(this, Component).hasClass(":active") == false) {
             return;
         }
 
-		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
-		keyEvent.keyCode = key;
-		fn(keyEvent);
-	}
+        var fn = _eventMap.get(KeyboardEvent.KEY_DOWN);
 
-	private function __onKeyUp(key:KeyCode) {
-		if (cast(this, Component).hasClass(":active") == false) {
-			return;
-		}
-
-		var fn = _eventMap.get(KeyboardEvent.KEY_UP);
-
-		if (fn == null) {
+        if (fn == null) {
             return;
         }
 
-		var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
-		keyEvent.keyCode = key;
-		fn(keyEvent);
-	}
+        var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN);
+        keyEvent.keyCode = key;
+        fn(keyEvent);
+    }
+
+    private function __onKeyUp(key:KeyCode) {
+        if (cast(this, Component).hasClass(":active") == false) {
+            return;
+        }
+
+        var fn = _eventMap.get(KeyboardEvent.KEY_UP);
+
+        if (fn == null) {
+            return;
+        }
+
+        var keyEvent = new KeyboardEvent(KeyboardEvent.KEY_UP);
+        keyEvent.keyCode = key;
+        fn(keyEvent);
+    }
 
     private function hasComponentOver(ref:Component, x:Float, y:Float):Bool {
         var array:Array<Component> = getComponentsAtPoint(x, y);
