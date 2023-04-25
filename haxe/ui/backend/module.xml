@@ -16,4 +16,10 @@
         <plugin type="asset" class="haxe.ui.assets.AssetNamePlugin" startsWith="img/" replaceWith="" removeExtension="true" />
     </plugins>
     -->
+
+    <loaders>
+        <image-loaders>
+            <image-loader prefix="tile" class="haxe.ui.backend.kha.TileImageLoader" singleInstance="true" />
+        </image-loaders>
+    </loaders>
 </module>
