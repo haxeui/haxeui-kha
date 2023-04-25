@@ -21,6 +21,7 @@ import kha.graphics2.Graphics;
 import kha.graphics2.ImageScaleQuality;
 import kha.input.KeyCode;
 
+@:access(haxe.ui.backend.ImageDisplayImpl)
 class ComponentImpl extends ComponentBase {
     private var _eventMap:Map<String, UIEvent->Void>;
 
@@ -432,14 +433,23 @@ class ComponentImpl extends ComponentBase {
         var y:Float = c.screenY;
         var w:Float = c.width;
         var h:Float = c.height;
-        var imageX = Std.int((x + c._imageDisplay.left) * Toolkit.scaleX);
-        var imageY = Std.int((y + c._imageDisplay.top) * Toolkit.scaleY);
+        var imageDisplay = c._imageDisplay;
+        var imageX = Std.int((x + imageDisplay.left) * Toolkit.scaleX);
+        var imageY = Std.int((y + imageDisplay.top) * Toolkit.scaleY);
         var orgScaleQuality = g.imageScaleQuality;
         g.imageScaleQuality = imageScaleQuality;
-        if (c._imageDisplay.scaled == true || Toolkit.scale != 1) {
-            g.drawScaledImage(c._imageDisplay._buffer, imageX, imageY, c._imageDisplay.imageWidth * Toolkit.scaleX, c._imageDisplay.imageHeight * Toolkit.scaleY);
+        if (imageDisplay.scaled == true || Toolkit.scale != 1) {
+            if (imageDisplay.isSubImage) {
+                g.drawScaledSubImage(imageDisplay._buffer, imageDisplay.sx, imageDisplay.sy, imageDisplay.sw, imageDisplay.sh, imageX, imageY, imageDisplay.imageWidth * Toolkit.scaleX, imageDisplay.imageHeight * Toolkit.scaleY);
+            } else {
+                g.drawScaledImage(imageDisplay._buffer, imageX, imageY, imageDisplay.imageWidth * Toolkit.scaleX, imageDisplay.imageHeight * Toolkit.scaleY);
+            }
         } else {
-            g.drawImage(c._imageDisplay._buffer, imageX, imageY);
+            if (imageDisplay.isSubImage) {
+                g.drawScaledSubImage(imageDisplay._buffer, imageDisplay.sx, imageDisplay.sy, imageDisplay.sw, imageDisplay.sh, imageX, imageY, imageDisplay.imageWidth * Toolkit.scaleX, imageDisplay.imageHeight * Toolkit.scaleY);
+            } else {
+                g.drawImage(imageDisplay._buffer, imageX, imageY);
+            }
         }
         g.imageScaleQuality = orgScaleQuality;
 
