@@ -43,7 +43,6 @@ jobs:
         cd Libraries
         git clone --single-branch --depth=1 https://github.com/haxeui/haxeui-core.git
         git clone --single-branch --depth=1 https://github.com/haxeui/haxeui-kha.git
-        git clone --single-branch --depth=1 https://github.com/haxefoundation/hscript.git
         cd ..
         mkdir src
         cd src
