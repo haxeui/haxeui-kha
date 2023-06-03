@@ -28,6 +28,8 @@ typedef SelectionInfo = {
 }
 
 class TextField {
+    public var id:String = null; // for debugging
+
     public static inline var SPACE:Int = 32;
     public static inline var CR:Int = 10;
     public static inline var LF:Int = 13;
@@ -603,6 +605,14 @@ class TextField {
     private var _ctrl:Bool = false;
     
     private function onCut() {
+        if (!isActive) {
+            return "";
+        }
+
+        if (password) {
+            return "";
+        }
+
         if (hasSelection) {
             var cutText = _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
             insertText("");
@@ -613,6 +623,14 @@ class TextField {
     }
 
     private function onCopy() {
+        if (!isActive) {
+            return "";
+        }
+
+        if (password) {
+            return "";
+        }
+
         if (hasSelection) {
             return _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
         }
@@ -621,6 +639,10 @@ class TextField {
     }
     
     private function onPaste(text:String) {
+        if (!isActive) {
+            return;
+        }
+
         insertText(text);
     }
     
@@ -710,10 +732,12 @@ class TextField {
             return;
         }
 
+        /*
         if (_currentFocus != null && _currentFocus != this) {
             _currentFocus.onBlur();
         }
         _currentFocus = this;
+        */
 
         var localX = x - left + scrollLeft;
         var localY = y - top;

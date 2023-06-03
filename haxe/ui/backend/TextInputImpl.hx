@@ -22,6 +22,7 @@ class TextInputImpl extends TextBase {
     }
 
     public override function focus() {
+        _tf.id = parentComponent.id + "_tf";
         _tf.focus();
     }
     
