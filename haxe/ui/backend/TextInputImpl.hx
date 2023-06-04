@@ -42,7 +42,9 @@ class TextInputImpl extends TextBase {
     }
 
     private function unregisterEvents() {
-        parentComponent.unregisterEvent(UIEvent.HIDDEN, onParentHidden);
+        if (parentComponent != null) {
+            parentComponent.unregisterEvent(UIEvent.HIDDEN, onParentHidden);
+        }
         _eventsRegistered = false;
     }
 
@@ -172,11 +174,13 @@ class TextInputImpl extends TextBase {
     }
 
     public override function dispose() {
-        super.dispose();
+        unregisterEvents();
+
         if (_tf != null) {
             _tf.destroy();
             _tf = null;
         }
-        unregisterEvents();
+
+        super.dispose();
     }
 }
