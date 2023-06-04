@@ -37,13 +37,17 @@ class TextField {
     private var _selectionInfo:SelectionInfo = {start: {row: -1, column: -1}, end: {row: -1, column: -1}};
     private var _caretInfo:CaretInfo = {row: -1, column: -1, visible: false, force: false, timerId: -1};
 
+    private static var _hasCutCopyPasteListner:Bool = false;
     public function new() {
         Mouse.get().notify(onMouseDown, onMouseUp, onMouseMove, null, null);
         Keyboard.get().notify(onKeyDown, onKeyUp, onKeyPress);
 
-        // Only one cutCopyPaste is set at once, as opposed to the listener list for keyboard/mouse.
-        // these functions are overriden by any component stealing focus
-        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+        if (!_hasCutCopyPasteListner) {
+            _hasCutCopyPasteListner = true;
+            // Only one cutCopyPaste is set at once, as opposed to the listener list for keyboard/mouse.
+            // these functions are overriden by any component stealing focus
+            System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
+        }
         recalc();
     }
 
@@ -107,6 +111,7 @@ class TextField {
             return value;
         }
 
+        _text = value;
         if (value == null || value.length == 0) {
             if (isActive == true) {
                 _caretInfo.row = 0;
@@ -118,7 +123,6 @@ class TextField {
             resetSelection();
         }
 
-        _text = value;
         recalc();
         notifyTextChanged();
         return value;
@@ -446,43 +450,47 @@ class TextField {
                 }
 
             case Backspace:
-                if (hasSelection) {
-                    insertText("");
-                } else {
-                    if (_ctrl) {
-                        var caretIndex = posToIndex(_caretInfo);
-                        var caretDisplacement = 0;
-                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) == SPACE)
-                            caretDisplacement--;
-                        while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) != SPACE)
-                            caretDisplacement--;
-
-                        deleteCharsFromCaret(caretDisplacement);
-                        scrollToCaret();
+                if (_text.length > 0) {
+                    if (hasSelection) {
+                        insertText("");
                     } else {
-                        deleteCharsFromCaret(-1);
+                        if (_ctrl) {
+                            var caretIndex = posToIndex(_caretInfo);
+                            var caretDisplacement = 0;
+                            while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) == SPACE)
+                                caretDisplacement--;
+                            while (caretIndex+caretDisplacement > 0 && _text.charCodeAt(caretIndex+caretDisplacement-1) != SPACE)
+                                caretDisplacement--;
+
+                            deleteCharsFromCaret(caretDisplacement);
+                            scrollToCaret();
+                        } else {
+                            deleteCharsFromCaret(-1);
+                        }
                     }
                 }
 
             case Delete:
-                if (hasSelection) {
-                    insertText("");
-                } else {
-                    if (_ctrl) {
-                        // Delete until the start of the next word
-                        var caretIndex = posToIndex(_caretInfo);
-                        var caretDisplacement = 0;
-                        while (_text.charCodeAt(caretIndex+caretDisplacement) != SPACE && caretIndex+caretDisplacement < _text.length)
-                            caretDisplacement++;
-                        while (_text.charCodeAt(caretIndex+caretDisplacement) == SPACE && caretIndex+caretDisplacement < _text.length)
-                            caretDisplacement++;
-
-                        deleteCharsFromCaret(caretDisplacement, false);
-                        caretPosition = caretIndex; // Updates _caretInfo (text changes may alter row/column, for instance after wrapping)
-                        scrollToCaret();
-
+                if (_text.length > 0) {
+                    if (hasSelection) {
+                        insertText("");
                     } else {
-                        deleteCharsFromCaret(1, false);
+                        if (_ctrl) {
+                            // Delete until the start of the next word
+                            var caretIndex = posToIndex(_caretInfo);
+                            var caretDisplacement = 0;
+                            while (_text.charCodeAt(caretIndex+caretDisplacement) != SPACE && caretIndex+caretDisplacement < _text.length)
+                                caretDisplacement++;
+                            while (_text.charCodeAt(caretIndex+caretDisplacement) == SPACE && caretIndex+caretDisplacement < _text.length)
+                                caretDisplacement++;
+
+                            deleteCharsFromCaret(caretDisplacement, false);
+                            caretPosition = caretIndex; // Updates _caretInfo (text changes may alter row/column, for instance after wrapping)
+                            scrollToCaret();
+
+                        } else {
+                            deleteCharsFromCaret(1, false);
+                        }
                     }
                 }
 
@@ -604,46 +612,46 @@ class TextField {
     private var _shift:Bool = false;
     private var _ctrl:Bool = false;
     
-    private function onCut() {
-        if (!isActive) {
+    private static function onCut() {
+        if (_currentFocus == null) {
             return "";
         }
 
-        if (password) {
+        if (_currentFocus.password) {
             return "";
         }
 
-        if (hasSelection) {
-            var cutText = _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
-            insertText("");
+        if (_currentFocus.hasSelection) {
+            var cutText = _currentFocus._text.substring(_currentFocus.posToIndex(_currentFocus._selectionInfo.start), _currentFocus.posToIndex(_currentFocus._selectionInfo.end));
+            _currentFocus.insertText("");
             return cutText;
         }
 
         return "";
     }
 
-    private function onCopy() {
-        if (!isActive) {
+    private static function onCopy() {
+        if (_currentFocus == null) {
             return "";
         }
 
-        if (password) {
+        if (_currentFocus.password) {
             return "";
         }
 
-        if (hasSelection) {
-            return _text.substring(posToIndex(_selectionInfo.start), posToIndex(_selectionInfo.end));
+        if (_currentFocus.hasSelection) {
+            return _currentFocus._text.substring(_currentFocus.posToIndex(_currentFocus._selectionInfo.start), _currentFocus.posToIndex(_currentFocus._selectionInfo.end));
         }
 
         return "";
     }
     
-    private function onPaste(text:String) {
-        if (!isActive) {
+    private static function onPaste(text:String) {
+        if (_currentFocus == null) {
             return;
         }
 
-        insertText(text);
+        _currentFocus.insertText(text);
     }
     
     private function onKeyDown(code:KeyCode) {
@@ -748,7 +756,9 @@ class TextField {
             _caretInfo.row = pos.row;
             _caretInfo.column = pos.column;
             scrollToCaret();
-            _currentFocus.onFocus();
+            if (_currentFocus != null) {
+                _currentFocus.onFocus();
+            }
         }
         _mouseDownPos = pos;
 
@@ -851,14 +861,13 @@ class TextField {
     }
     
     private function onFocus() {
-        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
-
         if (_currentFocus != null && _currentFocus != this) {
             _currentFocus.onBlur();
         }
         _currentFocus = this;
         
         if (_caretInfo.timerId == -1) {
+            _caretInfo.visible = false;
             _caretInfo.timerId = Scheduler.addTimeTask(function() {
                 _caretInfo.visible = !_caretInfo.visible;
             }, 0, .4);
@@ -870,13 +879,19 @@ class TextField {
     }
     
     private function onBlur() {
-        System.notifyOnCutCopyPaste(onCut, onCopy, onPaste);
-        
         Scheduler.removeTimeTask(_caretInfo.timerId);
         _caretInfo.timerId = -1;
         _caretInfo.visible = false;
+        _currentFocus = null;
 
         resetSelection();
+    }
+
+    public function destroy() {
+        Mouse.get().remove(onMouseDown, onMouseUp, onMouseMove, null, null);
+        Keyboard.get().remove(onKeyDown, onKeyUp, onKeyPress);
+        _textChanged = null;
+        _caretMoved = null;
     }
 
     //*****************************************************************************************************************//

@@ -1,5 +1,6 @@
 package haxe.ui.backend;
 
+import haxe.ui.events.UIEvent;
 import haxe.ui.backend.kha.TextField;
 import kha.Color;
 import kha.Font;
@@ -23,14 +24,37 @@ class TextInputImpl extends TextBase {
 
     public override function focus() {
         _tf.id = parentComponent.id + "_tf";
+        registerEvents();
         _tf.focus();
     }
     
     public override function blur() {
         _tf.blur();
     }
-    
+
+    private var _eventsRegistered:Bool = false;
+    private function registerEvents() {
+        if (_eventsRegistered) {
+            return;
+        }
+        _eventsRegistered = true;
+        parentComponent.registerEvent(UIEvent.HIDDEN, onParentHidden);
+    }
+
+    private function unregisterEvents() {
+        parentComponent.unregisterEvent(UIEvent.HIDDEN, onParentHidden);
+        _eventsRegistered = false;
+    }
+
+    private function onParentHidden(_) {
+        blur();
+    }
+
     private function onTextChanged(text) {
+        if (text == _text) {
+            return;
+        }
+
         _text = text;
         if (_inputData.onChangedCallback != null) {
             _inputData.onChangedCallback();
@@ -145,5 +169,14 @@ class TextInputImpl extends TextBase {
     private function normalizeText(text:String):String {
         text = StringTools.replace(text, "\\n", "\n");
         return text;
+    }
+
+    public override function dispose() {
+        super.dispose();
+        if (_tf != null) {
+            _tf.destroy();
+            _tf = null;
+        }
+        unregisterEvents();
     }
 }
