@@ -424,7 +424,7 @@ class ComponentImpl extends ComponentBase {
     private function renderImageTo(g:Graphics, c:ComponentImpl) {
         g.opacity = c.calcOpacity();
 
-        var imageScaleQuality = ImageScaleQuality.High;
+        var imageScaleQuality = g.imageScaleQuality;//ImageScaleQuality.High;
         if (c.style != null && c.style.imageRendering == "pixelated") {
             imageScaleQuality = ImageScaleQuality.Low;
         }
