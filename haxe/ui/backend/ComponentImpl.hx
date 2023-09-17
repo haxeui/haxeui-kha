@@ -378,9 +378,7 @@ class ComponentImpl extends ComponentBase {
         for (op in operations) {
             switch (op) {
                 case ApplyScissor(sx, sy, sw, sh):
-                    if (sw >= 0 && sh >= 0) {
-                        ScissorHelper.pushScissor(g, sx, sy, sw, sh);
-                    }
+                    ScissorHelper.pushScissor(g, sx, sy, sw > 0 ? sw : 0, sh > 0 ? sh : 0);
                 case DrawStyle(c):
                     renderStyleTo(g, c);
                 case DrawImage(c):
