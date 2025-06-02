@@ -135,6 +135,8 @@ class ComponentGraphicsImpl extends ComponentGraphicsBase {
                             g.drawScaledImage(img, sx + x, sy + y, width, height);
                         default:
                     }
+                case _:
+                    // Handle any other commands or ignore them
             }
         }
     }
